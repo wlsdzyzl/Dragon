@@ -17,8 +17,9 @@ namespace visualization
         bool LoadSource(const std::string &vfile, std::string& source);
         void SetUniform(const Uniform & v)
         {
+            
             GLuint loc = glGetUniformLocation(pid, v.id.c_str());
-
+            
             switch(v.t)
             {
                 case Uniform::INT:

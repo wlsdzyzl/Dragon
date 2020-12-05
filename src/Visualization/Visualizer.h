@@ -4,8 +4,8 @@
 #include "Geometry/BasicGeometry.h"
 #include <memory>
 #include "Window.h"
-
-
+#include "Geometry/TriangleMesh/TriangleMesh.h"
+#define MAX_BUFFER_SIZE 1024*1024*30
 namespace dragon
 {
 namespace visualization
@@ -20,8 +20,21 @@ namespace visualization
         public:
         bool Initialize();
         void ConfigProgram();
+        Visualizer()
+        {
+            Reset();
+            point_buffer = new float[MAX_BUFFER_SIZE];
+            index_buffer = new int[MAX_BUFFER_SIZE];
+            memset(point_buffer,0,MAX_BUFFER_SIZE*sizeof(float));
+            memset(index_buffer,0,MAX_BUFFER_SIZE*sizeof(int));
+
+        }
         ~Visualizer()
         {
+            delete[] point_buffer;
+            delete[] index_buffer;
+            glDeleteBuffers(1, &ebo);
+            glDeleteBuffers(1, &vbo);
             window::Cleanup();
         }
         void SetGeometryType(GeometryType type)
@@ -38,19 +51,24 @@ namespace visualization
         void SetProjectionMatrix(int w, int h, float fu, float fv, float u0, 
             float v0, float zNear, float zFar)
         {
-            projection_matrix.setZero();
+            // see https://wlsdzyzl.top/2018/11/14/%E5%9B%BE%E5%BD%A2%E5%AD%A6%E2%80%94%E2%80%94Viewing/
+            window::projection_matrix.setZero();
             const float L = +(u0) * zNear / -fu;
             const float T = +(v0) * zNear / fv;
             const float R = -(w-u0) * zNear / -fu;
             const float B = -(h-v0) * zNear / fv;   
-            projection_matrix(0, 0) = 2 * zNear / (R-L);
-            projection_matrix(1, 1) = 2 * zNear / (T-B);
-            projection_matrix(2, 2) = -(zFar +zNear) / (zFar - zNear);
-            projection_matrix(2, 0) = (R+L)/(R-L);
-            projection_matrix(2, 1) = (T+B)/(T-B);
-            projection_matrix(2, 3) = -1.0;
-            projection_matrix(3, 2) =  -(2*zFar*zNear)/(zFar-zNear);   
+            window::projection_matrix(0, 0) = 2 * zNear / (R-L);
+            window::projection_matrix(1, 1) = 2 * zNear / (T-B);
+            window::projection_matrix(2, 2) = -(zFar +zNear) / (zFar - zNear);
+            window::projection_matrix(2, 3) =  -(2*zFar*zNear)/(zFar-zNear); 
+            // window::projection_matrix(0, 2) = (R+L)/(R-L);
+            // window::projection_matrix(1, 2) = (T+B)/(T-B);
+            window::projection_matrix(3, 2) = -1.0;
+              
         }
+        void AddTriangleMesh(const geometry::TriangleMesh &mesh);
+        void Show();
+        void ShowOnce();
         void SetModelViewMatrix(const geometry::TransformationMatrix &camera_pose, 
             bool reversed_model = true)
         {
@@ -83,21 +101,52 @@ namespace visualization
             // objects, it need to add the z axis vector.
             auto camera_position_gl = - camera_rotation_gl * camera_position + 2 * forward_gl;
             
-            model_view_matrix.block<3, 3>(0, 0) = camera_rotation_gl.cast<double>();
-            model_view_matrix.block<3, 1>(0, 3) = camera_position_gl.cast<double>();
-            model_view_matrix(3, 3) = 1.0;
+            window::model_view_matrix.block<3, 3>(0, 0) = camera_rotation_gl;
+            window::model_view_matrix.block<3, 1>(0, 3) = camera_position_gl;
+            window::model_view_matrix(3, 3) = 1.0;
         }
         void PreCall()
         {
+            glfwPollEvents();
             glClearColor(1.0f,1.0f, 1.0f,1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
         }
         void PostCall()
         {
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             glfwSwapBuffers(window::window);
         }
-        void ShowOnce();
+        void ChooseCameraPoseFromPoints(const geometry::Point3List &points)
+        {
+            geometry::Point3 average_point =  geometry::Point3::Zero();
+            for(size_t i = 0; i != points.size(); ++i)
+            {
+                average_point += points[i];
+            }
+            average_point /= points.size();
+            //just change the y value
+            geometry::TransformationMatrix camera_pose = geometry::TransformationMatrix::Identity();
+            camera_pose.block<3, 1>(0, 3) = average_point + geometry::Point3(0, -5, 0);
+            //set camera
+            // camera_pose.block<3, 1>(0, 0) = geometry::Point3(1, 0, 0);
+            camera_pose.block<3, 1>(0, 1) = geometry::Point3(0, 0, -1);
+            camera_pose.block<3, 1>(0, 2) = geometry::Point3(0, 1, 0);
+            camera_pose_for_view = camera_pose;
+        }
+        void SetShaderPath()
+        {
+
+            if(!has_colors && !has_normals)
+            shader_vert = "draw_point.vert";
+            if(has_colors && !has_normals)
+            shader_vert = "draw_color.vert";
+            if(!has_colors && has_normals)
+            shader_vert = "draw_normal.vert";
+            if(has_colors && has_normals)
+            shader_vert = "draw_all.vert";
+            std::cout<<BLUE<<"[Visualizer]::[INFO]::Using shader: "<<shader_vert<<RESET<<std::endl;
+        }
         size_t point_step;
         float * point_buffer;
         int * index_buffer;
@@ -111,9 +160,9 @@ namespace visualization
         bool dynamic_first_view = true;
         //vertex shader
 
-        const std::string shader_vert = "draw_all.vert";
+        std::string shader_vert = "draw_triangle.vert";
         //fragment shader
-        const std::string shader_frag = "draw_feedback.frag";
+        const std::string shader_frag = "naive_color.frag";
 
         std::string shader_path = "../../src/Visualization/Shaders";
         bool draw_normal = false;
@@ -122,8 +171,7 @@ namespace visualization
         bool has_colors = true;
         bool has_normals = true;
         bool is_initialized = false;
-        geometry::Matrix4 projection_matrix;
-        geometry::Matrix4 model_view_matrix;
+
         std::shared_ptr<Shader> program;
         GeometryType geometry_type;
         protected:

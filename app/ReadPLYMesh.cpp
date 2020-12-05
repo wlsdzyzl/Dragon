@@ -1,5 +1,5 @@
 #include "Visualization/Visualizer.h"
-using namespace one_piece;
+using namespace dragon;
 int main(int argc, char* argv[]) 
 {
     
@@ -9,10 +9,10 @@ int main(int argc, char* argv[])
         return 0;
     }
     geometry::TriangleMesh mesh;
-    mesh.LoadFromPLY(argv[1]);
+    mesh.LoadFromOBJ(argv[1]);
 
-    if(!mesh.HasNormals())
-        mesh.ComputeNormals();
+    // if(!mesh.HasNormals())
+    //     mesh.ComputeNormals();
     visualization::Visualizer visualizer;
     //visualizer.SetDrawColor(true);
     visualizer.AddTriangleMesh(mesh);

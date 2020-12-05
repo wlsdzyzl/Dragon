@@ -6,6 +6,10 @@
 #include <Eigen/StdVector>
 #include <Eigen/Eigenvalues> 
 #include <Eigen/Eigen>
+#include "sophus/se3.hpp"
+#include "IO/ConsoleColor.h"
+#include <iostream>
+#define EPS 1e-6
 namespace dragon
 {
 namespace geometry
@@ -59,6 +63,25 @@ namespace geometry
     void TransformPoints(const Matrix4 &T, Point3List &points);
     Point3 TransformPoint(const Matrix4 &T, const Point3 &point);
     void TransformNormals(const Matrix4 &T, Point3List &normals);
+    double ComputeTriangleArea(const Point3 &a, const Point3 &b, const Point3 &c);
+    double inline cot(double a) {return 1 / std::tan(a);}
+    // compute the circum center of triangle
+    Point3 CircumCenter(const Point3 &a, const Point3 &b, const Point3 &c);
+    int TriangleType(const Point3 &a, const Point3 &b, const Point3 &c);
+    double AngleOfVector(const Vector3 &a, const Vector3 &b);
+    struct PairHasher
+    {
+        template<class T1, class T2>
+        std::size_t operator() (const std::pair<T1, T2>& p) const
+        {
+            // auto h1 = std::hash<T1>{}(p.first);
+            // auto h2 = std::hash<T2>{}(p.second);
+            // return h1 ^ h2;
+            static constexpr size_t p1 = 73856093;
+            static constexpr size_t p2 = 19349663;
+            return ( p.first * p1 ^ p.second * p2 );
+        }
+    };
 }
 }
 #endif

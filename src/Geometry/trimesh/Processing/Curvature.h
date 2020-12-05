@@ -1,1 +1,0 @@
-// compute mean curvature and the gauss curvature

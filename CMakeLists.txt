@@ -19,6 +19,7 @@ include_directories(3rdparty/Eigen)
 include_directories(3rdparty/tinyply/source)
 include_directories(3rdparty/tinyobjloader)
 include_directories(3rdparty/Sophus)
+include_directories(3rdparty/imgui)
 include_directories(src)
 
 #message("tinyobjloader")
@@ -54,7 +55,7 @@ file(GLOB IO_SRC
 "src/IO/*.cpp"
 "src/IO/*.h"
 )
-
+add_subdirectory(3rdparty/glfw)
 add_subdirectory(3rdparty/imgui)
 
 add_library(tinyply SHARED ${TinyPly_SRC})
@@ -74,11 +75,14 @@ set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -O3 -Wall -fopenmp -Wno-maybe-uninitial
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_executable(ReadPLYMesh "app/ReadPLYMesh.cpp")
-
+add_executable(GenerateMinimalSurface "app/GenerateMinimalSurface.cpp")
+add_executable(MeanCurvature "app/MeanCurvature.cpp")
+add_executable(GaussCurvature "app/GaussCurvature.cpp")
 set(THIRD_LIB 
     tinyply 
     objloader
     imgui
+    glfw
     ${OpenCV_LIBS} 
     ${GLUT_LIBRARIES}  
     ${GLEW_LIBRARIES} 
@@ -86,6 +90,18 @@ set(THIRD_LIB
 )
 
 target_link_libraries(ReadPLYMesh
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(GenerateMinimalSurface
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(MeanCurvature
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(GaussCurvature
     dragon
     ${THIRD_LIB}
 )

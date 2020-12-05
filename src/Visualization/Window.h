@@ -33,7 +33,7 @@ using namespace gl;
 
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
-
+#include "Geometry/BasicGeometry.h"
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
 // Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
@@ -47,10 +47,39 @@ namespace visualization
 {
 namespace window
 {
-    extern GLFWwindow* window;
-    static void glfw_error_callback(int error, const char* description);
-    bool Initialize();
+    extern GLFWwindow* window;  
+    extern geometry::Matrix4 projection_matrix;
+    extern geometry::Matrix4 model_view_matrix;    
+
+    static bool mouse_buttons[7];
+    extern double last_x;
+    extern double last_y;
+    extern int w_height;
+    extern int w_width;
+    bool Initialize(int width = 800, int height = 600);
     void Cleanup();
+    void RenderGuiComponents();
+    void RegisterMouseAndKeyboard();
+    void Translate(double x, double y);
+    void Rotate(double x, double y, int type);
+    void Translate(const geometry::Vector3 &translation);
+    void Rotate(const geometry::Matrix3 &rotation);
+    void Zoom(double y);
+    void CursorPos(double& x, double& y);
+    void movement(double xpos, double ypos);
+    bool inline right_mouse_pressed()
+    {
+        return mouse_buttons[GLFW_MOUSE_BUTTON_RIGHT];
+    }
+    bool inline left_mouse_pressed()
+    {
+        return mouse_buttons[GLFW_MOUSE_BUTTON_LEFT];
+    }
+    bool inline middle_mouse_pressed()
+    {
+        return mouse_buttons[GLFW_MOUSE_BUTTON_MIDDLE];
+    }
+            
 }
 }
 }

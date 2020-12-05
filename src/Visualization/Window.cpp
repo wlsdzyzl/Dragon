@@ -6,12 +6,47 @@ namespace visualization
 namespace window
 {
     GLFWwindow* window;
+    geometry::Matrix4 projection_matrix;
+    geometry::Matrix4 model_view_matrix; 
+    bool show_demo_window = false;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);   
+    int w_width;
+    int w_height;
+    double last_x = 0;
+    double last_y = 0;
     static void glfw_error_callback(int error, const char* description)
     {
         std::cout<<RED<<"[ERROR]::[Window]::Glfw Error: "<<description<<RESET<<std::endl;
-    }
-    bool Initialize()
+    }  
+
+    //callback function when we move mouse and keyboard
+    static void glfw_motion(GLFWwindow* window, double xpos, double ypos)
     {
+        movement(xpos, ypos);
+    }
+    static void glfw_scroll(GLFWwindow* window, double xoffset, double yoffset)
+    {
+        ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+        if (!ImGui::GetIO().WantCaptureMouse)
+        {
+            Zoom(yoffset);
+        }
+    }
+    static void glfw_mouse(GLFWwindow* window, int button, int action,
+                           int mods)
+    {
+        ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+        if (!ImGui::GetIO().WantCaptureMouse)
+        {
+            mouse_buttons[button] = (action == GLFW_PRESS);
+        }
+    }
+                              
+    bool Initialize(int width, int height)
+    {
+        w_width = width;
+        w_height = height;
         glfwSetErrorCallback(glfw_error_callback);
         if (!glfwInit())
             return 0;
@@ -34,36 +69,26 @@ namespace window
     #endif
 
         // Create window with graphics context
-        window = glfwCreateWindow(1280, 720, "Dragon 3D", NULL, NULL);
+        window = glfwCreateWindow(w_width, w_height, "Dragon 3D", NULL, NULL);
         if (window == NULL)
             return 0;
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1); // Enable vsync
 
         // Initialize OpenGL loader
-    #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-        bool err = gl3wInit() != 0;
-    #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-        bool err = glewInit() != GLEW_OK;
-    #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-        bool err = gladLoadGL() == 0;
-    #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD2)
-        bool err = gladLoadGL(glfwGetProcAddress) == 0; // glad2 recommend using the windowing library loader instead of the (optionally) bundled one.
-    #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
-        bool err = false;
-        glbinding::Binding::initialize();
-    #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING3)
-        bool err = false;
-        glbinding::initialize([](const char* name) { return (glbinding::ProcAddress)glfwGetProcAddress(name); });
-    #else
-        bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
-    #endif
-        if (err)
+        GLenum err = glewInit();
+        if (err != GLEW_OK)
         {
-            std::cout<<RED<<"Failed to initialize OpenGL loader!"<<RESET<<std::endl;
-            return 0;
+            std::cout<<RED<< "[ERROR]::[Visualizer]::Error initializing GLEW: " << glewGetErrorString(err)
+                    << RESET<<std::endl;
+            return false;
+        }
+        else
+        {
+            std::cout<<BLUE<<"[Visualizer]::[INFO]::GLEW init done."<<std::endl;
         }
 
+        glViewport( 0, 0, w_width, w_height);
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -72,8 +97,8 @@ namespace window
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
         // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        //ImGui::StyleColorsClassic();
+        //ImGui::StyleColorsDark();
+        ImGui::StyleColorsClassic();
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -93,9 +118,8 @@ namespace window
         //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
         //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
         //IM_ASSERT(font != NULL);
-
+        return true;
     }
-
     void Cleanup()
     {
         ImGui_ImplOpenGL3_Shutdown();
@@ -104,6 +128,112 @@ namespace window
 
         glfwDestroyWindow(window);
         glfwTerminate();
+    }
+    void RenderGuiComponents()
+    {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        
+        {
+            ImGui::Begin("Menu");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::Checkbox("Phong Lighting", &show_demo_window);      // Edit bools storing our window open/close state
+
+            if(ImGui::Button("Minimal Surface"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            {
+
+            }
+            if(ImGui::Button("Mean Curvature"))
+            {
+
+            }
+            if(ImGui::Button("Gauss Curvature"))
+            {
+
+            }
+            double x, y;
+            CursorPos(x, y);
+            {
+                ImGui::Text("Cursor: %f/%f", x, y);
+            }
+            //ImGui::SameLine();
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+        // Rendering
+        ImGui::Render();
+    }
+    void Translate(const geometry::Vector3 &translation)
+    {
+        geometry::Vector3 tmp_t = model_view_matrix.block<3, 1>(0, 3) + translation;
+        model_view_matrix.block<3, 1>(0, 3) = tmp_t;
+    }
+    void Rotate(const geometry::Matrix3 &rotation)
+    {
+        geometry::Matrix3 rot = rotation * model_view_matrix.block<3, 3>(0, 0);
+        model_view_matrix.block<3, 3>(0, 0) = rot;
+    }
+    void Zoom(double y)
+    {
+        float dy = y - last_y;
+        Translate(geometry::Vector3(0.0, 0.0, dy * 3.0 / w_height));
+    }
+    void RegisterMouseAndKeyboard()
+    {
+        // glfwSetKeyCallback(window, glfw_keyboard);
+        glfwSetCursorPosCallback(window, glfw_motion);
+        glfwSetMouseButtonCallback(window, glfw_mouse);
+        glfwSetScrollCallback(window, glfw_scroll);
+    }
+    void CursorPos(double& x, double& y)
+    {
+        glfwGetCursorPos(window, &x, &y);
+    }
+    void Translate(double x, double y)
+    {
+        // float dx = x - last_x;
+        // float dy = y - last_y;
+
+        // vec4 mc = vec4(center, 1.0);
+        // vec4 ec = modelview_matrix * mc;
+        // float z = -(ec[2] / ec[3]);
+
+        // float aspect = (float)w_width / (float)w_height;
+        // float up = tan(fovy_ / 2.0f * M_PI / 180.f) * near;
+        // float right = aspect * up;
+
+        // Translate(geometry::Vector3(2.0 * dx / w_width * right / near * z,
+        //             -2.0 * dy / w_height * up / near * z, 0.0f));
+    }
+    void Rotate(double x, double y, int type)
+    {
+        
+    }
+    void movement(double xpos, double ypos)
+    {
+        // rotation0
+        if (right_mouse_pressed() && left_mouse_pressed())
+        {
+            Rotate(xpos, ypos, 2);
+        }
+        else if (right_mouse_pressed())
+        {
+            Rotate(xpos, ypos, 0);
+        }
+        // translation
+        else if (left_mouse_pressed())
+        {
+            Translate(xpos, ypos);
+        }
+        // zoom
+        else if (middle_mouse_pressed())
+        {
+            Zoom(ypos);
+        }
+        // remember points
+        last_x = xpos;
+        last_y = ypos;
     }
 }
 }

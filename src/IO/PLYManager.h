@@ -29,7 +29,7 @@ namespace io
         const geometry::Point3uiList &triangles = geometry::Point3uiList(), 
         const std::vector<std::string> & comments = std::vector<std::string>(),
         const std::vector<AdditionalElement> & additional_labels = std::vector<AdditionalElement>(),
-        bool use_ascii = false);
+        bool use_ascii = true);
 }
 }
 #endif

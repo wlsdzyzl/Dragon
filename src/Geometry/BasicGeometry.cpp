@@ -37,5 +37,61 @@ namespace geometry
             normal = new_normal.head<3>();
         }
     }    
+    double ComputeTriangleArea(const Point3 &a, const Point3 &b, const Point3 &c)
+    {
+        double area = -1;
+        
+        double side[3];//
+    
+        side[0] = (a - b).norm(); 
+        side[1] = (b - c).norm();
+        side[2] = (c - a).norm(); 
+    
+        //not a triangle
+        if(side[0]+side[1]<=side[2] || side[0]+side[2]<=side[1] || side[1]+side[2]<=side[0]) return area; 
+    
+        // s=sqr(p*(p-a)(p-b)(p-c)); 
+        double p = (side[0]+side[1]+side[2])/2; //half of the C
+        area = sqrt(p*(p-side[0])*(p-side[1])*(p-side[2])); 
+        
+        return area;
+    }
+    Point3 CircumCenter(const Point3 &a, const Point3 &b, const Point3 &c)
+    {
+        Point3 ac = c - a ;
+        Point3 ab = b - a ;
+        Point3 abXac = ab.cross( ac ) ;
+
+        // this is the vector from a TO the circumsphere center
+        Point3 toCircumsphereCenter = (abXac.cross( ab )*ac.squaredNorm() + ac.cross( abXac )*ab.squaredNorm()) / (2.f*abXac.squaredNorm()) ;
+        // double circumsphereRadius = toCircumsphereCenter.norm() ;
+        // The 3 space coords of the circumsphere center then:
+        return a  +  toCircumsphereCenter ;
+    }
+    int TriangleType(const Point3 &a, const Point3 &b, const Point3 &c)
+    {
+        Vector3 ab = b - a;
+        Vector3 ac = c - a;
+        Vector3 ba = -ab;
+        Vector3 bc = c - b;
+        Vector3 ca = -ac;
+        Vector3 cb = -bc;
+        double a1 = ac.dot(ab);
+        double a2 = ba.dot(bc);
+        double a3 = ca.dot(cb);
+        // right angle
+        if(std::fabs(a1) <EPS || std::fabs(a2) < EPS || std::fabs(a3) < EPS)
+        return 1;
+        // obtuse angle
+        if(a1 < 0 || a2 < 0 || a3 < 0)
+        return 2;
+        // acute angle
+        return 0;
+    }
+    double AngleOfVector(const Vector3 &a, const Vector3 &b)
+    {
+        return std::acos(a.dot(b) / (a.norm() * b.norm()));
+    }
+
 }
 }

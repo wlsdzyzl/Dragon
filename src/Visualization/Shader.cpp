@@ -9,9 +9,10 @@ namespace visualization
     {
         // create shader
         GLint id = glCreateShader(type);
+
         if (!id)
         {
-            std::cout<<RED<< "Shader: Cannot create shader object";
+            std::cout<<RED<< "Shader: Cannot create shader object"<<RESET<<std::endl;
             return 0;
         }
 
@@ -41,6 +42,7 @@ namespace visualization
     bool Shader::LoadSource(const std::string &filename, std::string& source)
     {
         std::ifstream ifs(filename);
+        
         if (!ifs)
         {
             std::cout<<RED<< "[ERROR]::[Shader]::Cannot open file " << filename << RESET<< std::endl;
@@ -59,15 +61,20 @@ namespace visualization
         GLint id = 0;
 
         // cleanup existing shaders first
+        
         Clear();
 
         // create program
         pid = glCreateProgram();
-
+        
         // vertex shader
         std::string source; 
-        if(Load(vfile, source))
-        id = Compile(source.c_str(), GL_VERTEX_SHADER);
+
+        if(LoadSource(vfile, source))
+        {
+            // std::cout<<source<<std::endl;
+            id = Compile(source.c_str(), GL_VERTEX_SHADER);
+        }
         if (!id)
         {
             std::cout<<RED <<"[ERROR]::[Shader]::Cannot compile vertex shader!"<<RESET<<std::endl;
@@ -78,7 +85,7 @@ namespace visualization
 
         // fragment shader
         id = 0;
-        if(Load(ffile, source))
+        if(LoadSource(ffile, source))
         id = Compile(source.c_str(), GL_FRAGMENT_SHADER);
         if (!id)
         {
