@@ -29,6 +29,7 @@ namespace geometry
         HEVertex *des_vertex = nullptr;
         HEEdge *pre_edge = nullptr;
         HEEdge *next_edge = nullptr;
+        double weight = -1.0;
         // size_t id;
     };
     struct HEFace
@@ -61,6 +62,11 @@ namespace geometry
         void FromTriangleMesh(const TriangleMesh &mesh);
         void ToTriangleMesh(TriangleMesh &mesh);
         void CheckBorder();
+        void ResetWeight()
+        {
+            for(size_t i = 0; i != edges.size(); ++i)
+                edges[i].weight = -1.0;
+        }
     };
 }
 }

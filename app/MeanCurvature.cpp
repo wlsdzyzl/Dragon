@@ -31,10 +31,10 @@ int main(int argc, char* argv[])
     for(size_t i = 0; i != mean_curvature_vectors.size(); ++i)
     {
         mean_curvature.push_back(mean_curvature_vectors[i].norm());
-        if(mean_curvature.back() > max_c) max_c = mean_curvature.back();
+        if(mean_curvature.back() > max_c) {max_c = mean_curvature.back();}
         if(mean_curvature.back() < min_c) min_c = mean_curvature.back();
     }
-    std::cout<<min_c<<" "<<max_c<<std::endl;
+    
     for(size_t i = 0; i != he.vertices.size(); ++i)
     {
         
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     //visualizer.SetDrawColor(true);
     visualizer.AddTriangleMesh(mesh);
     visualizer.Show();
-
+    std::sort(mean_curvature.begin(), mean_curvature.end());
     mapping_mesh.WriteToPLY("./mean_curvature.ply");
     return 0;
 }

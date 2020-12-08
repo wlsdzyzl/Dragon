@@ -36,25 +36,15 @@ namespace geometry
                 T *Vector4(normal(0), normal(1), normal(2), 0.0);
             normal = new_normal.head<3>();
         }
-    }    
+    }  
     double ComputeTriangleArea(const Point3 &a, const Point3 &b, const Point3 &c)
     {
-        double area = -1;
-        
-        double side[3];//
-    
-        side[0] = (a - b).norm(); 
-        side[1] = (b - c).norm();
-        side[2] = (c - a).norm(); 
-    
-        //not a triangle
-        if(side[0]+side[1]<=side[2] || side[0]+side[2]<=side[1] || side[1]+side[2]<=side[0]) return area; 
-    
-        // s=sqr(p*(p-a)(p-b)(p-c)); 
-        double p = (side[0]+side[1]+side[2])/2; //half of the C
-        area = sqrt(p*(p-side[0])*(p-side[1])*(p-side[2])); 
-        
-        return area;
+        auto edge1 = b-a;
+        auto edge2 = c-a;
+
+        // std::cout<<"area: "<<area<<" "<< <<std::endl;
+
+        return 0.5 * edge1.norm() * edge2.norm() * Sin(edge1, edge2);
     }
     Point3 CircumCenter(const Point3 &a, const Point3 &b, const Point3 &c)
     {
@@ -88,6 +78,15 @@ namespace geometry
         // acute angle
         return 0;
     }
+    int AngleType(const Vector3 &a, const Vector3 &b)
+    {
+        double dot = a.dot(b);
+        if(std::fabs(dot) < EPS)
+        return 1;
+        if(std::fabs(dot) < 0)
+        return 2;
+        return 0;
+    }  
     double AngleOfVector(const Vector3 &a, const Vector3 &b)
     {
         return std::acos(a.dot(b) / (a.norm() * b.norm()));

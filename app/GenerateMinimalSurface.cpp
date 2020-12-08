@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     }
     geometry::TriangleMesh mesh;
     mesh.LoadFromPLY(argv[1]);
-    auto minimal_surface = geometry::ComputeMinimalSurface(mesh);
+    auto minimal_surface = geometry::MinimalSurfaceLocal(mesh, 0.2, 1000);
     auto laplacian_surface = geometry::LaplacianSmooting(mesh);
     // if(!mesh.HasNormals())
     //     mesh.ComputeNormals();

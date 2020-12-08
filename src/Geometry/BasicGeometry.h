@@ -64,11 +64,43 @@ namespace geometry
     Point3 TransformPoint(const Matrix4 &T, const Point3 &point);
     void TransformNormals(const Matrix4 &T, Point3List &normals);
     double ComputeTriangleArea(const Point3 &a, const Point3 &b, const Point3 &c);
-    double inline cot(double a) {return 1 / std::tan(a);}
+
+    // double inline cos(const Vector3 &a, const Vector3 &b){return a.dot(b) / (a.norm() * b.norm()); }
+    // double inline sin(const Vector3 &a, const Vector3 &b){double cos_= cos(a, b); return sqrt(1-cos_ * cos_) ; }
+    // double inline tan(const Vector3 &a, const Vector3 &b){return sin(a, b) / cos(a, b);}
+    // double inline cot(const Vector3 &a, const Vector3 &b){return 1 / tan(a, b);}
+    double inline Cos(const Vector3 &a, const Vector3 &b)
+    {
+        double norm_prod = (a.norm() * b.norm());
+        if(norm_prod < EPS)
+            norm_prod = 2 * EPS;
+        return a.dot(b) / norm_prod; 
+    }
+    double inline Sin(const Vector3 &a, const Vector3 &b){double cos_= Cos(a, b); return sqrt(1-cos_ * cos_) ; }
+    double inline Tan(const Vector3 &a, const Vector3 &b)
+    { 
+        double cos_ = Cos(a, b); 
+        if(std::fabs(cos_) < EPS) 
+            cos_ = cos_ > 0 ? EPS * 2:-EPS * 2;
+        return Sin(a, b) / cos_;}
+    double inline Cot(const Vector3 &a, const Vector3 &b)
+    { 
+        double tan_ = Tan(a,b); 
+        if(std::fabs(tan_)<EPS) 
+            tan_ = tan_ > 0? EPS * 2: - EPS * 2;
+        return 1 / tan_;
+    }
+    double inline ClampCot(double cot_value)
+    {
+        double bound = 19.1; // 3 degrees
+        return (cot_value < -bound ? -bound : (cot_value > bound ? bound : cot_value));
+    }
+    double inline ClampCot(const Vector3 &a, const Vector3 &b){return ClampCot(Cot(a, b));}
     // compute the circum center of triangle
     Point3 CircumCenter(const Point3 &a, const Point3 &b, const Point3 &c);
     int TriangleType(const Point3 &a, const Point3 &b, const Point3 &c);
     double AngleOfVector(const Vector3 &a, const Vector3 &b);
+    int AngleType(const Vector3 &a, const Vector3 &b);
     struct PairHasher
     {
         template<class T1, class T2>

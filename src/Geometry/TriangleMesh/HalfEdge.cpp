@@ -67,6 +67,7 @@ namespace geometry
             if(visited_edges.find(edge_id_0) != visited_edges.end())
             {
                 //error, not maniford
+                std::cout<<YELLOW<<"[WARNING]::[HalfEdge]::Not a maniford."<<RESET<<std::endl;
                 continue;
             }            
             else if(visited_edges.find(edge_id_0_r) != visited_edges.end())
@@ -80,6 +81,7 @@ namespace geometry
             if(visited_edges.find(edge_id_1) != visited_edges.end())
             {
                 //error, not maniford
+                std::cout<<YELLOW<<"[WARNING]::[HalfEdge]::Not a maniford."<<RESET<<std::endl;
                 continue;
             }            
             else if(visited_edges.find(edge_id_1_r) != visited_edges.end())
@@ -93,6 +95,7 @@ namespace geometry
             if(visited_edges.find(edge_id_2) != visited_edges.end())
             {
                 //error, not maniford
+                std::cout<<YELLOW<<"[WARNING]::[HalfEdge]::Not a maniford."<<RESET<<std::endl;
                 continue;
             }            
             else if(visited_edges.find(edge_id_2_r) != visited_edges.end())
