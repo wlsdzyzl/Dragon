@@ -4,9 +4,12 @@
 #include <iostream>
 #include <fstream>
 #include "./Processing/Simplification.h"
+#include "Tool/CppExtension.h"
 namespace dragon
 {
 namespace geometry
+{
+namespace mesh
 {
     bool TriangleMesh::LoadFromPLY(const std::string &filename)
     {
@@ -19,37 +22,54 @@ namespace geometry
         Reset();
         return io::ReadOBJ(filename,points,normals,colors,triangles);
     }
-    void TriangleMesh::Transform(const geometry::TransformationMatrix & T)
+    bool TriangleMesh::LoadFromFile(const std::string & filename)
     {
-        geometry::TransformPoints(T,points);
-        if(HasNormals())
-        geometry::TransformNormals(T,normals);
+        std::vector<std::string> result = tool::RSplit(filename, ".", 1);
+        if(result.size() == 2)
+        {
+            if(result[1] == "obj")//obj
+            {
+                return LoadFromOBJ(filename);
+            }
+            else if(result[1] == "ply")
+            {
+                return LoadFromPLY(filename);
+            }
+        }
+        std::cout<<YELLOW<<"[WARNING]::[LoadFromFile]::Dragon only supports obj and ply file."<<RESET<<std::endl;
+        return false;
     }
-    // std::shared_ptr<geometry::TriangleMesh> TriangleMesh::QuadricSimplify(size_t target_num) const
+    void TriangleMesh::Transform(const TransformationMatrix & T)
+    {
+        TransformPoints(T,points);
+        if(HasNormals())
+        TransformNormals(T,normals);
+    }
+    // std::shared_ptr<TriangleMesh> TriangleMesh::QuadricSimplify(size_t target_num) const
     // {
-    //     geometry::TriangleMesh s_mesh = *this;
+    //     TriangleMesh s_mesh = *this;
     //     QuadricSimplification(s_mesh,target_num);
-    //     return std::make_shared<geometry::TriangleMesh>(s_mesh);
+    //     return std::make_shared<TriangleMesh>(s_mesh);
     // }
-    // std::shared_ptr<geometry::TriangleMesh> TriangleMesh::ClusteringSimplify(float grid_len) const
+    // std::shared_ptr<TriangleMesh> TriangleMesh::ClusteringSimplify(float grid_len) const
     // {
-    //     geometry::TriangleMesh s_mesh = *this;
+    //     TriangleMesh s_mesh = *this;
     //     ClusteringSimplification(s_mesh,grid_len);
-    //     return std::make_shared<geometry::TriangleMesh>(s_mesh);
+    //     return std::make_shared<TriangleMesh>(s_mesh);
     // }
-    // std::shared_ptr<geometry::TriangleMesh> TriangleMesh::Prune(size_t min_points) const
+    // std::shared_ptr<TriangleMesh> TriangleMesh::Prune(size_t min_points) const
     // {
-    //     geometry::TriangleMesh s_mesh = *this;
+    //     TriangleMesh s_mesh = *this;
     //     MeshPruning(s_mesh,min_points);
-    //     return std::make_shared<geometry::TriangleMesh>(s_mesh);
+    //     return std::make_shared<TriangleMesh>(s_mesh);
     // }
-    // std::shared_ptr<geometry::PointCloud> TriangleMesh::GetPointCloud() const
+    // std::shared_ptr<PointCloud> TriangleMesh::GetPointCloud() const
     // {
-    //     geometry::PointCloud pcd;
+    //     PointCloud pcd;
     //     pcd.normals = normals;
     //     pcd.points = points;
     //     pcd.colors = colors;
-    //     return std::make_shared<geometry::PointCloud>(pcd);
+    //     return std::make_shared<PointCloud>(pcd);
     // }
     void TriangleMesh::LoadFromMeshes(const std::vector<TriangleMesh > &meshes)
     {
@@ -79,9 +99,9 @@ namespace geometry
     //     references.resize(points.size());
     //     UpdateReferences(triangles,references);
     //     normals.resize(points.size());
-    //     geometry::Point3List triangle_normals;
+    //     Point3List triangle_normals;
     //     triangle_normals.resize(triangles.size());
-    //     geometry::Point3 n,p1,p2,p3;
+    //     Point3 n,p1,p2,p3;
       
     //     for(size_t i = 0;i!= triangles.size(); ++i)
     //     {
@@ -95,7 +115,7 @@ namespace geometry
 	// 	for(size_t i = 0;i!=points.size();++i)
 	// 	{
 
-	// 		geometry::Point3 vnormal; 
+	// 		Point3 vnormal; 
     //         vnormal.setZero();
     //         for(size_t j = 0;j!=references[i].size();++j)
 	// 		{
@@ -116,5 +136,6 @@ namespace geometry
     {
         return io::WriteOBJ(filename,points,normals,colors,triangles);
     }
+}
 }
 }

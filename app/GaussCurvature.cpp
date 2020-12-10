@@ -13,17 +13,17 @@ int main(int argc, char* argv[])
 {
     if(argc != 2)
     {
-        std::cout << "Usage: GenerateMinimalSurface [filename.obj]"<<std::endl;
+        std::cout << "Usage: GaussCurvature [filename]"<<std::endl;
         return 0;
     }
-    geometry::TriangleMesh mesh;
-    mesh.LoadFromOBJ(argv[1]);
-    geometry::HalfEdge he; 
+    geometry::mesh::TriangleMesh mesh;
+    mesh.LoadFromFile(argv[1]);
+    geometry::mesh::HalfEdge he; 
     he.FromTriangleMesh(mesh);
     std::cout<<"Build HalfEdge!"<<std::endl;
     he.CheckBorder();
     std::vector<double> gauss_curvatures;
-    geometry::ComputeGaussCurvature(he, gauss_curvatures);
+    geometry::mesh::ComputeGaussCurvature(he, gauss_curvatures);
 
     double min_c = std::numeric_limits<double>::max();
     double max_c = std::numeric_limits<double>::min();
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     {   
         he.vertices[i].color = ColorRemapping(min_c, max_c, gauss_curvatures[i]);
     }
-    geometry::TriangleMesh mapping_mesh;
+    geometry::mesh::TriangleMesh mapping_mesh;
     he.ToTriangleMesh(mapping_mesh);
 
     visualization::Visualizer visualizer;

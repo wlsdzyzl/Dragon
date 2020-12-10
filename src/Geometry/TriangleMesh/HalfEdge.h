@@ -5,6 +5,8 @@ namespace dragon
 {
 namespace geometry
 {
+namespace mesh
+{
     struct HEEdge;
     struct HEFace;
     struct HEVertex
@@ -68,6 +70,7 @@ namespace geometry
                 edges[i].weight = -1.0;
         }
     };
+}
 }
 }
 #endif

@@ -5,7 +5,9 @@ namespace dragon
 {
 namespace geometry
 {
-    void HalfEdge::FromTriangleMesh(const geometry::TriangleMesh &mesh)
+namespace mesh
+{
+    void HalfEdge::FromTriangleMesh(const TriangleMesh &mesh)
     {
         std::unordered_map<std::pair<size_t, size_t>, HEEdge *, PairHasher> visited_edges; 
         has_colors = mesh.HasColors();
@@ -174,5 +176,6 @@ namespace geometry
             }
         }
     }
+}
 }
 }

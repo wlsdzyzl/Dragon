@@ -163,7 +163,7 @@ namespace visualization
         program->SetUniform(Uniform("lightDir", lightDir));        
     }
 
-    void Visualizer::AddTriangleMesh(const geometry::TriangleMesh &mesh)
+    void Visualizer::AddTriangleMesh(const geometry::mesh::TriangleMesh &mesh)
     {
         if(dynamic_first_view)
         {

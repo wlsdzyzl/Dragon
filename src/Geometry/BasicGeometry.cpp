@@ -78,7 +78,7 @@ namespace geometry
         // acute angle
         return 0;
     }
-    int AngleType(const Vector3 &a, const Vector3 &b)
+    int AngleType(const VectorX &a, const VectorX &b)
     {
         double dot = a.dot(b);
         if(std::fabs(dot) < EPS)
@@ -87,10 +87,23 @@ namespace geometry
         return 2;
         return 0;
     }  
-    double AngleOfVector(const Vector3 &a, const Vector3 &b)
+    double AngleOfVector(const VectorX &a, const VectorX &b)
     {
         return std::acos(a.dot(b) / (a.norm() * b.norm()));
     }
-
+    void AddToCoefficientTriplet(std::vector<Eigen::Triplet<scalar>> &coefficients,
+        int start_row, int start_col, const MatrixX &JTJ)
+    {
+        int rows = JTJ.rows();
+        int cols = JTJ.cols();
+        for(int i = 0; i != rows; ++i)
+        {
+            for(int j = 0; j != cols; ++j)
+            {
+                if(JTJ(i, j) != 0)
+                    coefficients.push_back(Eigen::Triplet<scalar>(i + start_row, j + start_col, JTJ(i,j)));
+            }
+        }
+    }
 }
 }

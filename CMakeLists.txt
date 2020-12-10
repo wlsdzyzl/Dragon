@@ -64,7 +64,7 @@ add_library(objloader SHARED ${Objloader_SRC})
 
 
 add_library(dragon SHARED ${Geometry_SRC}  
-    ${Visualization_SRC}  ${IO_SRC} )
+    ${Visualization_SRC}  ${IO_SRC} ${Tool_SRC})
 
 
 

@@ -3,7 +3,9 @@ namespace dragon
 {
 namespace geometry
 {
-    void ComputeLocalWeights(HalfEdge &he)
+namespace mesh
+{
+    void ComputeCotanWeight(HalfEdge &he)
     {
         auto &edges = he.edges;
         he.ResetWeight();
@@ -32,10 +34,10 @@ namespace geometry
             }
         }
     }
-    // compute mean curvature
-    void ComputeMeanCurvature(HalfEdge &he, Point3List &mean_curvature_vectors)
+    // compute mean curvature, which will also compute the local weights
+    void ComputeMeanCurvature(HalfEdge &he, std::vector<double> &mean_curvatures)
     {
-        mean_curvature_vectors.clear();
+        mean_curvatures.clear();
         auto &vertices = he.vertices;
         // auto &faces = he.faces;
         //auto &edges = he.edges;
@@ -54,7 +56,7 @@ namespace geometry
 
             if(is_border[i])
             {
-                mean_curvature_vectors.push_back(mean_curvature_vector);
+                mean_curvatures.push_back(0.0);
                 continue;
             }
             auto current_edge =  vertices[i].inc_edge;
@@ -99,7 +101,7 @@ namespace geometry
                 current_edge = current_edge->twin_edge->next_edge;
                 if(current_edge == start_edge) break;
             }
-            mean_curvature_vectors.push_back( mean_curvature_vector / sum_area / 2);
+            mean_curvatures.push_back( (mean_curvature_vector / sum_area / 4).norm());
         }
     }
     void ComputeGaussCurvature(HalfEdge &he, std::vector<double> &gauss_curvatures)
@@ -153,5 +155,6 @@ namespace geometry
             gauss_curvatures.push_back( (2 * M_PI -  sum_angle) / sum_area);
         }
     }
+}
 }
 }

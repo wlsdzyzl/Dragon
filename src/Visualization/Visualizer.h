@@ -66,7 +66,7 @@ namespace visualization
             window::projection_matrix(3, 2) = -1.0;
               
         }
-        void AddTriangleMesh(const geometry::TriangleMesh &mesh);
+        void AddTriangleMesh(const geometry::mesh::TriangleMesh &mesh);
         void Show();
         void ShowOnce();
         void SetModelViewMatrix(const geometry::TransformationMatrix &camera_pose, 

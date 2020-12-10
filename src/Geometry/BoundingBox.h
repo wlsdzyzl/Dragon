@@ -1,3 +1,5 @@
+#ifndef DRAGON_BB_H
+#define DRAGON_BB_H
 #include "BasicGeometry.h"
 #include <algorithm>
 namespace dragon
@@ -41,3 +43,4 @@ namespace geometry
     };
 }
 }
+#endif

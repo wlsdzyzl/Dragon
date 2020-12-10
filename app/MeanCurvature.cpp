@@ -13,37 +13,33 @@ int main(int argc, char* argv[])
 {
     if(argc != 2)
     {
-        std::cout << "Usage: GenerateMinimalSurface [filename.obj]"<<std::endl;
+        std::cout << "Usage: GenerateMinimalSurface [filename]"<<std::endl;
         return 0;
     }
-    geometry::TriangleMesh mesh;
-    mesh.LoadFromOBJ(argv[1]);
-    geometry::HalfEdge he; 
+    geometry::mesh::TriangleMesh mesh;
+    mesh.LoadFromFile(argv[1]);
+    geometry::mesh::HalfEdge he; 
     he.FromTriangleMesh(mesh);
     he.CheckBorder();
-    geometry::Point3List mean_curvature_vectors;
-    geometry::ComputeMeanCurvature(he, mean_curvature_vectors);
+    std::vector<double> mean_curvatures;
+    geometry::mesh::ComputeMeanCurvature(he, mean_curvatures);
     // if(!mesh.HasNormals())
     //     mesh.ComputeNormals();
     std::vector<double> mean_curvature;
     double min_c = std::numeric_limits<double>::max();
     double max_c = std::numeric_limits<double>::min();
-    for(size_t i = 0; i != mean_curvature_vectors.size(); ++i)
+    for(size_t i = 0; i != mean_curvatures.size(); ++i)
     {
-        mean_curvature.push_back(mean_curvature_vectors[i].norm());
-        if(mean_curvature.back() > max_c) {max_c = mean_curvature.back();}
-        if(mean_curvature.back() < min_c) min_c = mean_curvature.back();
+        // if(mean_curvatures[i] < -3) std::cout<<i<<" "<<mean_curvatures[i]<<std::endl;
+        if(mean_curvatures[i] > max_c) max_c = mean_curvatures[i];
+        if(mean_curvatures[i] < min_c) min_c = mean_curvatures[i];
     }
-    
     for(size_t i = 0; i != he.vertices.size(); ++i)
-    {
-        
-        // if(mean_curvature[i] > 1)
-        // std::cout<<i<<" "<<mean_curvature[i]<<std::endl;
-        he.vertices[i].color = ColorRemapping(min_c, max_c, mean_curvature[i]);
+    {   
+        he.vertices[i].color = ColorRemapping(min_c, max_c, mean_curvatures[i]);
     }
     he.has_colors = true;
-    geometry::TriangleMesh mapping_mesh;
+    geometry::mesh::TriangleMesh mapping_mesh;
     he.ToTriangleMesh(mapping_mesh);
 
     visualization::Visualizer visualizer;
