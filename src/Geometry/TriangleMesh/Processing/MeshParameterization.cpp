@@ -35,14 +35,14 @@ namespace mesh
         }
     }
     //map to a circle
-    std::shared_ptr<TriangleMesh > MeshParameterization(const TriangleMesh &mesh, double radius)
+    std::shared_ptr<TriangleMesh > MeshParameterization(const TriangleMesh &mesh, int para_type, double radius)
     {
         HalfEdge he; 
-        
+     
         he.FromTriangleMesh(mesh);    
         auto &vertices = he.vertices;
         std::vector<int> ordered_vid;
-        
+       
         GetOrderedBorder(he, ordered_vid);
         
         geometry::Point3List ordered_border;
@@ -52,7 +52,15 @@ namespace mesh
         {
             ordered_border.push_back(vertices[ordered_vid[i]].coor);
         }
-        std::vector<double> t = parameterization::Foley<3>(ordered_border);
+        std::vector<double> t;
+        if(para_type == 0)
+        t = parameterization::Uniform<3>(ordered_border);
+        else if(para_type == 1)
+        t = parameterization::Chordal<3>(ordered_border);
+        else if(para_type == 2)
+        t = parameterization::Centripetal<3>(ordered_border);
+        else if(para_type == 3)
+        t = parameterization::Foley<3>(ordered_border);
         //map border to 2D map
         for(size_t i = 0; i != t.size(); ++i)
         {
@@ -61,8 +69,9 @@ namespace mesh
             tmp_p.block<2, 1>(0, 0) = Point2(cos(angle), sin(angle));
             vertices[ordered_vid[i]].coor = tmp_p;
         }
+        //std::cout<<he.has_colors<<std::endl;
         TriangleMesh tmp_mesh;
-        he.ToTriangleMesh(tmp_mesh);
+        he.ToTriangleMesh(tmp_mesh);  
         return GlobalLaplacianSmooting(tmp_mesh, 0);
     }
 }

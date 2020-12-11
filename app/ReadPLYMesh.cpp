@@ -2,14 +2,13 @@
 using namespace dragon;
 int main(int argc, char* argv[]) 
 {
-    
     if(argc != 2)
     {
         std::cout << "Usage: ReadPLYMesh [filename.ply]"<<std::endl;
         return 0;
     }
     geometry::mesh::TriangleMesh mesh;
-    mesh.LoadFromOBJ(argv[1]);
+    mesh.LoadFromFile(argv[1]);
 
     // if(!mesh.HasNormals())
     //     mesh.ComputeNormals();
@@ -17,6 +16,6 @@ int main(int argc, char* argv[])
     //visualizer.SetDrawColor(true);
     visualizer.AddTriangleMesh(mesh);
     visualizer.Show();
-    mesh.WriteToPLY("./dragon.ply");
+    // mesh.WriteToPLY("./dragon.ply");
     return 0;
 }

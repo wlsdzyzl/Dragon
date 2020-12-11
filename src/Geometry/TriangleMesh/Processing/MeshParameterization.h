@@ -10,7 +10,7 @@ namespace geometry
 namespace mesh
 {
     void GetOrderedVertices(HalfEdge &he, std::vector<int> &ordered_vid);
-    std::shared_ptr<TriangleMesh > MeshParameterization(const TriangleMesh &mesh, double radius = 2);
+    std::shared_ptr<TriangleMesh > MeshParameterization(const TriangleMesh &mesh, int para_type = 0, double radius = 2);
 }
 }
 }

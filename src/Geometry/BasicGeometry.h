@@ -105,6 +105,8 @@ namespace geometry
     int AngleType(const VectorX &a, const VectorX &b);
     void AddToCoefficientTriplet(std::vector<Eigen::Triplet<scalar>> &coefficients,
         int start_row, int start_col, const MatrixX &JTJ);
+    Matrix3 RotationMatrix(const Vector3 &axis, double angle);
+    Matrix3 GetSkewSymmetricMatrix(const Vector3 &t);
     struct PairHasher
     {
         template<class T1, class T2>
@@ -117,6 +119,19 @@ namespace geometry
             static constexpr size_t p2 = 19349663;
             return ( p.first * p1 ^ p.second * p2 );
         }
+    };
+
+    struct VoxelGridHasher
+    {
+            // Three large primes are used for spatial hashing.
+            static constexpr size_t p1 = 73856093;
+            static constexpr size_t p2 = 19349663;
+            static constexpr size_t p3 = 83492791;
+
+            std::size_t operator()(const Point3i& key) const
+            {
+                return ( key(0) * p1 ^ key(1) * p2 ^ key(2) * p3);
+            }
     };
 }
 }

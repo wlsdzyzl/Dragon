@@ -10,6 +10,7 @@ int main(int argc, char* argv[])
         return 0;
     }
     geometry::mesh::TriangleMesh mesh;
+    
     mesh.LoadFromFile(argv[1]);
     auto minimal_surface = geometry::mesh::LocalLaplacianSmooting(mesh, 0.2, 1000);
     auto laplacian_surface = geometry::mesh::NaiveLaplacianSmooting(mesh);

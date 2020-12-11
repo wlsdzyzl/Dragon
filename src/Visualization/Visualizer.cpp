@@ -5,7 +5,7 @@ namespace visualization
 {
     bool Visualizer::Initialize()
     {
-        window::Initialize(800, 600);
+        window::Initialize(width, height);
         program = std::make_shared<Shader>();
 
         if(!program->Load(shader_path + "/" +shader_vert, 
@@ -16,7 +16,8 @@ namespace visualization
             return false;
         }
 
-        SetProjectionMatrix(640, 480, 420, 420, 320, 240, 0.1, 1000);
+        SetProjectionMatrix(width, height, width * 0.66, width * 0.66, width * 0.5, 
+            width * 0.375, 0.1, 1000);
         SetModelViewMatrix(camera_pose_for_view);
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
@@ -34,6 +35,82 @@ namespace visualization
         is_initialized = true;
         buffer_data_updated = false;
         return true;
+    }
+    void Visualizer::SetProjectionMatrix(int w, int h, float fu, float fv, float u0, 
+        float v0, float zNear, float zFar)
+    {
+        // see https://wlsdzyzl.top/2018/11/14/%E5%9B%BE%E5%BD%A2%E5%AD%A6%E2%80%94%E2%80%94Viewing/
+        // and http://www.songho.ca/opengl/gl_projectionmatrix.html
+        window::projection_matrix.setZero();
+        const float L = +(u0) * zNear / -fu;
+        const float T = +(v0) * zNear / fv;
+        const float R = -(w-u0) * zNear / -fu;
+        const float B = -(h-v0) * zNear / fv;   
+        window::projection_matrix(0, 0) = 2 * zNear / (R-L);
+        window::projection_matrix(1, 1) = 2 * zNear / (T-B);
+        window::projection_matrix(2, 2) = -(zFar +zNear) / (zFar - zNear);
+        window::projection_matrix(2, 3) =  -(2*zFar*zNear)/(zFar-zNear); 
+        window::projection_matrix(0, 2) = (R+L)/(R-L);
+        window::projection_matrix(1, 2) = (T+B)/(T-B);
+        window::projection_matrix(3, 2) = -1.0;
+        window::near = zNear;
+        window::far = zFar;
+        window::fovy = 2 * atan(1.0 / window::projection_matrix(1, 1));
+        window::aspect = w / h;
+        window::up = tan(window::fovy / 2.0f) * window::near;
+        window::right = window::aspect * window::up;
+
+            
+    }
+    Visualizer::~Visualizer()
+    {
+        delete[] point_buffer;
+        delete[] index_buffer;
+        glDeleteBuffers(1, &ebo);
+        glDeleteBuffers(1, &vbo);
+        window::Cleanup();
+    }
+    void Visualizer::PostCall()
+    {
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glfwSwapBuffers(window::window);
+        glFinish();
+    }
+    void Visualizer::SetModelViewMatrix(const geometry::TransformationMatrix &camera_pose, 
+        bool reversed_model)
+    {
+        //transform to camera coordinate system
+        geometry::Matrix3 camera_rotation = camera_pose.block<3, 3>(0, 0);
+        
+        geometry::Vector3 camera_position = camera_pose.block<3, 1>(0, 3);
+        //in OpenGL
+        //z
+        geometry::Vector3 forward_gl = - camera_rotation.block<3, 1>(0, 2);
+        //y
+        geometry::Vector3 up_gl = camera_rotation.block<3, 1>(0, 1);
+        if(reversed_model) up_gl = -up_gl;
+        //x
+        geometry::Vector3 right_gl = camera_rotation.block<3, 1>(0, 0);
+        up_gl.normalize();
+        right_gl.normalize();
+        forward_gl.normalize();
+        
+        geometry::Matrix3 camera_rotation_gl;
+        // axis of OpenGL coordinate system
+        camera_rotation_gl.block<1, 3>(0, 0) = right_gl.transpose();
+    
+        camera_rotation_gl.block<1, 3>(1, 0) = up_gl.transpose();
+
+        camera_rotation_gl.block<1, 3>(2, 0) = forward_gl.transpose();
+        // change the zero point
+        // we want the camera can be more far away to the object
+        // because in OpenGL coordinate, the Z axis is towards the camera, so if camera wants to move far away from the 
+        // objects, it need to add the z axis vector.
+        auto camera_position_gl = - camera_rotation_gl * camera_position ;
+        
+        window::model_view_matrix.block<3, 3>(0, 0) = camera_rotation_gl;
+        window::model_view_matrix.block<3, 1>(0, 3) = camera_position_gl;
+        window::model_view_matrix(3, 3) = 1.0;
     }
     void Visualizer::ShowOnce()
     {
@@ -96,11 +173,15 @@ namespace visualization
             {
                 glEnableVertexAttribArray(2);
                 glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, point_step * sizeof(float),reinterpret_cast< GLvoid*>(6*sizeof(float)));
-            }
-                
+            }  
             if(geometry_type == GeometryType::TRIANGLE_MESH)
+            {
+                if(wireframe_mode)
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  
+                else
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  
                 glDrawElements(GL_TRIANGLES,index_buffer_size, GL_UNSIGNED_INT,0);
-            
+            }
             if(geometry_type == GeometryType::POINTCLOUD)
                 glDrawArrays(GL_POINTS, 0, point_buffer_size/point_step);
 
@@ -134,11 +215,13 @@ namespace visualization
         if(point_step == 0) return;
         geometry::Matrix4 tmp_mvp = window::projection_matrix * window::model_view_matrix;
         Eigen::Matrix4f mvp = tmp_mvp.cast<float>();
-    //     mvp <<   1.3125,        0,        0, -5.12902,
-    //    0  ,      0  ,   1.75, -5.47029,
-    //    0,   1.0002,        0,  2.25604,
-    //    0,        1,        0,  2.45557;
-    //    std::cout<<mvp<<std::endl;
+    //      mvp     <<1.3125,          0,          0, -0.0508005,
+    //      0,          0,       1.75,   -2.73389,
+    //      0,     1.0002,          0,    4.98702,
+    //      0,          1,          0,      5.186;
+
+    // //    std::cout<<mvp<<std::endl;
+    //     std::cout<<mvp<<std::endl;
         program->SetUniform(Uniform("MVP", mvp));
         int color_type = (draw_normal ? 1 : draw_color ? 2 : 0);
         if(draw_color_phong) color_type = 3;
@@ -165,12 +248,6 @@ namespace visualization
 
     void Visualizer::AddTriangleMesh(const geometry::mesh::TriangleMesh &mesh)
     {
-        if(dynamic_first_view)
-        {
-            ChooseCameraPoseFromPoints(mesh.points);
-            SetModelViewMatrix(camera_pose_for_view);
-            
-        }
         
         if( point_step != 0 &&geometry_type != GeometryType::TRIANGLE_MESH)
         {
@@ -232,7 +309,13 @@ namespace visualization
         std::cout<<"[Visualizer]::[INFO]::Index Buffer Size: "<<index_buffer_size;
         std::cout<<" Triangles: "<<index_buffer_size/3<<RESET<<std::endl;
 #endif
-
+        window::bb += mesh.GetBoundingBox();
+        if(dynamic_first_view)
+        {
+            ChooseCameraPoseThroughBB(window::bb);
+            // ChooseCameraPoseFromPoints(mesh.points);
+            SetModelViewMatrix(camera_pose_for_view);
+        }
         if(point_buffer_size > MAX_BUFFER_SIZE || index_buffer_size > MAX_BUFFER_SIZE)
         std::cout<<YELLOW<<"[Visualizer]::[WARNING]::Overflow."<<RESET<<std::endl;
         

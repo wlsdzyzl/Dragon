@@ -1,5 +1,6 @@
 #include "Geometry/TriangleMesh/Processing/Curvature.h"
 #include "Visualization/Visualizer.h"
+#include "Tool/ColorMapping.h"
 using namespace dragon;
 geometry::Point3 ColorRemapping(double min_c, double max_c, double tmp)
 {

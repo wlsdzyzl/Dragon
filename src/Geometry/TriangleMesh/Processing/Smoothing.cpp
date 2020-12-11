@@ -145,16 +145,20 @@ namespace mesh
             auto current_edge = start_edge->twin_edge->next_edge;
             std::vector<size_t> first_neighbors;
             std::vector<double> cotan_weights;
+            geometry::Vector3 weighted_position = geometry::Vector3::Zero();
             double sum_weight = 0.0;
             first_neighbors.push_back(start_edge->des_vertex->id);
             cotan_weights.push_back(start_edge->weight);
             sum_weight += start_edge->weight;
+            weighted_position += start_edge->weight * start_edge->des_vertex->coor;
             while(current_edge != start_edge)
             {
                 cotan_weights.push_back(current_edge->weight);
                 first_neighbors.push_back(current_edge->des_vertex->id);
                 sum_weight += current_edge->weight;
+                weighted_position += current_edge->weight * current_edge->des_vertex->coor;
                 current_edge = current_edge->twin_edge->next_edge;
+                
             }
             //first_neighbors
 
@@ -164,12 +168,15 @@ namespace mesh
                 AddToCoefficientTriplet(coefficients, i * 3, first_neighbors[id] * 3, tmp_l);
             }
             //set sigma vector
-            tmp_sigma = vertices[i].coor * lambda;
+            // std::cout<<"wegited_position: "<<weighted_position / sum_weight<<std::endl;
+            tmp_sigma = (vertices[i].coor - weighted_position / sum_weight) * lambda;
             sigma.block<3, 1>(3*i, 0) += tmp_sigma;
         }
         laplace_matrix.setZero();
         laplace_matrix.setFromTriplets(coefficients.begin(), coefficients.end());
-        //std::cout<<laplace_matrix<<std::endl;
+        // std::cout<<laplace_matrix<<std::endl;
+        // std::cout<<std::endl;
+        // std::cout<<sigma<<std::endl;
         Eigen::SparseLU<Eigen::SparseMatrix<geometry::scalar>, Eigen::COLAMDOrdering<int>> slu_solver;
         slu_solver.compute(laplace_matrix);
         new_vertices = slu_solver.solve(sigma);

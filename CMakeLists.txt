@@ -69,15 +69,17 @@ add_library(dragon SHARED ${Geometry_SRC}
 
 
 set(CMAKE_CXX_FLAGS " -std=c++11 ")
-set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -O3 -Wall -fopenmp -Wno-maybe-uninitialized") 
+set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -O0 -g -Wall -fopenmp -Wno-maybe-uninitialized") 
 # if you want a double-precision
 # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -DUSING_FLOAT64") 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_executable(ReadPLYMesh "app/ReadPLYMesh.cpp")
-add_executable(GenerateMinimalSurface "app/GenerateMinimalSurface.cpp")
-add_executable(MeanCurvature "app/MeanCurvature.cpp")
-add_executable(GaussCurvature "app/GaussCurvature.cpp")
+add_executable(ReadMesh "app/ReadPLYMesh.cpp")
+# for test
+# add_executable(GenerateMinimalSurface "app/GenerateMinimalSurface.cpp")
+# add_executable(MeanCurvature "app/MeanCurvature.cpp")
+# add_executable(GaussCurvature "app/GaussCurvature.cpp")
+add_executable(DragonView "app/DragonView.cpp")
 set(THIRD_LIB 
     tinyply 
     objloader
@@ -89,19 +91,11 @@ set(THIRD_LIB
     ${OPENGL_LIBRARIES} 
 )
 
-target_link_libraries(ReadPLYMesh
+target_link_libraries(ReadMesh
     dragon
     ${THIRD_LIB}
 )
-target_link_libraries(GenerateMinimalSurface
-    dragon
-    ${THIRD_LIB}
-)
-target_link_libraries(MeanCurvature
-    dragon
-    ${THIRD_LIB}
-)
-target_link_libraries(GaussCurvature
+target_link_libraries(DragonView
     dragon
     ${THIRD_LIB}
 )

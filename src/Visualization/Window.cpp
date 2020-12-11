@@ -10,11 +10,18 @@ namespace window
     geometry::Matrix4 model_view_matrix; 
     bool show_demo_window = false;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);   
+    geometry::Vector4 clear_color = geometry::Vector4(0.45f, 0.55f, 0.60f, 1.00f);   
     int w_width;
     int w_height;
     double last_x = 0;
     double last_y = 0;
+    geometry::BoundingBox bb;
+    double near, far, fovy;
+    double aspect;
+    double up;
+    double right;
+    bool last_point_valid;
+    geometry::Point3 last_point_3d;
     static void glfw_error_callback(int error, const char* description)
     {
         std::cout<<RED<<"[ERROR]::[Window]::Glfw Error: "<<description<<RESET<<std::endl;
@@ -23,14 +30,15 @@ namespace window
     //callback function when we move mouse and keyboard
     static void glfw_motion(GLFWwindow* window, double xpos, double ypos)
     {
-        movement(xpos, ypos);
+        Movement(xpos, ypos);
     }
     static void glfw_scroll(GLFWwindow* window, double xoffset, double yoffset)
     {
         ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+        
         if (!ImGui::GetIO().WantCaptureMouse)
         {
-            Zoom(yoffset);
+            Zoom(yoffset * 50);
         }
     }
     static void glfw_mouse(GLFWwindow* window, int button, int action,
@@ -85,10 +93,15 @@ namespace window
         }
         else
         {
-            std::cout<<BLUE<<"[Visualizer]::[INFO]::GLEW init done."<<std::endl;
+            std::cout<<BLUE<<"[Visualizer]::[INFO]::GLEW init done."<<RESET<<std::endl;
         }
 
         glViewport( 0, 0, w_width, w_height);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -103,7 +116,7 @@ namespace window
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
-
+        RegisterMouseAndKeyboard();
         // Load Fonts
         // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
         // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -133,30 +146,9 @@ namespace window
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        
+        ImGui::NewFrame();        
         {
-            ImGui::Begin("Menu");                          // Create a window called "Hello, world!" and append into it.
-            ImGui::Checkbox("Phong Lighting", &show_demo_window);      // Edit bools storing our window open/close state
-
-            if(ImGui::Button("Minimal Surface"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-            {
-
-            }
-            if(ImGui::Button("Mean Curvature"))
-            {
-
-            }
-            if(ImGui::Button("Gauss Curvature"))
-            {
-
-            }
-            double x, y;
-            CursorPos(x, y);
-            {
-                ImGui::Text("Cursor: %f/%f", x, y);
-            }
+            ImGui::Begin("Menu");                         
             //ImGui::SameLine();
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
@@ -176,8 +168,7 @@ namespace window
     }
     void Zoom(double y)
     {
-        float dy = y - last_y;
-        Translate(geometry::Vector3(0.0, 0.0, dy * 3.0 / w_height));
+        Translate(geometry::Vector3(0.0, 0.0, y * 3.0 / w_height));
     }
     void RegisterMouseAndKeyboard()
     {
@@ -192,30 +183,85 @@ namespace window
     }
     void Translate(double x, double y)
     {
-        // float dx = x - last_x;
-        // float dy = y - last_y;
+        double dx = x - last_x;
+        double dy = y - last_y;
+        geometry::Point3 center = bb.Center();
+        geometry::Vector4 mc = geometry::Vector4(center(0), center(1), center(2), 1.0);
+        geometry::Vector4 ec = model_view_matrix * mc;
+        double z = -(ec[2] / ec[3]);
 
-        // vec4 mc = vec4(center, 1.0);
-        // vec4 ec = modelview_matrix * mc;
-        // float z = -(ec[2] / ec[3]);
+        Translate(geometry::Vector3(2.0 * dx / w_width * right / near * z,
+                    -2.0 * dy / w_height * up / near * z, 0.0f));
+    }
+    bool Map2Sphere(const geometry::Point2i& point2D, geometry::Vector3& result)
+    {
+        if ((point2D[0] >= 0) && (point2D[0] <= w_width) && (point2D[1] >= 0) &&
+            (point2D[1] <= w_height))
+        {
 
-        // float aspect = (float)w_width / (float)w_height;
-        // float up = tan(fovy_ / 2.0f * M_PI / 180.f) * near;
-        // float right = aspect * up;
+            double x = (double)(point2D[0] - 0.5 * w_width) / w_width;
+            double y = (double)(0.5 * w_height - point2D[1]) / w_height;
+            double sinx = sin(M_PI * x * 0.5);
+            double siny = sin(M_PI * y * 0.5);
+            double sinx2siny2 = sinx * sinx + siny * siny;
 
-        // Translate(geometry::Vector3(2.0 * dx / w_width * right / near * z,
-        //             -2.0 * dy / w_height * up / near * z, 0.0f));
+            result[0] = sinx;
+            result[1] = siny;
+            result[2] = sinx2siny2 < 1.0 ? sqrt(1.0 - sinx2siny2) : 0.0;
+
+            return true;
+        }
+        else
+            return false;
+    }
+    void Rotate(const geometry::Vector3& axis, double angle)
+    {
+        // center in eye coordinates
+        geometry::Point3 center = bb.Center();
+        geometry::Vector4 mc = geometry::Vector4(center(0), center(1), center(2), 1.0);
+        geometry::Vector4 ec = model_view_matrix * mc;
+        geometry::Vector3 c(ec[0] / ec[3], ec[1] / ec[3], ec[2] / ec[3]);
+        geometry::Matrix4 transform = geometry::Matrix4::Identity();
+        geometry::Matrix3 rotation = geometry::RotationMatrix(axis, angle);
+        geometry::Vector3 translation = c + rotation * (-c);
+        transform.block<3, 3>(0, 0) = rotation;
+        transform.block<3, 1>(0, 3) = translation;
+        model_view_matrix = transform* model_view_matrix;
     }
     void Rotate(double x, double y, int type)
     {
-        
+        if(last_point_valid)
+        {
+            geometry::Point2i new_point_2d((int)x, (int)y);
+            geometry::Point3 new_point_3d;
+            bool new_point_valid = Map2Sphere(new_point_2d, new_point_3d);
+            if (new_point_valid)
+            {
+                if(type == 0)
+                {
+
+                        auto axis = last_point_3d.cross(new_point_3d);
+                        double cos_ = geometry::Cos(last_point_3d, new_point_3d);
+
+                        if (std::fabs(cos_) < 1.0)
+                        {
+                            double angle = 2.0 * acos(cos_);
+                            Rotate(axis, angle);
+                        }
+                }
+                else
+                {
+
+                }
+            }
+        }
     }
-    void movement(double xpos, double ypos)
+    void Movement(double xpos, double ypos)
     {
         // rotation0
         if (right_mouse_pressed() && left_mouse_pressed())
         {
-            Rotate(xpos, ypos, 2);
+            Rotate(xpos, ypos, 1);
         }
         else if (right_mouse_pressed())
         {
@@ -226,14 +272,15 @@ namespace window
         {
             Translate(xpos, ypos);
         }
-        // zoom
-        else if (middle_mouse_pressed())
-        {
-            Zoom(ypos);
-        }
+        // // zoom
+        // else if (middle_mouse_pressed())
+        // {
+        //     Zoom(ypos);
+        // }
         // remember points
         last_x = xpos;
         last_y = ypos;
+        last_point_valid = Map2Sphere(geometry::Point2i((int)last_x, (int)last_y), last_point_3d);
     }
 }
 }

@@ -24,6 +24,7 @@ namespace mesh
     }
     bool TriangleMesh::LoadFromFile(const std::string & filename)
     {
+        
         std::vector<std::string> result = tool::RSplit(filename, ".", 1);
         if(result.size() == 2)
         {
@@ -93,45 +94,52 @@ namespace mesh
             start_index += meshes[i].points.size();
         }
     }
-    // void TriangleMesh::ComputeNormals()
-    // {
-    //     std::vector<Reference> references;
-    //     references.resize(points.size());
-    //     UpdateReferences(triangles,references);
-    //     normals.resize(points.size());
-    //     Point3List triangle_normals;
-    //     triangle_normals.resize(triangles.size());
-    //     Point3 n,p1,p2,p3;
+    void TriangleMesh::ComputeNormals()
+    {
+        std::vector<Reference> references;
+        references.resize(points.size());
+        UpdateReferences(triangles,references);
+        normals.resize(points.size());
+        Point3List triangle_normals;
+        triangle_normals.resize(triangles.size());
+        Point3 n,p1,p2,p3;
       
-    //     for(size_t i = 0;i!= triangles.size(); ++i)
-    //     {
-    //         p1 = points[triangles[i](0)];
-    //         p2 = points[triangles[i](1)];
-    //         p3 = points[triangles[i](2)];
-    //         n = ((p2 - p1).cross(p3 - p1));
-    //         n.normalize();
-    //         triangle_normals[i] = n;
-    //     }
-	// 	for(size_t i = 0;i!=points.size();++i)
-	// 	{
+        for(size_t i = 0;i!= triangles.size(); ++i)
+        {
+            p1 = points[triangles[i](0)];
+            p2 = points[triangles[i](1)];
+            p3 = points[triangles[i](2)];
+            n = ((p2 - p1).cross(p3 - p1));
+            n.normalize();
+            triangle_normals[i] = n;
+        }
+		for(size_t i = 0;i!=points.size();++i)
+		{
 
-	// 		Point3 vnormal; 
-    //         vnormal.setZero();
-    //         for(size_t j = 0;j!=references[i].size();++j)
-	// 		{
-	// 			vnormal += triangle_normals[references[i][j].first];
-	// 		}
-	// 		vnormal.normalize();
+			Point3 vnormal; 
+            vnormal.setZero();
+            for(size_t j = 0;j!=references[i].size();++j)
+			{
+				vnormal += triangle_normals[references[i][j].first];
+			}
+			vnormal.normalize();
 
-    //         normals[i] = vnormal;
-	// 	}
-    // }
+            normals[i] = vnormal;
+		}
+    }
+    BoundingBox TriangleMesh::GetBoundingBox() const
+    {
+        BoundingBox bb;
+        for(size_t i = 0; i != points.size(); ++i)
+        {
+            bb.AddPoint(points[i]);
+        }
+        return bb;
+    }
     bool TriangleMesh::WriteToPLY(const std::string &filename) const
     {
         return io::WritePLY(filename, points, normals, colors, triangles);
     }
-
-
     bool TriangleMesh::WriteToOBJ(const std::string& filename) const
     {
         return io::WriteOBJ(filename,points,normals,colors,triangles);

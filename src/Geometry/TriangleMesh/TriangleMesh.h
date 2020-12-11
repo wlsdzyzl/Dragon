@@ -35,15 +35,6 @@ namespace mesh
         {
             return normals.size() == points.size() && normals.size() > 0;
         }
-        BoundingBox GetBB() const
-        {
-            BoundingBox bb;
-            for(size_t i = 0; i != points.size(); ++i)
-            {
-                bb.AddPoint(points[i]);
-            }
-            return bb;
-        }
         // std::shared_ptr<TriangleMesh> QuadricSimplify(size_t target_num) const;
         // std::shared_ptr<TriangleMesh> ClusteringSimplify(float grid_len) const;
         // std::shared_ptr<TriangleMesh> Prune(size_t min_points) const;
@@ -52,6 +43,7 @@ namespace mesh
         size_t GetTriangleSize() const{return triangles.size();}
         bool WriteToPLY(const std::string &fileName) const;
         bool WriteToOBJ(const std::string &fileName) const;
+        BoundingBox GetBoundingBox() const;
         Point3uiList triangles;
         Point3List points;
         Point3List normals;

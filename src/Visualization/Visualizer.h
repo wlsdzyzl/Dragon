@@ -5,6 +5,7 @@
 #include <memory>
 #include "Window.h"
 #include "Geometry/TriangleMesh/TriangleMesh.h"
+#include "Geometry/BoundingBox.h"
 #define MAX_BUFFER_SIZE 1024*1024*30
 namespace dragon
 {
@@ -20,7 +21,7 @@ namespace visualization
         public:
         bool Initialize();
         void ConfigProgram();
-        Visualizer()
+        Visualizer(int w = 800, int h = 600):width(w), height(h)
         {
             Reset();
             point_buffer = new float[MAX_BUFFER_SIZE];
@@ -29,14 +30,7 @@ namespace visualization
             memset(index_buffer,0,MAX_BUFFER_SIZE*sizeof(int));
 
         }
-        ~Visualizer()
-        {
-            delete[] point_buffer;
-            delete[] index_buffer;
-            glDeleteBuffers(1, &ebo);
-            glDeleteBuffers(1, &vbo);
-            window::Cleanup();
-        }
+        ~Visualizer();
         void SetGeometryType(GeometryType type)
         {
             geometry_type = type;
@@ -47,64 +41,15 @@ namespace visualization
             point_buffer_size = 0;
             index_buffer_size = 0;
             geometry_type = GeometryType::TRIANGLE_MESH;
+            window::bb = geometry::BoundingBox();
         }
         void SetProjectionMatrix(int w, int h, float fu, float fv, float u0, 
-            float v0, float zNear, float zFar)
-        {
-            // see https://wlsdzyzl.top/2018/11/14/%E5%9B%BE%E5%BD%A2%E5%AD%A6%E2%80%94%E2%80%94Viewing/
-            window::projection_matrix.setZero();
-            const float L = +(u0) * zNear / -fu;
-            const float T = +(v0) * zNear / fv;
-            const float R = -(w-u0) * zNear / -fu;
-            const float B = -(h-v0) * zNear / fv;   
-            window::projection_matrix(0, 0) = 2 * zNear / (R-L);
-            window::projection_matrix(1, 1) = 2 * zNear / (T-B);
-            window::projection_matrix(2, 2) = -(zFar +zNear) / (zFar - zNear);
-            window::projection_matrix(2, 3) =  -(2*zFar*zNear)/(zFar-zNear); 
-            // window::projection_matrix(0, 2) = (R+L)/(R-L);
-            // window::projection_matrix(1, 2) = (T+B)/(T-B);
-            window::projection_matrix(3, 2) = -1.0;
-              
-        }
+            float v0, float zNear, float zFar);
         void AddTriangleMesh(const geometry::mesh::TriangleMesh &mesh);
         void Show();
         void ShowOnce();
         void SetModelViewMatrix(const geometry::TransformationMatrix &camera_pose, 
-            bool reversed_model = true)
-        {
-            //transform to camera coordinate system
-            geometry::Matrix3 camera_rotation = camera_pose.block<3, 3>(0, 0);
-            
-            geometry::Vector3 camera_position = camera_pose.block<3, 1>(0, 3);
-            //in OpenGL
-            //z
-            geometry::Vector3 forward_gl = - camera_rotation.block<3, 1>(0, 2);
-            //y
-            geometry::Vector3 up_gl = camera_rotation.block<3, 1>(0, 1);
-            if(reversed_model) up_gl = -up_gl;
-            //x
-            geometry::Vector3 right_gl = camera_rotation.block<3, 1>(0, 0);
-            up_gl.normalize();
-            right_gl.normalize();
-            forward_gl.normalize();
-            
-            geometry::Matrix3 camera_rotation_gl;
-            // axis of OpenGL coordinate system
-            camera_rotation_gl.block<1, 3>(0, 0) = right_gl.transpose();
-        
-            camera_rotation_gl.block<1, 3>(1, 0) = up_gl.transpose();
-
-            camera_rotation_gl.block<1, 3>(2, 0) = forward_gl.transpose();
-            // change the zero point
-            // we want the camera can be more far away to the object
-            // because in OpenGL coordinate, the Z axis is towards the camera, so if camera wants to move far away from the 
-            // objects, it need to add the z axis vector.
-            auto camera_position_gl = - camera_rotation_gl * camera_position + 2 * forward_gl;
-            
-            window::model_view_matrix.block<3, 3>(0, 0) = camera_rotation_gl;
-            window::model_view_matrix.block<3, 1>(0, 3) = camera_position_gl;
-            window::model_view_matrix(3, 3) = 1.0;
-        }
+            bool reversed_model = false);
         void PreCall()
         {
             glfwPollEvents();
@@ -112,11 +57,7 @@ namespace visualization
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
         }
-        void PostCall()
-        {
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-            glfwSwapBuffers(window::window);
-        }
+        void PostCall();
         void ChooseCameraPoseFromPoints(const geometry::Point3List &points)
         {
             geometry::Point3 average_point =  geometry::Point3::Zero();
@@ -134,9 +75,22 @@ namespace visualization
             camera_pose.block<3, 1>(0, 2) = geometry::Point3(0, 1, 0);
             camera_pose_for_view = camera_pose;
         }
+        void ChooseCameraPoseThroughBB(const geometry::BoundingBox &bb)
+        {
+            geometry::Point3 average_point =  bb.Center();
+            //just change the y value
+            geometry::TransformationMatrix camera_pose = geometry::TransformationMatrix::Identity();
+            double back = 2 * (bb.z_max - bb.z_min);
+            if(back <= 0.0) back = 2 * (bb.x_max - bb.x_min);
+            camera_pose.block<3, 1>(0, 3) = average_point - geometry::Vector3(0, 0, back);
+            //set camera
+            // camera_pose.block<3, 1>(0, 0) = geometry::Point3(1, 0, 0);
+            // camera_pose.block<3, 1>(0, 1) = geometry::Point3(0, 0, -1);
+            // camera_pose.block<3, 1>(0, 2) = geometry::Point3(0, 1, 0);
+            camera_pose_for_view = camera_pose;            
+        }
         void SetShaderPath()
         {
-
             if(!has_colors && !has_normals)
             shader_vert = "draw_point.vert";
             if(has_colors && !has_normals)
@@ -166,12 +120,14 @@ namespace visualization
 
         std::string shader_path = "../../src/Visualization/Shaders";
         bool draw_normal = false;
+        int width;
+        int height;
         bool draw_color = false;
         bool draw_color_phong = true;
         bool has_colors = true;
         bool has_normals = true;
         bool is_initialized = false;
-
+        bool wireframe_mode = false;
         std::shared_ptr<Shader> program;
         GeometryType geometry_type;
         protected:

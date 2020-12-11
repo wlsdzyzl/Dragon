@@ -105,5 +105,23 @@ namespace geometry
             }
         }
     }
+    Matrix3 RotationMatrix(const Vector3 &_axis, double angle)
+    {
+        //Rodrigues
+        // Matrix3 rotation_matrix;
+        Vector3 axis = _axis.normalized();
+        // Matrix3 aat =  axis * axis.transpose();
+        // Matrix3 A = GetSkewSymmetricMatrix(axis);
+        // rotation_matrix = aat + (Matrix3::Identity()-aat )*cos(angle) + sin(angle) * A;
+        return Eigen::AngleAxis<geometry::scalar>(angle, axis).toRotationMatrix();
+    }
+    Matrix3 GetSkewSymmetricMatrix(const Vector3 &t)
+    {
+        Matrix3 t_hat;
+        t_hat << 0, -t(2), t(1),
+                t(2), 0, -t(0),
+                -t(1), t(0), 0;
+        return t_hat;        
+    }
 }
 }

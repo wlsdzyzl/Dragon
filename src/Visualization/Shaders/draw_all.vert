@@ -32,7 +32,6 @@ void main()
         else if(colorType == 3)
         {
             // use Phong shading
-
             vec4 material = materialDiffuse;
 	    
             vec3 eyeDir = normalize(position.xyz);

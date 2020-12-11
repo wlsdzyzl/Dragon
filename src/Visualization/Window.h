@@ -4,6 +4,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "IO/ConsoleColor.h"
+#include "Geometry/BoundingBox.h"
 #include <iostream>
 // About Desktop OpenGL function loaders:
 //  Modern desktop OpenGL doesn't have a standard portable header file to load OpenGL function pointers.
@@ -50,23 +51,31 @@ namespace window
     extern GLFWwindow* window;  
     extern geometry::Matrix4 projection_matrix;
     extern geometry::Matrix4 model_view_matrix;    
-
+    extern geometry::BoundingBox bb;
     static bool mouse_buttons[7];
     extern double last_x;
     extern double last_y;
     extern int w_height;
     extern int w_width;
+    extern double near, far, fovy;
+    extern double aspect;
+    extern double up;
+    extern double right;
+    extern bool last_point_valid;
+    extern geometry::Point3 last_point_3d;
     bool Initialize(int width = 800, int height = 600);
     void Cleanup();
+    // the function that can be rewritten
     void RenderGuiComponents();
     void RegisterMouseAndKeyboard();
     void Translate(double x, double y);
-    void Rotate(double x, double y, int type);
     void Translate(const geometry::Vector3 &translation);
     void Rotate(const geometry::Matrix3 &rotation);
+    void Rotate(const geometry::Vector3 &axis, double angle);
+    void Rotate(double x, double y, int type);
     void Zoom(double y);
     void CursorPos(double& x, double& y);
-    void movement(double xpos, double ypos);
+    void Movement(double xpos, double ypos);  
     bool inline right_mouse_pressed()
     {
         return mouse_buttons[GLFW_MOUSE_BUTTON_RIGHT];

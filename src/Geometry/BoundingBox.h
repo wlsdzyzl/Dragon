@@ -9,11 +9,11 @@ namespace geometry
     class BoundingBox
     {
         public:
-        geometry::Point3 Center()
+        geometry::Point3 Center() const
         {
             return geometry::Point3(x_max + x_min, y_max + y_min, z_max + z_min) / 2;
         }
-        double Radius()
+        double Radius() const
         {
             geometry::Point3 center = Center();
             geometry::Point3 max_p(x_max, y_max, z_max);
@@ -34,11 +34,21 @@ namespace geometry
             if(p(2) < z_min)
             z_min = p(2);
         }
-        double x_max = std::numeric_limits<double>::min();
+        BoundingBox &operator+= (const BoundingBox &bb)
+        {
+            x_max = std::max(bb.x_max, x_max);
+            x_min = std::min(bb.x_min, x_min);
+            y_max = std::max(bb.y_max, y_max);
+            y_min = std::min(bb.y_min, y_min);
+            z_max = std::max(bb.z_max, z_max);
+            z_min = std::min(bb.z_min, z_min);
+            return *this;
+        }
+        double x_max = std::numeric_limits<double>::lowest();
         double x_min = std::numeric_limits<double>::max();
-        double y_max = std::numeric_limits<double>::min();
+        double y_max = std::numeric_limits<double>::lowest();
         double y_min = std::numeric_limits<double>::max();
-        double z_max = std::numeric_limits<double>::min();
+        double z_max = std::numeric_limits<double>::lowest();
         double z_min = std::numeric_limits<double>::max();
     };
 }
