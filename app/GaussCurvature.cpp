@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     }
     geometry::mesh::TriangleMesh mesh;
     mesh.LoadFromFile(argv[1]);
-    geometry::mesh::HalfEdge he; 
+    geometry::HalfEdge he; 
     he.FromTriangleMesh(mesh);
     std::cout<<"Build HalfEdge!"<<std::endl;
     he.CheckBorder();

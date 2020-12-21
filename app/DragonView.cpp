@@ -11,6 +11,8 @@ static bool use_uniform_para = true;
 static geometry::mesh::TriangleMesh object;
 static std::string filename;
 static bool wireframe_mode = false;
+static double simplify_rate = 0.1f;
+static double voxel_len = 0.01f;
 bool updated = false;
 bool reorient = false;
 bool show_normal = false;
@@ -25,9 +27,10 @@ void RenderGuiComponents()
         ImGui::Checkbox("Wireframe", &wireframe_mode); 
         ImGui::SameLine();
         ImGui::Checkbox("NormalMapping", &show_normal);
+        // ImGui::BeginMenu("Curvature");
         if(ImGui::Button("Mean Curvature"))
         {
-            geometry::mesh::HalfEdge he; 
+            geometry::HalfEdge he; 
             he.FromTriangleMesh(object);
             he.CheckBorder();
             std::vector<double> mean_curvatures;
@@ -48,7 +51,7 @@ void RenderGuiComponents()
         }
         if(ImGui::Button("Gauss Curvature"))
         {
-            geometry::mesh::HalfEdge he; 
+            geometry::HalfEdge he; 
             he.FromTriangleMesh(object);
             he.CheckBorder();
             std::vector<double> gauss_curvatures;
@@ -65,6 +68,15 @@ void RenderGuiComponents()
             object.ComputeNormals();
             updated = true;
         }
+        // if(ImGui::Button("Naive Laplacian Smoothing"))
+        // {
+        //     auto result = 
+        //         geometry::mesh::NaiveLaplacianSmooting(object, local_lambda, iteration_local);            
+        //     object = *result;
+        //     if(!object.HasNormals())
+        //     object.ComputeNormals();
+        //     updated = true;
+        // }
         ImGui::SliderFloat("local lambda", &local_lambda, 0.001f, 0.5f);
         ImGui::SliderInt("Local Iteration", &iteration_local, 1, 1000);
         if(ImGui::Button("Local Laplacian Smoothing"))
@@ -87,23 +99,58 @@ void RenderGuiComponents()
             updated = true;
         }
         ImGui::Checkbox("Uniform", &use_uniform_para); 
-        if(ImGui::Button("UV Parameterization"))
+        if(ImGui::Button("UV Parameterization (Circle)"))
         {
             if(use_uniform_para)
             {
                 auto result = 
-                    geometry::mesh::MeshParameterization(object, 0);            
+                    geometry::mesh::MeshParameterizationCircle(object, 0);            
                 object = *result;
             }
             else
             {
                 auto result = 
-                    geometry::mesh::MeshParameterization(object, 3);            
+                    geometry::mesh::MeshParameterizationCircle(object, 3);            
                 object = *result;
             }
             if(!object.HasNormals())
             object.ComputeNormals();
             reorient = true;
+            updated = true;
+        }
+        if(ImGui::Button("UV Parameterization (Square)"))
+        {
+            if(use_uniform_para)
+            {
+                auto result = 
+                    geometry::mesh::MeshParameterizationSquare(object, 0);            
+                object = *result;
+            }
+            else
+            {
+                auto result = 
+                    geometry::mesh::MeshParameterizationSquare(object, 3);            
+                object = *result;
+            }
+            if(!object.HasNormals())
+            object.ComputeNormals();
+            reorient = true;
+            updated = true;
+        }
+        if(ImGui::Button("Quadric Simplification"))
+        {
+            auto result = object.QuadricSimplify(simplify_rate * object.triangles.size());
+            object = *result;
+            if(!object.HasNormals())
+            object.ComputeNormals();
+            updated = true;
+        }
+        if(ImGui::Button("Clustering Simplification"))
+        {
+            auto result = object.QuadricSimplify(voxel_len);
+            object = *result;
+            if(!object.HasNormals())
+            object.ComputeNormals();
             updated = true;
         }
         if(ImGui::Button("Reload"))
@@ -114,6 +161,7 @@ void RenderGuiComponents()
             updated = true;
             reorient = true;
         }
+        ImGui::SameLine();
         if(ImGui::Button("Save"))
         {
             object.WriteToPLY("ByDragon.ply");

@@ -22,6 +22,7 @@ namespace window
     double right;
     bool last_point_valid;
     geometry::Point3 last_point_3d;
+    geometry::Point2List pressed_points;
     static void glfw_error_callback(int error, const char* description)
     {
         std::cout<<RED<<"[ERROR]::[Window]::Glfw Error: "<<description<<RESET<<std::endl;
@@ -50,8 +51,22 @@ namespace window
             mouse_buttons[button] = (action == GLFW_PRESS);
         }
     }
-                              
-    bool Initialize(int width, int height)
+    static void glfw_mouse_2d(GLFWwindow* window, int button, int action,
+                           int mods)
+    {
+        ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+        // if (!ImGui::GetIO().WantCaptureMouse)
+        // {
+        //     mouse_buttons[button] = (action == GLFW_PRESS);
+        // }
+        if((button == GLFW_MOUSE_BUTTON_RIGHT) && (action == GLFW_RELEASE))
+        {
+            double x, y;
+            CursorPos(x, y);
+            pressed_points.push_back(geometry::Point2(x, y));
+        }
+    }                              
+    bool Initialize(int width, int height, bool is_3d)
     {
         w_width = width;
         w_height = height;
@@ -116,6 +131,7 @@ namespace window
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
+        if(is_3d)
         RegisterMouseAndKeyboard();
         // Load Fonts
         // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -151,6 +167,8 @@ namespace window
             ImGui::Begin("Menu");                         
             //ImGui::SameLine();
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImVec2 p = ImGui::GetCursorScreenPos();
+            ImGui::Text("x: %f, y: %f", p.x, p.y);
             ImGui::End();
         }
         // Rendering
@@ -176,6 +194,10 @@ namespace window
         glfwSetCursorPosCallback(window, glfw_motion);
         glfwSetMouseButtonCallback(window, glfw_mouse);
         glfwSetScrollCallback(window, glfw_scroll);
+    }
+    void RegisterMouseAndKeyboard2D()
+    {
+        glfwSetMouseButtonCallback(window, glfw_mouse_2d);
     }
     void CursorPos(double& x, double& y)
     {
@@ -204,7 +226,6 @@ namespace window
             double sinx = sin(M_PI * x * 0.5);
             double siny = sin(M_PI * y * 0.5);
             double sinx2siny2 = sinx * sinx + siny * siny;
-
             result[0] = sinx;
             result[1] = siny;
             result[2] = sinx2siny2 < 1.0 ? sqrt(1.0 - sinx2siny2) : 0.0;
@@ -239,19 +260,31 @@ namespace window
             {
                 if(type == 0)
                 {
+                    auto axis = last_point_3d.cross(new_point_3d);
+                    
+                    double cos_ = geometry::Cos(last_point_3d, new_point_3d);
 
-                        auto axis = last_point_3d.cross(new_point_3d);
-                        double cos_ = geometry::Cos(last_point_3d, new_point_3d);
-
-                        if (std::fabs(cos_) < 1.0)
-                        {
-                            double angle = 2.0 * acos(cos_);
-                            Rotate(axis, angle);
-                        }
+                    if (std::fabs(cos_) < 1.0)
+                    {
+                        double angle = 2.0 * acos(cos_);
+                        Rotate(axis, angle);
+                    }
                 }
                 else
                 {
+                    //z axis is the look-at direction, because it's model view matrix
+                    // the look-at direction is just (0,0, 1)
+                    auto axis = last_point_3d.cross(new_point_3d);
+                    geometry::Vector3 z_axis = geometry::Vector3(0, 0, 1);
+                    if(axis.dot(geometry::Vector3(0, 0, 1)) < 0) z_axis = -z_axis;
+                    double cos_ = geometry::Cos(last_point_3d, new_point_3d);
 
+                    if (std::fabs(cos_) < 1.0)
+                    {
+                        double angle = 2.0 * acos(cos_);
+                        
+                        Rotate(z_axis, angle);
+                    }
                 }
             }
         }
@@ -281,6 +314,88 @@ namespace window
         last_x = xpos;
         last_y = ypos;
         last_point_valid = Map2Sphere(geometry::Point2i((int)last_x, (int)last_y), last_point_3d);
+    }
+    void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color, bool filled, int n)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glBegin(GL_POLYGON);              // Each set of 4 vertices form a quad
+        for(int i = 0; i < n; ++i)
+        {
+            glVertex2f(p(0) +  cos((i + 0.0f) / n * 2 * M_PI) * r, (p(1) + sin((i + 0.0f) / n * 2 * M_PI) * r));
+        }
+        glEnd();
+    }      
+    void DrawPoint(const geometry::Point2 &p, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glPointSize(thickness);
+        glBegin(GL_POINTS);              // Each set of 4 vertices form a quad
+        glVertex2f(p(0), p(1));
+        glEnd();
+    }
+    void DrawPoints(const geometry::Point2List &points, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glPointSize(thickness);
+        glBegin(GL_POINTS);              // Each set of 4 vertices form a quad
+        for(size_t i = 0; i < points.size(); ++i)
+        glVertex2f(points[i](0), points[i](1));
+        glEnd();
+    }
+    void DrawLine(const geometry::Point2 &p1, const geometry::Point2 &p2, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
+        glBegin(GL_LINES);
+        glVertex2f(p1(0), p1(1));
+        glVertex2f(p2(0), p2(1));
+        glEnd();
+    }
+    void DrawLines(const geometry::Point2List &points, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
+        glBegin(GL_LINES);
+        for(size_t i = 0; i < points.size(); i+=2)
+        {
+            glVertex2f(points[i](0), points[i](1));
+            glVertex2f(points[i+1](0), points[i+1](1));
+        }
+        glEnd();
+    }
+    void DrawLineStrip(const geometry::Point2List &points, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
+        glBegin(GL_LINE_STRIP);
+        for(size_t i = 0; i < points.size(); i+=2)
+        {
+            glVertex2f(points[i](0), points[i](1));
+            glVertex2f(points[i+1](0), points[i+1](1));
+        }
+        glEnd();
+    }
+    void DrawPolygon(const geometry::Point2List &points, const geometry::Point3 &color,  double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
+        glBegin(GL_LINE_LOOP);              
+        for(size_t i = 0; i < points.size(); ++i)
+        {
+            // std::cout<< points[i].transpose()<<std::endl;
+            glVertex2f(points[i](0), points[i](1));
+        }
+        glEnd();        
+    }
+    void DrawPolygonFilled(const geometry::Point2List &points, const geometry::Point3 &color,  double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glBegin(GL_POLYGON);              
+        for(size_t i = 0; i < points.size(); ++i)
+        {
+            glVertex2f(points[i](0), points[i](1));
+        }
+        glEnd();        
     }
 }
 }

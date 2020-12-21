@@ -1,7 +1,7 @@
 #ifndef DRAGON_GURVATURE_H
 #define DRAGON_GURVATURE_H
 // compute mean curvature and the gauss curvature
-#include "../HalfEdge.h"
+#include "Geometry/Structure/HalfEdge.h"
 
 namespace dragon
 {

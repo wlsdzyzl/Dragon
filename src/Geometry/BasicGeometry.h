@@ -27,6 +27,7 @@ namespace geometry
     typedef Eigen::Matrix<scalar, 4, 1> Vector4;
     typedef Eigen::Matrix<scalar, 6, 1> Vector6;
     typedef Eigen::Matrix<scalar, Eigen::Dynamic, 1> VectorX;
+    typedef Eigen::Matrix<scalar, Eigen::Dynamic, 1> PointX;
     typedef Eigen::Matrix<scalar, 2, 2> Matrix2;
     typedef Eigen::Matrix<scalar, 3, 3> Matrix3;
     typedef Eigen::Matrix<scalar, 4, 4> Matrix4;
@@ -41,12 +42,13 @@ namespace geometry
     typedef Eigen::Matrix<int, 3, 1> Point3i;
     typedef Eigen::Matrix<unsigned int, 2, 1> Point2ui;
     typedef Eigen::Matrix<unsigned int, 3, 1> Point3ui;
-
+    typedef std::vector<Point2i, Eigen::aligned_allocator<Point2i> > Point2iList;
     typedef std::vector<Point3i, Eigen::aligned_allocator<Point3i> > Point3iList;
     typedef std::vector<Point3ui, Eigen::aligned_allocator<Point3ui> > Point3uiList;
 
     typedef std::vector<Point2, Eigen::aligned_allocator<Point2> > Point2List;
     typedef std::vector<Point3, Eigen::aligned_allocator<Point3> > Point3List; 
+    typedef std::vector<PointX, Eigen::aligned_allocator<Point3> > PointXList; 
     template <int T>
         using PointList = std::vector<Eigen::Matrix<scalar, T, 1>, 
             Eigen::aligned_allocator<Eigen::Matrix<scalar, T, 1>>>;
@@ -65,7 +67,7 @@ namespace geometry
     void TransformPoints(const Matrix4 &T, Point3List &points);
     Point3 TransformPoint(const Matrix4 &T, const Point3 &point);
     void TransformNormals(const Matrix4 &T, Point3List &normals);
-    double ComputeTriangleArea(const Point3 &a, const Point3 &b, const Point3 &c);
+    double ComputeTriangleArea(const PointX &a, const PointX &b, const PointX &c);
 
     // double inline cos(const Vector3 &a, const Vector3 &b){return a.dot(b) / (a.norm() * b.norm()); }
     // double inline sin(const Vector3 &a, const Vector3 &b){double cos_= cos(a, b); return sqrt(1-cos_ * cos_) ; }
@@ -99,14 +101,77 @@ namespace geometry
     }
     double inline ClampCot(const VectorX &a, const VectorX &b){return ClampCot(Cot(a, b));}
     // compute the circum center of triangle
-    Point3 CircumCenter(const Point3 &a, const Point3 &b, const Point3 &c);
-    int TriangleType(const Point3 &a, const Point3 &b, const Point3 &c);
+    std::tuple<Point3, double> CircumCenter(const Point3 &a, const Point3 &b, const Point3 &c);
+    std::tuple<Point2, double, double> CircumCenter(const Point2 &a, const Point2 &b, const Point2 &c);
+    int TriangleType(const PointX &a, const PointX &b, const PointX &c);
     double AngleOfVector(const VectorX &a, const VectorX &b);
     int AngleType(const VectorX &a, const VectorX &b);
     void AddToCoefficientTriplet(std::vector<Eigen::Triplet<scalar>> &coefficients,
         int start_row, int start_col, const MatrixX &JTJ);
     Matrix3 RotationMatrix(const Vector3 &axis, double angle);
     Matrix3 GetSkewSymmetricMatrix(const Vector3 &t);
+    std::tuple<Point3, double ,double> FitPlane(const Point3List & _points);
+    std::tuple<Vector2, double ,double> FitLine(const Point2List & _points);
+    // computational geometry
+    // from onepiece geometry2d
+    struct LineSegment;
+    struct Line;
+
+    double Cross3(const Point2 &a, const Point2 &b, const Point2 &c);
+    bool InSegBounding(const LineSegment &l, const Point2 &p);
+    bool InSegBoundingX(const LineSegment &l, const Point2 &p);
+    bool InSegBoundingY(const LineSegment &l, const Point2 &p);
+    bool IsIntersecting(const LineSegment &l1, const LineSegment &l2);
+    bool IsIntersecting(const Line & l1, const LineSegment &l2);
+    Line LineFromSeg(const LineSegment &s);
+    Point2 LineIntersect(const Line &a, const Line &b);
+    Point2 SegIntersect(const LineSegment &s1, const LineSegment &s2);
+    Point2 LineSegIntersect(const Line &a, const LineSegment & b);
+    double Distance(const Point2 &a, const Point2 &b);
+    Point2 ProjectionPointToLine(const Line &a, const Point2 &p);
+    Point2 ProjectionPointToLineSegment(const LineSegment &a, const Point2 &p);
+    int CheckPointInConvexPoly(const geometry::Point2List &points, const Point2 &p);
+    int CheckPointToLine(const Line &line, const Point2 &point);
+    int CheckPointToLine(const Point2 &a, const Point2 &b, const Point2 &z );
+    int CheckPointInTriangle(const Point2 & a, const Point2 &b, const Point2 & c, const Point2 &p);
+    double ComputeAreaTriangle(Point2 a, Point2 b, Point2 c);
+    double ComputeAreaConvexPoly(const Point2List &points);
+
+    Line VerticalBisector(const Point2 & a, const Point2 &b);
+    struct LineSegment
+    {
+        Point2 p0, p1;
+        LineSegment(){}
+        LineSegment(Point2 _p0, Point2 _p1) : p0(_p0), p1(_p1) {}
+        double Length()
+        {
+            return Distance(p0, p1);
+        }
+    };
+
+    struct Line
+    {
+        geometry::Vector2 n;
+        double d;
+        Line() = default;
+        Line(double a, double b, double c)
+        {
+            n(0) = a;
+            n(1) = b;
+            d = c;
+        }
+        Line(const geometry::Vector2 &_n, double _d)
+        {
+            n = _n;
+            d = _d;
+        }
+        Line(const geometry::Point3 &l)
+        {
+            n = l.head<2>();
+            d = l(2);
+        }
+    };
+    // for hash
     struct PairHasher
     {
         template<class T1, class T2>
@@ -118,6 +183,18 @@ namespace geometry
             static constexpr size_t p1 = 73856093;
             static constexpr size_t p2 = 19349663;
             return ( p.first * p1 ^ p.second * p2 );
+        }
+    };
+    struct PixelGridHasher
+    {
+        std::size_t operator() (const Point2i& key) const
+        {
+            // auto h1 = std::hash<T1>{}(p.first);
+            // auto h2 = std::hash<T2>{}(p.second);
+            // return h1 ^ h2;
+            static constexpr size_t p1 = 73856093;
+            static constexpr size_t p2 = 19349663;
+            return ( key(0) * p1 ^ key(1) * p2);
         }
     };
 

@@ -5,7 +5,7 @@
 #include <memory>
 #include "Window.h"
 #include "Geometry/TriangleMesh/TriangleMesh.h"
-#include "Geometry/BoundingBox.h"
+#include "Geometry/Structure/BoundingBox.h"
 #define MAX_BUFFER_SIZE 1024*1024*30
 namespace dragon
 {

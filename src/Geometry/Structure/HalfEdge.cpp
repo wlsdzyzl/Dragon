@@ -5,10 +5,14 @@ namespace dragon
 {
 namespace geometry
 {
-namespace mesh
-{
-    void HalfEdge::FromTriangleMesh(const TriangleMesh &mesh)
+    void HalfEdge::FromTriangleMesh(const mesh::TriangleMesh &mesh)
     {
+        if(type != -1 && type != 0)
+        {
+            std::cout<<YELLOW<<"[WARNING]::[HalfEdge]::This halfedge is used to store 2D polygon, and not you are change it to store triangle mesh, which could lead to loss of original information."<<RESET<<std::endl;
+        }
+        Reset();
+        type = 0;
         std::unordered_map<std::pair<size_t, size_t>, HEEdge *, PairHasher> visited_edges; 
         has_colors = mesh.HasColors();
         vertices.resize(mesh.points.size());
@@ -30,18 +34,21 @@ namespace mesh
             size_t vid2 = mesh.triangles[i](2);
             HEEdge * edge0 = & edges[i * 3 + 0];
             *edge0 = HEEdge(&vertices[vid0], &vertices[vid1]);
+            edge0->id = i * 3 + 0;
             if(vertices[vid0].inc_edge == nullptr)
             {
                 vertices[vid0].inc_edge = edge0;
             }       
             HEEdge * edge1 = & edges[i * 3 + 1];
             *edge1 = HEEdge(&vertices[vid1], &vertices[vid2]);
+            edge1->id = i * 3 + 1;
             if(vertices[vid1].inc_edge == nullptr)
             {
                 vertices[vid1].inc_edge = edge1;
             }          
             HEEdge * edge2 = & edges[i * 3 + 2];
             *edge2 = HEEdge(&vertices[vid2], &vertices[vid0]);
+            edge2->id = i * 3 + 2;
             if(vertices[vid2].inc_edge == nullptr)
             {
                 vertices[vid2].inc_edge = edge2;
@@ -116,8 +123,13 @@ namespace mesh
             edge2->parent_face = new_face;
         }
     }
-    void HalfEdge::ToTriangleMesh(TriangleMesh &mesh)
+    void HalfEdge::ToTriangleMesh(mesh::TriangleMesh &mesh)
     {
+        if(type != 0)
+        {
+            std::cout<<RED<<"This halfedge is not used to store triangle mesh, so it cannot be converted into a triangle mesh."<<RESET<<std::endl;
+            return;
+        }
         std::vector<int> visited_vertices(vertices.size(), -1);
         size_t pos = 0;
         for(size_t i = 0; i != faces.size(); ++i)
@@ -176,6 +188,5 @@ namespace mesh
             }
         }
     }
-}
 }
 }

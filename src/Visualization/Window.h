@@ -4,7 +4,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "IO/ConsoleColor.h"
-#include "Geometry/BoundingBox.h"
+#include "Geometry/Structure/BoundingBox.h"
 #include <iostream>
 // About Desktop OpenGL function loaders:
 //  Modern desktop OpenGL doesn't have a standard portable header file to load OpenGL function pointers.
@@ -52,7 +52,7 @@ namespace window
     extern geometry::Matrix4 projection_matrix;
     extern geometry::Matrix4 model_view_matrix;    
     extern geometry::BoundingBox bb;
-    static bool mouse_buttons[7];
+    static int mouse_buttons[7];
     extern double last_x;
     extern double last_y;
     extern int w_height;
@@ -62,8 +62,9 @@ namespace window
     extern double up;
     extern double right;
     extern bool last_point_valid;
+    extern geometry::Point2List pressed_points;
     extern geometry::Point3 last_point_3d;
-    bool Initialize(int width = 800, int height = 600);
+    bool Initialize(int width = 800, int height = 800, bool is_3d = true);
     void Cleanup();
     // the function that can be rewritten
     void RenderGuiComponents();
@@ -88,7 +89,15 @@ namespace window
     {
         return mouse_buttons[GLFW_MOUSE_BUTTON_MIDDLE];
     }
-            
+    void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color = geometry::Point3(0, 0, 0), bool filled = false, int n = 100);    
+
+    void DrawPoint(const geometry::Point2 &p, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 4);
+    void DrawPoints(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 4);
+    void DrawLine(const geometry::Point2 &p1, const geometry::Point2 &p2, const geometry::Point3 &color = geometry::Point3(0, 0, 0),  double thickness = 2);
+    void DrawLines(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
+    void DrawLineStrip(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
+    void DrawPolygon(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
+    void DrawPolygonFilled(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
 }
 }
 }

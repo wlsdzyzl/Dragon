@@ -5,19 +5,18 @@ namespace dragon
 {
 namespace geometry
 {
-namespace mesh
-{
+
     struct HEEdge;
     struct HEFace;
     struct HEVertex
     {
         HEVertex()=default;
-        HEVertex(const geometry::Point3 & p):coor(p){}
+        HEVertex(const geometry::VectorX & p):coor(p){}
         //vertex of HalfEdge
-        geometry::Point3 coor;
-        geometry::Point3 color;
+        geometry::VectorX coor;
+        geometry::Vector3 color;
         //one edge whose start point is this vertex. 
-        size_t id;
+        int id = -1;
         HEEdge * inc_edge = nullptr; 
     };
     struct HEEdge
@@ -32,7 +31,7 @@ namespace mesh
         HEEdge *pre_edge = nullptr;
         HEEdge *next_edge = nullptr;
         double weight = -1.0;
-        // size_t id;
+        int id = -1;
     };
     struct HEFace
     {
@@ -40,7 +39,7 @@ namespace mesh
         HEFace() = default;
         HEFace(HEEdge * e): inc_edge(e){}
         HEEdge * inc_edge = nullptr;
-        size_t id;
+        int id = -1;
     };
 
     class HalfEdge
@@ -50,6 +49,8 @@ namespace mesh
         std::vector<HEEdge > edges;
         std::vector<HEFace > faces;
         bool has_colors = false;
+        // 0 for triangle, 1 for 2D polygon
+        int type = -1;
         std::vector<bool> is_border;
         ~HalfEdge()
         {
@@ -61,16 +62,18 @@ namespace mesh
             edges.clear();
             faces.clear();
         }
-        void FromTriangleMesh(const TriangleMesh &mesh);
-        void ToTriangleMesh(TriangleMesh &mesh);
+        void FromTriangleMesh(const mesh::TriangleMesh &mesh);
+        void ToTriangleMesh(mesh::TriangleMesh &mesh);
         void CheckBorder();
+        // add 2d line into the HalfEdge List
+        // if I have time
+        // void AddLine();
         void ResetWeight()
         {
             for(size_t i = 0; i != edges.size(); ++i)
                 edges[i].weight = -1.0;
         }
     };
-}
 }
 }
 #endif

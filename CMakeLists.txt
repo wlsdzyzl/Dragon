@@ -20,6 +20,7 @@ include_directories(3rdparty/tinyply/source)
 include_directories(3rdparty/tinyobjloader)
 include_directories(3rdparty/Sophus)
 include_directories(3rdparty/imgui)
+include_directories(3rdparty/nanoflann/include)
 include_directories(src)
 
 #message("tinyobjloader")
@@ -77,9 +78,10 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 add_executable(ReadMesh "app/ReadPLYMesh.cpp")
 # for test
 # add_executable(GenerateMinimalSurface "app/GenerateMinimalSurface.cpp")
-# add_executable(MeanCurvature "app/MeanCurvature.cpp")
+add_executable(MeanCurvature "app/MeanCurvature.cpp")
 # add_executable(GaussCurvature "app/GaussCurvature.cpp")
-add_executable(DragonView "app/DragonView.cpp")
+add_executable(DragonView3D "app/DragonView.cpp")
+add_executable(DragonView2D "app/DragonView2D.cpp")
 set(THIRD_LIB 
     tinyply 
     objloader
@@ -95,7 +97,15 @@ target_link_libraries(ReadMesh
     dragon
     ${THIRD_LIB}
 )
-target_link_libraries(DragonView
+target_link_libraries(MeanCurvature
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(DragonView3D
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(DragonView2D
     dragon
     ${THIRD_LIB}
 )

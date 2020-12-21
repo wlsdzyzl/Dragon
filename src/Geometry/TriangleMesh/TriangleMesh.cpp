@@ -46,24 +46,24 @@ namespace mesh
         if(HasNormals())
         TransformNormals(T,normals);
     }
-    // std::shared_ptr<TriangleMesh> TriangleMesh::QuadricSimplify(size_t target_num) const
-    // {
-    //     TriangleMesh s_mesh = *this;
-    //     QuadricSimplification(s_mesh,target_num);
-    //     return std::make_shared<TriangleMesh>(s_mesh);
-    // }
-    // std::shared_ptr<TriangleMesh> TriangleMesh::ClusteringSimplify(float grid_len) const
-    // {
-    //     TriangleMesh s_mesh = *this;
-    //     ClusteringSimplification(s_mesh,grid_len);
-    //     return std::make_shared<TriangleMesh>(s_mesh);
-    // }
-    // std::shared_ptr<TriangleMesh> TriangleMesh::Prune(size_t min_points) const
-    // {
-    //     TriangleMesh s_mesh = *this;
-    //     MeshPruning(s_mesh,min_points);
-    //     return std::make_shared<TriangleMesh>(s_mesh);
-    // }
+    std::shared_ptr<TriangleMesh> TriangleMesh::QuadricSimplify(size_t target_num) const
+    {
+        TriangleMesh s_mesh = *this;
+        QuadricSimplification(s_mesh,target_num);
+        return std::make_shared<TriangleMesh>(s_mesh);
+    }
+    std::shared_ptr<TriangleMesh> TriangleMesh::ClusteringSimplify(float grid_len) const
+    {
+        TriangleMesh s_mesh = *this;
+        ClusteringSimplification(s_mesh,grid_len);
+        return std::make_shared<TriangleMesh>(s_mesh);
+    }
+    std::shared_ptr<TriangleMesh> TriangleMesh::Prune(size_t min_points) const
+    {
+        TriangleMesh s_mesh = *this;
+        MeshPruning(s_mesh,min_points);
+        return std::make_shared<TriangleMesh>(s_mesh);
+    }
     // std::shared_ptr<PointCloud> TriangleMesh::GetPointCloud() const
     // {
     //     PointCloud pcd;

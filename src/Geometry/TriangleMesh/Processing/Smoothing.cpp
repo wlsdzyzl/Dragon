@@ -115,20 +115,19 @@ namespace mesh
         he.ToTriangleMesh(result);
         return std::make_shared<TriangleMesh>(result);
     }
-    std::shared_ptr<TriangleMesh> GlobalLaplacianSmooting(const TriangleMesh &mesh, double lambda)
+
+    void GlobalLaplacianSmooting(HalfEdge &he, double lambda)
     {
-        HalfEdge he; 
-        he.FromTriangleMesh(mesh);
-        // std::cout<<"he: "<<he.faces.size()<<"/"<<he.edges.size()<<"/"<<he.vertices.size()<<std::endl;
-        he.CheckBorder();
-        ComputeCotanWeight(he);
         auto &vertices = he.vertices;
-        //auto &edges = he.edges;
+        // auto &edges = he.edges;
+        // for(int i = 0; i != edges.size(); ++i)
+        // edges[i].weight = 1;
         auto &is_border = he.is_border;
         Eigen::SparseMatrix<geometry::scalar> laplace_matrix(3 * he.vertices.size(), 3 * he.vertices.size());
         geometry::MatrixX sigma(3 * vertices.size(), 1), new_vertices(3 * vertices.size(), 1);
         sigma.setZero();
         std::vector<Eigen::Triplet<geometry::scalar>> coefficients;
+
         for(size_t i = 0; i != vertices.size(); ++i)
         {
             geometry::Matrix3 tmp_l = geometry::Matrix3::Identity();
@@ -177,16 +176,102 @@ namespace mesh
         // std::cout<<laplace_matrix<<std::endl;
         // std::cout<<std::endl;
         // std::cout<<sigma<<std::endl;
-        Eigen::SparseLU<Eigen::SparseMatrix<geometry::scalar>, Eigen::COLAMDOrdering<int>> slu_solver;
+         Eigen::SparseLU<Eigen::SparseMatrix<geometry::scalar>, Eigen::COLAMDOrdering<int>> slu_solver;
         slu_solver.compute(laplace_matrix);
         new_vertices = slu_solver.solve(sigma);
+        // Eigen::SimplicialLDLT<Eigen::SparseMatrix<scalar>> sldlt_solver;
+        // sldlt_solver.compute(laplace_matrix);
+        // new_vertices = sldlt_solver.solve(sigma);
+
         //Restore vertices
         for(size_t i = 0; i != vertices.size(); ++i)
         vertices[i].coor = new_vertices.block<3, 1>(i * 3, 0);
+    }    
+    std::shared_ptr<TriangleMesh> GlobalLaplacianSmooting(const TriangleMesh &mesh, double lambda)
+    {
+        HalfEdge he; 
+        he.FromTriangleMesh(mesh);
+        // std::cout<<"he: "<<he.faces.size()<<"/"<<he.edges.size()<<"/"<<he.vertices.size()<<std::endl;
+        he.CheckBorder();
+        ComputeCotanWeight(he);
+        GlobalLaplacianSmooting(he, lambda);
         TriangleMesh result;
         he.ToTriangleMesh(result);
         return std::make_shared<TriangleMesh>(result);
     }
+    // std::shared_ptr<TriangleMesh> GlobalLaplacianSmooting(const TriangleMesh &mesh, double lambda)
+    // {
+    //     HalfEdge he; 
+    //     he.FromTriangleMesh(mesh);
+    //     // std::cout<<"he: "<<he.faces.size()<<"/"<<he.edges.size()<<"/"<<he.vertices.size()<<std::endl;
+    //     he.CheckBorder();
+    //     ComputeCotanWeight(he);
+    //     auto &vertices = he.vertices;
+    //     //auto &edges = he.edges;
+    //     auto &is_border = he.is_border;
+    //     Eigen::SparseMatrix<geometry::scalar> laplace_matrix(3 * he.vertices.size(), 3 * he.vertices.size());
+    //     geometry::MatrixX sigma(3 * vertices.size(), 1), new_vertices(3 * vertices.size(), 1);
+    //     sigma.setZero();
+    //     std::vector<Eigen::Triplet<geometry::scalar>> coefficients;
+    //     for(size_t i = 0; i != vertices.size(); ++i)
+    //     {
+    //         if(is_border[i])
+    //         {
+    //             continue;
+    //         }
+    //         geometry::Matrix3 tmp_l = geometry::Matrix3::Identity();
+    //         geometry::Vector3 tmp_sigma = geometry::Vector3::Zero();
+
+
+    //         //set L matrix
+    //         auto start_edge = vertices[i].inc_edge;
+    //         auto current_edge = start_edge;
+    //         double sum_weight = 0.0;
+    //         while(true)
+    //         {
+    //             size_t tmp_vid = current_edge->des_vertex->id;
+    //             double tmp_weight = current_edge->weight;
+    //             if(is_border[tmp_vid])
+    //             {
+    //                 sigma.block<3, 1>(3*i, 0) += tmp_weight * current_edge->des_vertex->coor;
+    //             }
+    //             else
+    //             {
+    //                 tmp_l = -geometry::Matrix3::Identity() * tmp_weight;
+    //                 AddToCoefficientTriplet(coefficients, i *3, tmp_vid * 3, tmp_l);
+    //             }
+    //             sum_weight += current_edge->weight;
+    //             current_edge = current_edge->twin_edge->next_edge;
+    //             if(start_edge == current_edge) break;
+                
+    //         }
+    //         //first_neighbors
+    //         tmp_l = geometry::Matrix3::Identity() * sum_weight;
+    //         AddToCoefficientTriplet(coefficients, i *3, i*3, tmp_l);
+    //         //set sigma vector
+    //         // std::cout<<"wegited_position: "<<weighted_position / sum_weight<<std::endl;
+    //         //tmp_sigma = (vertices[i].coor - weighted_position / sum_weight) * lambda;
+    //         // sigma.block<3, 1>(3*i, 0) += tmp_sigma;
+    //     }
+    //     laplace_matrix.setZero();
+    //     laplace_matrix.setFromTriplets(coefficients.begin(), coefficients.end());
+    //     std::cout<<laplace_matrix<<std::endl;
+    //     // std::cout<<std::endl;
+    //     std::cout<<sigma<<std::endl;
+    //     //  Eigen::SparseLU<Eigen::SparseMatrix<geometry::scalar>, Eigen::COLAMDOrdering<int>> slu_solver;
+    //     // slu_solver.compute(laplace_matrix);
+    //     // new_vertices = slu_solver.solve(sigma);
+    //     Eigen::SimplicialLDLT<Eigen::SparseMatrix<scalar>> sldlt_solver;
+    //     sldlt_solver.compute(laplace_matrix);
+    //     new_vertices = sldlt_solver.solve(sigma);
+
+    //     //Restore vertices
+    //     for(size_t i = 0; i != vertices.size(); ++i)
+    //     vertices[i].coor = new_vertices.block<3, 1>(i * 3, 0);
+    //     TriangleMesh result;
+    //     he.ToTriangleMesh(result);
+    //     return std::make_shared<TriangleMesh>(result);
+    // }
 }
 }
 }
