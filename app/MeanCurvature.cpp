@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     }
     for(size_t i = 0; i != he.vertices.size(); ++i)
     {   
-        he.vertices[i].color = ColorRemapping(min_c, max_c, mean_curvatures[i]);
+        he.vertices[i]->color = ColorRemapping(min_c, max_c, mean_curvatures[i]);
     }
     // geometry::Point3List colors;
     // tool::ColorRemapping(mean_curvatures, colors);

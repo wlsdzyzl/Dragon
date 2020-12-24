@@ -62,13 +62,14 @@ namespace window
     extern double up;
     extern double right;
     extern bool last_point_valid;
-    extern geometry::Point2List pressed_points;
+    // extern geometry::Point2List pressed_points;
     extern geometry::Point3 last_point_3d;
-    bool Initialize(int width = 800, int height = 800, bool is_3d = true);
+    bool Initialize(int width = 800, int height = 800);
     void Cleanup();
     // the function that can be rewritten
     void RenderGuiComponents();
     void RegisterMouseAndKeyboard();
+    void RegisterMouseAndKeyboard2D();
     void Translate(double x, double y);
     void Translate(const geometry::Vector3 &translation);
     void Rotate(const geometry::Matrix3 &rotation);
@@ -90,9 +91,9 @@ namespace window
         return mouse_buttons[GLFW_MOUSE_BUTTON_MIDDLE];
     }
     void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color = geometry::Point3(0, 0, 0), bool filled = false, int n = 100);    
-
-    void DrawPoint(const geometry::Point2 &p, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 4);
-    void DrawPoints(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 4);
+    void DrawCircleFilled(const geometry::Point2 &p, double r, const geometry::Point3 &color = geometry::Point3(0, 0, 0), bool filled = false, int n = 100); 
+    void DrawPoint(const geometry::Point2 &p, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 5);
+    void DrawPoints(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 5);
     void DrawLine(const geometry::Point2 &p1, const geometry::Point2 &p2, const geometry::Point3 &color = geometry::Point3(0, 0, 0),  double thickness = 2);
     void DrawLines(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
     void DrawLineStrip(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);

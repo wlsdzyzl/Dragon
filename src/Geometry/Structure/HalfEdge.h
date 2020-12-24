@@ -45,9 +45,9 @@ namespace geometry
     class HalfEdge
     {
         public:
-        std::vector<HEVertex > vertices;
-        std::vector<HEEdge > edges;
-        std::vector<HEFace > faces;
+        std::vector<HEVertex *> vertices;
+        std::vector<HEEdge *> edges;
+        std::vector<HEFace *> faces;
         bool has_colors = false;
         // 0 for triangle, 1 for 2D polygon
         int type = -1;
@@ -58,6 +58,21 @@ namespace geometry
         }
         void Reset()
         {
+            for(size_t i = 0; i !=vertices.size(); ++i)
+            {
+                if(vertices[i])
+                delete vertices[i];
+            }
+            for(size_t i = 0; i !=edges.size(); ++i)
+            {
+                if(edges[i])
+                delete edges[i];
+            }
+            for(size_t i = 0; i !=faces.size(); ++i)
+            {
+                if(faces[i])
+                delete faces[i];
+            }
             vertices.clear();
             edges.clear();
             faces.clear();
@@ -65,15 +80,23 @@ namespace geometry
         void FromTriangleMesh(const mesh::TriangleMesh &mesh);
         void ToTriangleMesh(mesh::TriangleMesh &mesh);
         void CheckBorder();
+        void RearrangeFaceIncEdge();
         // add 2d line into the HalfEdge List
         // if I have time
         // void AddLine();
         void ResetWeight()
         {
             for(size_t i = 0; i != edges.size(); ++i)
-                edges[i].weight = -1.0;
+                edges[i]->weight = -1.0;
         }
     };
+
+    inline bool LessOfIntersection(const std::pair<geometry::Vector2, int> & a, const std::pair<geometry::Vector2, int> &b)
+    {
+        if(a.first(0) != b.first(0))
+        return a.first(0) < b.first(0);
+        return a.first(1) > b.first(1);
+    }
 }
 }
 #endif

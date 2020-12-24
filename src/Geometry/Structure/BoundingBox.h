@@ -44,6 +44,22 @@ namespace geometry
             z_min = std::min(bb.z_min, z_min);
             return *this;
         }
+        bool IsInside(const PointX &a) const
+        {
+            if(a.rows() == 2)
+            {
+                return a(0) >= x_min && a(0) <= x_max && a(1) >= y_min && a(1) <= y_max;
+            }
+            else if(a.rows() == 3)
+            {
+                return a(0) >= x_min && a(0) <= x_max && a(1) >= y_min && a(1) <= y_max && a(2) >= z_min && a(2) <= z_max;
+            }
+            else
+            {
+                std::cout<<YELLOW<<"[WARNING]::[BoundBox]::Unsupported dimension."<<RESET<<std::endl;
+                return false;
+            }
+        }
         double x_max = std::numeric_limits<double>::lowest();
         double x_min = std::numeric_limits<double>::max();
         double y_max = std::numeric_limits<double>::lowest();

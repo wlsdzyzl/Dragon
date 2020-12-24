@@ -28,7 +28,7 @@ namespace mesh
                 new_positions.push_back(new_position);
                 continue;
             }
-            auto start_edge = vertices[i].inc_edge;
+            auto start_edge = vertices[i]->inc_edge;
             auto current_edge = start_edge->twin_edge->next_edge;
             std::vector<size_t> first_neighbors;
 
@@ -41,7 +41,7 @@ namespace mesh
 
             for(size_t id = 0; id != first_neighbors.size(); ++id)
             {
-                new_position += vertices[first_neighbors[id]].coor;
+                new_position += vertices[first_neighbors[id]]->coor;
             }
 
             new_positions.push_back( new_position / first_neighbors.size());
@@ -66,7 +66,7 @@ namespace mesh
                 if(is_border[i])
                 continue;
                 // update the vertices
-                vertices[i].coor += (new_positions[i] - vertices[i].coor) * lambda; 
+                vertices[i]->coor += (new_positions[i] - vertices[i]->coor) * lambda; 
                 // if(new_positions[i].norm() > 1)
                 // std::cout<<new_positions[i].transpose()<<std::endl;
             }
@@ -94,7 +94,7 @@ namespace mesh
             {
                 if(is_border[i])
                 continue;
-                auto start_edge = vertices[i].inc_edge;
+                auto start_edge = vertices[i]->inc_edge;
                 auto current_edge = start_edge->twin_edge->next_edge;
                 double sum_weight = 0.0;
                 geometry::Vector3 update_vector = geometry::Vector3::Zero();
@@ -107,7 +107,7 @@ namespace mesh
                     current_edge = current_edge->twin_edge->next_edge;
                 }
                 // std::cout<<update_vector.transpose()<<std::endl;
-                vertices[i].coor -= lambda * update_vector / sum_weight;
+                vertices[i]->coor -= lambda * update_vector / sum_weight;
             }
             iter ++;
         }
@@ -135,12 +135,12 @@ namespace mesh
             AddToCoefficientTriplet(coefficients, i *3, i*3, tmp_l);
             if(is_border[i])
             {
-                tmp_sigma = vertices[i].coor;
+                tmp_sigma = vertices[i]->coor;
                 sigma.block<3, 1>(3*i, 0) += tmp_sigma;
                 continue;
             }
             //set L matrix
-            auto start_edge = vertices[i].inc_edge;
+            auto start_edge = vertices[i]->inc_edge;
             auto current_edge = start_edge->twin_edge->next_edge;
             std::vector<size_t> first_neighbors;
             std::vector<double> cotan_weights;
@@ -168,7 +168,7 @@ namespace mesh
             }
             //set sigma vector
             // std::cout<<"wegited_position: "<<weighted_position / sum_weight<<std::endl;
-            tmp_sigma = (vertices[i].coor - weighted_position / sum_weight) * lambda;
+            tmp_sigma = (vertices[i]->coor - weighted_position / sum_weight) * lambda;
             sigma.block<3, 1>(3*i, 0) += tmp_sigma;
         }
         laplace_matrix.setZero();
@@ -185,7 +185,7 @@ namespace mesh
 
         //Restore vertices
         for(size_t i = 0; i != vertices.size(); ++i)
-        vertices[i].coor = new_vertices.block<3, 1>(i * 3, 0);
+        vertices[i]->coor = new_vertices.block<3, 1>(i * 3, 0);
     }    
     std::shared_ptr<TriangleMesh> GlobalLaplacianSmooting(const TriangleMesh &mesh, double lambda)
     {
@@ -224,7 +224,7 @@ namespace mesh
 
 
     //         //set L matrix
-    //         auto start_edge = vertices[i].inc_edge;
+    //         auto start_edge = vertices[i]->inc_edge;
     //         auto current_edge = start_edge;
     //         double sum_weight = 0.0;
     //         while(true)
@@ -250,7 +250,7 @@ namespace mesh
     //         AddToCoefficientTriplet(coefficients, i *3, i*3, tmp_l);
     //         //set sigma vector
     //         // std::cout<<"wegited_position: "<<weighted_position / sum_weight<<std::endl;
-    //         //tmp_sigma = (vertices[i].coor - weighted_position / sum_weight) * lambda;
+    //         //tmp_sigma = (vertices[i]->coor - weighted_position / sum_weight) * lambda;
     //         // sigma.block<3, 1>(3*i, 0) += tmp_sigma;
     //     }
     //     laplace_matrix.setZero();
@@ -267,7 +267,7 @@ namespace mesh
 
     //     //Restore vertices
     //     for(size_t i = 0; i != vertices.size(); ++i)
-    //     vertices[i].coor = new_vertices.block<3, 1>(i * 3, 0);
+    //     vertices[i]->coor = new_vertices.block<3, 1>(i * 3, 0);
     //     TriangleMesh result;
     //     he.ToTriangleMesh(result);
     //     return std::make_shared<TriangleMesh>(result);

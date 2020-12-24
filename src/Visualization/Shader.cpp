@@ -127,6 +127,7 @@ namespace visualization
     } 
     void Shader::Enable()
     {
+        // std::cout<<pid<<std::endl;
         if(pid)
             glUseProgram(pid);
     }   

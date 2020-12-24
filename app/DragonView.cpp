@@ -39,7 +39,7 @@ void RenderGuiComponents()
             tool::ColorRemapping(mean_curvatures, colors);
             for(size_t i = 0; i != he.vertices.size(); ++i)
             {   
-                he.vertices[i].color = colors[i];
+                he.vertices[i]->color = colors[i];
             }    
     
             he.has_colors = true;
@@ -60,7 +60,7 @@ void RenderGuiComponents()
             tool::ColorRemapping(gauss_curvatures, colors);
             for(size_t i = 0; i != he.vertices.size(); ++i)
             {   
-                he.vertices[i].color = colors[i];
+                he.vertices[i]->color = colors[i];
             }    
             he.has_colors = true;
             he.ToTriangleMesh(object);
@@ -188,6 +188,7 @@ int main(int argc, char* argv[])
     //visualizer.SetDrawColor(true);
     visualizer.AddTriangleMesh(object);
     visualizer.Initialize();
+    visualization::window::RegisterMouseAndKeyboard();
     visualizer.dynamic_first_view = false;
     while(!glfwWindowShouldClose(visualization::window::window))
     {

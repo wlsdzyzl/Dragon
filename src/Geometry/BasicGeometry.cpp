@@ -268,7 +268,18 @@ namespace geometry
     {
         double min_x = std::min(l2.p0(0), l2.p1(0));
         double max_x = std::max(l2.p0(0), l2.p1(0));
-
+        if(l1.n(1) == 0)
+        {
+            double x = -l1.d /l1.n(0);
+            return min_x <= x && max_x >= x;
+        }
+        else if(l1.n(0) == 0)
+        {
+            double min_y = std::min(l2.p0(1), l2.p1(1));
+            double max_y = std::max(l2.p0(1), l2.p1(1));
+            double y = -l1.d /l1.n(1);
+            return min_y <= y && max_y >= y;            
+        }
         double y1 = (-l1.n(0) * min_x - l1.d) / l1.n(1);
         double y2 = (-l1.n(0) * max_x - l1.d) / l1.n(1);
         
@@ -345,6 +356,11 @@ namespace geometry
         // equal to CheckPointToLine(LineFromSeg(LineSegment(a,b)), z);
         double d =  a(0)* b(1) + a(1) * z(0) + b(0) * z(1) - z(0)* b(1) - a(1)*b(0) - a(0) * z(1);
         //std::cout<<d<<std::endl;
+        // if(std::fabs(d) < EPS)
+        // {
+        //     std::cout<<YELLOW<<"Special case: Point is On Line."<<RESET<<std::endl;
+        //     exit(0);
+        // }
         if(std::fabs(d) < EPS) return 0;
         if(d > 0) return 1;
         return -1;

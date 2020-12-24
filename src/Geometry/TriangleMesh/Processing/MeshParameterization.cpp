@@ -13,9 +13,9 @@ namespace mesh
         HEEdge *start_edge = nullptr;
         for(size_t i = 0; i != edges.size(); ++i)
         {
-            if(edges[i].twin_edge == nullptr)
+            if(edges[i]->twin_edge == nullptr)
             {
-                start_edge = &edges[i];
+                start_edge = edges[i];
                 break;
             }
         }
@@ -53,7 +53,7 @@ namespace mesh
         ordered_vid.push_back(ordered_vid[0]);
         for(size_t i = 0; i != ordered_vid.size(); ++i)
         {
-            ordered_border.push_back(vertices[ordered_vid[i]].coor);
+            ordered_border.push_back(vertices[ordered_vid[i]]->coor);
         }
         std::vector<double> t;
         if(para_type == 0)
@@ -70,7 +70,7 @@ namespace mesh
             double angle = 2 * M_PI * t[i];
             Point3 tmp_p = Point3::Zero();
             tmp_p.block<2, 1>(0, 0) = Point2(radius * cos(angle), radius * sin(angle));
-            vertices[ordered_vid[i]].coor = tmp_p;
+            vertices[ordered_vid[i]]->coor = tmp_p;
         }
         //std::cout<<he.has_colors<<std::endl;
         TriangleMesh tmp_mesh;
@@ -97,7 +97,7 @@ namespace mesh
         ordered_vid.push_back(ordered_vid[0]);
         for(size_t i = 0; i != ordered_vid.size(); ++i)
         {
-            ordered_border.push_back(vertices[ordered_vid[i]].coor);
+            ordered_border.push_back(vertices[ordered_vid[i]]->coor);
         }
         std::vector<double> t;
         if(para_type == 0)
@@ -152,7 +152,7 @@ namespace mesh
                 tmp = geometry::Point3(len - (t[i] - 0.75) * (8 * len) , len, 0 );
             }
 
-            vertices[ordered_vid[i]].coor = tmp;
+            vertices[ordered_vid[i]]->coor = tmp;
         }
         //std::cout<<he.has_colors<<std::endl;
         GlobalLaplacianSmooting(he, 0);

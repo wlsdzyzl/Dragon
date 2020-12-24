@@ -22,7 +22,7 @@ namespace window
     double right;
     bool last_point_valid;
     geometry::Point3 last_point_3d;
-    geometry::Point2List pressed_points;
+    // geometry::Point2List pressed_points;
     static void glfw_error_callback(int error, const char* description)
     {
         std::cout<<RED<<"[ERROR]::[Window]::Glfw Error: "<<description<<RESET<<std::endl;
@@ -50,23 +50,8 @@ namespace window
         {
             mouse_buttons[button] = (action == GLFW_PRESS);
         }
-    }
-    static void glfw_mouse_2d(GLFWwindow* window, int button, int action,
-                           int mods)
-    {
-        ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-        // if (!ImGui::GetIO().WantCaptureMouse)
-        // {
-        //     mouse_buttons[button] = (action == GLFW_PRESS);
-        // }
-        if((button == GLFW_MOUSE_BUTTON_RIGHT) && (action == GLFW_RELEASE))
-        {
-            double x, y;
-            CursorPos(x, y);
-            pressed_points.push_back(geometry::Point2(x, y));
-        }
-    }                              
-    bool Initialize(int width, int height, bool is_3d)
+    }                           
+    bool Initialize(int width, int height)
     {
         w_width = width;
         w_height = height;
@@ -115,6 +100,8 @@ namespace window
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_POINT_SMOOTH);
+        glEnable (GL_LINE_SMOOTH);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         // Setup Dear ImGui context
@@ -131,8 +118,6 @@ namespace window
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
-        if(is_3d)
-        RegisterMouseAndKeyboard();
         // Load Fonts
         // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
         // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -191,13 +176,10 @@ namespace window
     void RegisterMouseAndKeyboard()
     {
         // glfwSetKeyCallback(window, glfw_keyboard);
+        std::cout<<"??? "<<std::endl;
         glfwSetCursorPosCallback(window, glfw_motion);
         glfwSetMouseButtonCallback(window, glfw_mouse);
         glfwSetScrollCallback(window, glfw_scroll);
-    }
-    void RegisterMouseAndKeyboard2D()
-    {
-        glfwSetMouseButtonCallback(window, glfw_mouse_2d);
     }
     void CursorPos(double& x, double& y)
     {
@@ -311,11 +293,22 @@ namespace window
         //     Zoom(ypos);
         // }
         // remember points
+        
         last_x = xpos;
         last_y = ypos;
         last_point_valid = Map2Sphere(geometry::Point2i((int)last_x, (int)last_y), last_point_3d);
     }
     void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color, bool filled, int n)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glBegin(GL_LINE_LOOP);              // Each set of 4 vertices form a quad
+        for(int i = 0; i < n; ++i)
+        {
+            glVertex2f(p(0) +  cos((i + 0.0f) / n * 2 * M_PI) * r, (p(1) + sin((i + 0.0f) / n * 2 * M_PI) * r));
+        }
+        glEnd();
+    }  
+    void DrawCircleFilled(const geometry::Point2 &p, double r, const geometry::Point3 &color, bool filled, int n)
     {
         glColor3f(color(0), color(1), color(2));
         glBegin(GL_POLYGON);              // Each set of 4 vertices form a quad

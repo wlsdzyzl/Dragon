@@ -7,10 +7,10 @@ namespace geometry
 {
     void HalfEdge::FromTriangleMesh(const mesh::TriangleMesh &mesh)
     {
-        if(type != -1 && type != 0)
-        {
-            std::cout<<YELLOW<<"[WARNING]::[HalfEdge]::This halfedge is used to store 2D polygon, and not you are change it to store triangle mesh, which could lead to loss of original information."<<RESET<<std::endl;
-        }
+        // if(type != -1 && type != 0)
+        // {
+        //     std::cout<<YELLOW<<"[WARNING]::[HalfEdge]::This halfedge is used to store 2D polygon, and not you are change it to store triangle mesh, which could lead to loss of original information."<<RESET<<std::endl;
+        // }
         Reset();
         type = 0;
         std::unordered_map<std::pair<size_t, size_t>, HEEdge *, PairHasher> visited_edges; 
@@ -18,12 +18,12 @@ namespace geometry
         vertices.resize(mesh.points.size());
         for(size_t i = 0; i != mesh.points.size(); ++i)
         {
-            vertices[i] = HEVertex(mesh.points[i]);
-            vertices[i].id = i;
-            if(has_colors) vertices[i].color = mesh.colors[i];
+            vertices[i] = new HEVertex(mesh.points[i]);
+            vertices[i]->id = i;
+            if(has_colors) vertices[i]->color = mesh.colors[i];
         }
-        edges.resize(mesh.triangles.size() * 3);
-        faces.resize(mesh.triangles.size());
+        edges.resize(mesh.triangles.size() * 3, nullptr);
+        faces.resize(mesh.triangles.size(), nullptr);
         //currently we don't consider to reverse the triangle connection order.
         for(size_t i = 0; i != mesh.triangles.size(); ++i)
         {
@@ -32,26 +32,28 @@ namespace geometry
             size_t vid0 = mesh.triangles[i](0);
             size_t vid1 = mesh.triangles[i](1);
             size_t vid2 = mesh.triangles[i](2);
-            HEEdge * edge0 = & edges[i * 3 + 0];
-            *edge0 = HEEdge(&vertices[vid0], &vertices[vid1]);
+            edges[i * 3 + 0] = new HEEdge(vertices[vid0], vertices[vid1]);
+            HEEdge * edge0 = edges[i * 3 + 0];
             edge0->id = i * 3 + 0;
-            if(vertices[vid0].inc_edge == nullptr)
+            if(vertices[vid0]->inc_edge == nullptr)
             {
-                vertices[vid0].inc_edge = edge0;
+                vertices[vid0]->inc_edge = edge0;
             }       
-            HEEdge * edge1 = & edges[i * 3 + 1];
-            *edge1 = HEEdge(&vertices[vid1], &vertices[vid2]);
+
+            edges[i * 3 + 1] = new HEEdge(vertices[vid1], vertices[vid2]);
+            HEEdge * edge1 = edges[i * 3 + 1];
             edge1->id = i * 3 + 1;
-            if(vertices[vid1].inc_edge == nullptr)
+            if(vertices[vid1]->inc_edge == nullptr)
             {
-                vertices[vid1].inc_edge = edge1;
-            }          
-            HEEdge * edge2 = & edges[i * 3 + 2];
-            *edge2 = HEEdge(&vertices[vid2], &vertices[vid0]);
+                vertices[vid1]->inc_edge = edge1;
+            }         
+
+            edges[i * 3 + 2] = new HEEdge(vertices[vid2], vertices[vid0]);
+            HEEdge * edge2 =  edges[i * 3 + 2];
             edge2->id = i * 3 + 2;
-            if(vertices[vid2].inc_edge == nullptr)
+            if(vertices[vid2]->inc_edge == nullptr)
             {
-                vertices[vid2].inc_edge = edge2;
+                vertices[vid2]->inc_edge = edge2;
             }  
 
 
@@ -115,8 +117,8 @@ namespace geometry
             }
 
             visited_edges[edge_id_2] = edge2;
-            HEFace * new_face = & faces[i];
-            *new_face = HEFace(edge0);
+            faces[i] = new HEFace(edge0);
+            HEFace * new_face = faces[i];
             new_face->id = i;
             edge0->parent_face = new_face;
             edge1->parent_face = new_face; 
@@ -134,7 +136,7 @@ namespace geometry
         size_t pos = 0;
         for(size_t i = 0; i != faces.size(); ++i)
         {
-            HEEdge *start_edge = faces[i].inc_edge;
+            HEEdge *start_edge = faces[i]->inc_edge;
             if(start_edge == nullptr) continue;
             if(visited_vertices[start_edge->ori_vertex->id] == -1)
                 visited_vertices[start_edge->ori_vertex->id] = pos++;
@@ -148,7 +150,7 @@ namespace geometry
         mesh.triangles.resize(faces.size());
         for(size_t i = 0; i != faces.size(); ++i)
         {
-            HEEdge *start_edge = faces[i].inc_edge;
+            HEEdge *start_edge = faces[i]->inc_edge;
             if(start_edge == nullptr) continue;
             size_t vid0 = visited_vertices[start_edge->ori_vertex->id];
             size_t vid1 = visited_vertices[start_edge->des_vertex->id];
@@ -159,7 +161,7 @@ namespace geometry
         {
             if(visited_vertices[i] != -1)
             {
-                mesh.points[visited_vertices[i]] = vertices[i].coor; 
+                mesh.points[visited_vertices[i]] = vertices[i]->coor; 
             }
         }
         if(has_colors)
@@ -169,7 +171,7 @@ namespace geometry
             {
                 if(visited_vertices[i] != -1)
                 {
-                    mesh.colors[visited_vertices[i]] = vertices[i].color; 
+                    mesh.colors[visited_vertices[i]] = vertices[i]->color; 
                 }
             }
         }
@@ -181,12 +183,34 @@ namespace geometry
         for(size_t i = 0; i != edges.size(); ++i)
         {   
             //std::cout<<i<<" "<<(edges[i]->ori_vertex->id)<<std::endl;
-            if(edges[i].twin_edge == nullptr)
+            if(edges[i]->twin_edge == nullptr)
             {
-                is_border[edges[i].ori_vertex->id] = true;
-                is_border[edges[i].des_vertex->id] = true;
+                is_border[edges[i]->ori_vertex->id] = true;
+                is_border[edges[i]->des_vertex->id] = true;
             }
         }
+    }
+    void HalfEdge::RearrangeFaceIncEdge()
+    {
+        for(size_t i = 0; i != edges.size(); ++i)
+        {
+            if(edges[i]->id != -1)
+            {
+                
+                if(edges[i]->parent_face == nullptr)
+                {
+                    edges[i]->parent_face = edges[i]->pre_edge->parent_face;
+                }
+                if(edges[i]->parent_face == nullptr)
+                {
+                    edges[i]->parent_face = edges[i]->next_edge->parent_face;
+                }
+                if(edges[i]->parent_face->inc_edge->id == -1)
+                edges[i]->parent_face->inc_edge = edges[i];
+            }
+        }
+
+        
     }
 }
 }

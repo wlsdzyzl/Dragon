@@ -17,11 +17,13 @@ namespace geometry
         double x;
         Point2 o;
         ArcNode * arc_ptr;  
+        bool is_valid = true;
     };
     struct SiteEvent
     {
-        SiteEvent(double x_, size_t id_):x(x_),id(id_){}
+        SiteEvent(double x_, double y_, size_t id_):x(x_), y(y_),id(id_){}
         double x;
+        double y;
         size_t id;
     };
     struct ArcNode
@@ -32,7 +34,7 @@ namespace geometry
         ArcNode(const Point2 &p_, size_t id = -1):p(p_), id(id){}
         ArcNode *pre_ptr = nullptr;
         ArcNode *next_ptr = nullptr;
-        CircleEvent * circle_events;
+        CircleEvent * circle_event = nullptr;
     };
     struct GreaterCircleEvent
     {
@@ -45,7 +47,8 @@ namespace geometry
     {
         inline bool operator()(const SiteEvent *a, const SiteEvent *b)
         {
-            return a->x > b->x;
+            if(a->x !=  b->x) return a-> x > b->x;
+            else return a->y < b->y; 
         }
     };
     class Voronoi2D
@@ -54,21 +57,37 @@ namespace geometry
         Voronoi2D() = default;
         // 3d point
         // void FromPointCloud(const PointCloud &pcd);
-        void FromPoints(const Point2List &points) {site_points = points;}
+        void FromPoints(const Point2List &points) { Reset(); site_points = points;}
         void ToDualTriangleMesh(mesh::TriangleMesh &mesh) const;
-        void Relaxation(int max_iteration = 100);
+        Point2List Relaxation();
         void GenerateDiagram();
+        void Reset()
+        {
+            he.Reset();
+            decisive_point_to_edge.clear();
+            edge_to_decisive_point.clear();
+            bb = BoundingBox();
+            site_points.clear();
+            while(beachline!= nullptr)
+            {
+                auto tmp_arc = beachline->next_ptr;
+                delete beachline;
+                beachline = tmp_arc;
+            }
+            beachline = nullptr;
+        }
+        void BBTruncation(const BoundingBox &bb);
         // clockwise halfedge
         HalfEdge he;
         Point2List site_points;
         BoundingBox bb;
-        double margin = 20;
+        // double margin = 20;
         protected:
         void ProcessTopSiteEvent();
         void ProcessTopCircleEvent();
         void CheckCircleEvent(ArcNode *arc, double swp);
         void PrintArc() const;
-        void BBTruncation();
+        
         std::unordered_map<Point2i, int, PixelGridHasher> decisive_point_to_edge;
         Point2iList edge_to_decisive_point; 
         // site events queue
