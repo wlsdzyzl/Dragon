@@ -51,7 +51,7 @@ namespace window
             mouse_buttons[button] = (action == GLFW_PRESS);
         }
     }                           
-    bool Initialize(int width, int height)
+    bool Initialize(int width, int height, const std::string &window_name)
     {
         w_width = width;
         w_height = height;
@@ -77,7 +77,7 @@ namespace window
     #endif
 
         // Create window with graphics context
-        window = glfwCreateWindow(w_width, w_height, "Dragon 3D", NULL, NULL);
+        window = glfwCreateWindow(w_width, w_height, window_name.c_str(), NULL, NULL);
         if (window == NULL)
             return 0;
         glfwMakeContextCurrent(window);
@@ -176,7 +176,7 @@ namespace window
     void RegisterMouseAndKeyboard()
     {
         // glfwSetKeyCallback(window, glfw_keyboard);
-        std::cout<<"??? "<<std::endl;
+        // std::cout<<"??? "<<std::endl;
         glfwSetCursorPosCallback(window, glfw_motion);
         glfwSetMouseButtonCallback(window, glfw_mouse);
         glfwSetScrollCallback(window, glfw_scroll);

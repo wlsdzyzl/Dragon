@@ -17,6 +17,7 @@ int points_num = 100;
 std::random_device rd;
 std::uniform_real_distribution<double> uni_real(-0.95, 0.95);
 geometry::BoundingBox bb;
+bool remain_convex_hull = false;
 static void glfw_mouse_2d(GLFWwindow* window, int button, int action,
                         int mods)
 {
@@ -136,11 +137,14 @@ void RenderGuiComponents()
             }
             vor.FromPoints(points);
             vor.GenerateDiagram();
+            if(!remain_convex_hull) vor.BBTruncation(bb);
             geometry::mesh::TriangleMesh mesh;
             vor.ToDualTriangleMesh(mesh);     
             visualizer.AddTriangleMesh(mesh);  
             // mesh.WriteToPLY("2dmesh.ply");     
         }
+        ImGui::SameLine();
+        ImGui::Checkbox("Convex Hull", &remain_convex_hull);
 
         // if(ImGui::Button("Line arrangement"))
         // {

@@ -66,6 +66,7 @@ namespace geometry
     void Voronoi2D::ToDualTriangleMesh(mesh::TriangleMesh &mesh) const
     {
         // to dual triangle mesh, which is also known as delaunay triangulation
+        if(site_points.size()==0) return;
         auto &vertices = he.vertices;
         mesh.Reset();
         for(size_t i = 0; i != site_points.size(); ++i)
@@ -74,6 +75,10 @@ namespace geometry
         }
         for(size_t i = 0; i != vertices.size(); ++i)
         {
+            if(vertices[i]->id == -1) 
+            {
+                continue;
+            }
             if(vertices[i]->inc_edge)
             {
                 auto start_edge = vertices[i]->inc_edge;
@@ -588,6 +593,7 @@ namespace geometry
     {
         // this file is to use boundingbox to truncate the edges, which has a nullptr vertex
         // auto &faces = he.faces;
+        if(site_points.size()==0) return;
         auto &edges = he.edges;
         auto &vertices = he.vertices;
         Point2 left_top(bb.x_min, bb.y_max), left_bottom(bb.x_min, bb.y_min);
@@ -695,6 +701,8 @@ namespace geometry
                     std::cout<<BLUE<<"[INFO]::[BBTruncation]::Cannot find the intersection, and this edge will be deleted from DCEL."<<RESET<<std::endl;
                     edges[i]->id = -1;
                     edges[i]->twin_edge->id = -1;
+                    edges[i]->ori_vertex->id = -1;
+                    edges[i]->des_vertex->id = -1;
                     continue;
                 }
                 else if(inter_points.size() == 2)
@@ -778,6 +786,8 @@ namespace geometry
                     std::cout<<YELLOW<<"[WARNING]::[BBTruncation]::Special case: more than 2 intersection points."<<RESET<<std::endl;
                     edges[i]->id = -1;
                     edges[i]->twin_edge->id = -1;
+                    edges[i]->ori_vertex->id = -1;
+                    edges[i]->des_vertex->id = -1;
                     continue;                    
                 }
             }
@@ -841,16 +851,17 @@ namespace geometry
                         }
                         if(!bb.IsInside(edges[i]->ori_vertex->coor))
                         {
+                            edges[i]->ori_vertex->id = -1;
                             // no intersection with border.
                             if(inter_pid == inter_points.size())
                             {
                                 edges[i]->id = -1;
-                                edges[i]->twin_edge->id = -1;                
+                                edges[i]->twin_edge->id = -1;             
                                 continue;                
                             }
                             else
                             {
-                                edges[i]->ori_vertex->id = -1;
+                                
                                 if(CheckPointToLine(inter_points[0].first, inter_points[1].first, site_point) < 0)
                                 {
                                     HEVertex *v0 = new HEVertex (inter_points[0].first);
@@ -906,15 +917,16 @@ namespace geometry
                         }
                         if(!bb.IsInside(edges[i]->des_vertex->coor))
                         {
+                            edges[i]->des_vertex->id = -1;   
                             if(inter_pid == inter_points.size())
                             {
                                 edges[i]->id = -1;
-                                edges[i]->twin_edge->id = -1;                
+                                edges[i]->twin_edge->id = -1;   
+                                          
                                 continue;                
                             }
                             else
                             {
-                                edges[i]->des_vertex->id = -1;
                                 if(CheckPointToLine(inter_points[0].first, inter_points[1].first, site_point) < 0)
                                 {
                                     HEVertex *v0 = new HEVertex (inter_points[0].first);
@@ -975,6 +987,7 @@ namespace geometry
     }
     void Voronoi2D::GenerateDiagram()
     {
+        if(site_points.size()==0) return;
         std::priority_queue<SiteEvent *, std::vector<SiteEvent *>, GreaterSiteEvent>().swap(site_events);
         std::priority_queue<CircleEvent *, std::vector<CircleEvent *>, GreaterCircleEvent>().swap(circle_events);
         for(size_t i = 0; i != site_points.size(); ++i)

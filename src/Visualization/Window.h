@@ -64,7 +64,7 @@ namespace window
     extern bool last_point_valid;
     // extern geometry::Point2List pressed_points;
     extern geometry::Point3 last_point_3d;
-    bool Initialize(int width = 800, int height = 800);
+    bool Initialize(int width = 800, int height = 800, const std::string &window_name = "Dragon 3D");
     void Cleanup();
     // the function that can be rewritten
     void RenderGuiComponents();

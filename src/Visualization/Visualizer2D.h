@@ -13,7 +13,7 @@ namespace visualization
         public:
         bool Initialize()
         {
-            window::Initialize(width, height);
+            window::Initialize(width, height, "Dragon 2D");
             SetRange(-width / 2, width / 2, - height / 2, height / 2);
             for(size_t i = 0; i < io::color_table.size(); ++i)
             {
