@@ -143,7 +143,7 @@ namespace mesh
             auto start_edge = vertices[i]->inc_edge;
             auto current_edge = start_edge->twin_edge->next_edge;
             std::vector<size_t> first_neighbors;
-            std::vector<double> cotan_weights;
+            geometry::ScalarList cotan_weights;
             geometry::Vector3 weighted_position = geometry::Vector3::Zero();
             double sum_weight = 0.0;
             first_neighbors.push_back(start_edge->des_vertex->id);

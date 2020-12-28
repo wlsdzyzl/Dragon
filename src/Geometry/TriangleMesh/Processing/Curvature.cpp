@@ -35,7 +35,7 @@ namespace mesh
         }
     }
     // compute mean curvature, which will also compute the local weights
-    void ComputeMeanCurvature(HalfEdge &he, std::vector<double> &mean_curvatures)
+    void ComputeMeanCurvature(HalfEdge &he, geometry::ScalarList &mean_curvatures)
     {
         mean_curvatures.clear();
         auto &vertices = he.vertices;
@@ -104,7 +104,7 @@ namespace mesh
             mean_curvatures.push_back( (mean_curvature_vector / sum_area / 4).norm());
         }
     }
-    void ComputeGaussCurvature(HalfEdge &he, std::vector<double> &gauss_curvatures)
+    void ComputeGaussCurvature(HalfEdge &he, geometry::ScalarList &gauss_curvatures)
     {
         gauss_curvatures.clear();
         auto &vertices = he.vertices;

@@ -1,16 +1,16 @@
 #version 130
 
-    in vec3 position;
-    uniform mat4 MVP;
-    uniform int colorType;
-
-    uniform float materialShininess;
-    uniform vec4 materialAmbient;
-    uniform vec4 materialDiffuse;
-    uniform vec4 materialSpecular;
-    uniform vec4 lightAmbient;
-    uniform vec4 lightDiffuse;
-    uniform vec4 lightSpecular;
+in vec3 position;
+uniform mat4 MVP;
+uniform int colorType;
+uniform int phong;
+uniform float materialShininess;
+uniform vec4 materialAmbient;
+uniform vec4 materialDiffuse;
+uniform vec4 materialSpecular;
+uniform vec4 lightAmbient;
+uniform vec4 lightDiffuse;
+uniform vec4 lightSpecular;
 
 
 out vec4 vColor;

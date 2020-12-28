@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
         std::cout << "Usage: ReadPLYMesh [filename.ply]"<<std::endl;
         return 0;
     }
-    geometry::mesh::TriangleMesh mesh;
+    geometry::TriangleMesh mesh;
     mesh.LoadFromFile(argv[1]);
 
     // if(!mesh.HasNormals())

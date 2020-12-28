@@ -82,6 +82,7 @@ add_executable(MeanCurvature "app/MeanCurvature.cpp")
 # add_executable(GaussCurvature "app/GaussCurvature.cpp")
 add_executable(DragonView3D "app/DragonView.cpp")
 add_executable(DragonView2D "app/DragonView2D.cpp")
+add_executable(SpiderMan "app/SpiderMan.cpp")
 set(THIRD_LIB 
     tinyply 
     objloader
@@ -106,6 +107,10 @@ target_link_libraries(DragonView3D
     ${THIRD_LIB}
 )
 target_link_libraries(DragonView2D
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(SpiderMan
     dragon
     ${THIRD_LIB}
 )

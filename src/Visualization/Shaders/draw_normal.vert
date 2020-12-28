@@ -1,17 +1,17 @@
 #version 130
 
-    in vec3 position;
-    in vec3 normal;
-    uniform mat4 MVP;
-    uniform int colorType;
-
-    uniform float materialShininess;
-    uniform vec4 materialAmbient;
-    uniform vec4 materialDiffuse;
-    uniform vec4 materialSpecular;
-    uniform vec4 lightAmbient;
-    uniform vec4 lightDiffuse;
-    uniform vec4 lightSpecular;
+in vec3 position;
+in vec3 normal;
+uniform mat4 MVP;
+uniform int colorType;
+uniform int phong;
+uniform float materialShininess;
+uniform vec4 materialAmbient;
+uniform vec4 materialDiffuse;
+uniform vec4 materialSpecular;
+uniform vec4 lightAmbient;
+uniform vec4 lightDiffuse;
+uniform vec4 lightSpecular;
 
 
 out vec4 vColor;
@@ -23,7 +23,8 @@ void main()
         {
             vColor = vec4(-normal.xyz, 1.0);
         }
-        else
+        
+        if(phong == 1)
         {
             // use Phong shading
 

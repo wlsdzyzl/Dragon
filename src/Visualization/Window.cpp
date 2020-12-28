@@ -99,9 +99,14 @@ namespace window
         glViewport( 0, 0, w_width, w_height);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glEnable(GL_DEPTH_TEST);
+
         glEnable(GL_POINT_SMOOTH);
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
         glEnable (GL_LINE_SMOOTH);
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         // Setup Dear ImGui context
@@ -298,9 +303,10 @@ namespace window
         last_y = ypos;
         last_point_valid = Map2Sphere(geometry::Point2i((int)last_x, (int)last_y), last_point_3d);
     }
-    void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color, bool filled, int n)
+    void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color, double thickness, int n)
     {
         glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
         glBegin(GL_LINE_LOOP);              // Each set of 4 vertices form a quad
         for(int i = 0; i < n; ++i)
         {
@@ -308,7 +314,7 @@ namespace window
         }
         glEnd();
     }  
-    void DrawCircleFilled(const geometry::Point2 &p, double r, const geometry::Point3 &color, bool filled, int n)
+    void DrawCircleFilled(const geometry::Point2 &p, double r, const geometry::Point3 &color, int n)
     {
         glColor3f(color(0), color(1), color(2));
         glBegin(GL_POLYGON);              // Each set of 4 vertices form a quad
@@ -364,7 +370,6 @@ namespace window
         for(size_t i = 0; i < points.size(); i+=2)
         {
             glVertex2f(points[i](0), points[i](1));
-            glVertex2f(points[i+1](0), points[i+1](1));
         }
         glEnd();
     }
@@ -380,7 +385,7 @@ namespace window
         }
         glEnd();        
     }
-    void DrawPolygonFilled(const geometry::Point2List &points, const geometry::Point3 &color,  double thickness)
+    void DrawPolygonFilled(const geometry::Point2List &points, const geometry::Point3 &color)
     {
         glColor3f(color(0), color(1), color(2));
         glBegin(GL_POLYGON);              

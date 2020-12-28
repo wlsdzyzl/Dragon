@@ -5,7 +5,7 @@ namespace dragon
 {
 namespace geometry
 {
-    void HalfEdge::FromTriangleMesh(const mesh::TriangleMesh &mesh)
+    void HalfEdge::FromTriangleMesh(const TriangleMesh &mesh)
     {
         // if(type != -1 && type != 0)
         // {
@@ -125,7 +125,7 @@ namespace geometry
             edge2->parent_face = new_face;
         }
     }
-    void HalfEdge::ToTriangleMesh(mesh::TriangleMesh &mesh)
+    void HalfEdge::ToTriangleMesh(TriangleMesh &mesh)
     {
         if(type != 0)
         {

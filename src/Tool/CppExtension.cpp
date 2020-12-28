@@ -88,5 +88,16 @@ namespace tool
         }
         return true;
     }
+    geometry::ScalarList LinSpace(double min_n, double max_n, size_t n)
+    {
+        double step = (max_n - min_n) / n;
+        geometry::ScalarList res;
+        for(size_t i = 0; i != n; ++i)
+        {
+            res.push_back(i * step + min_n);
+        }
+        if(res.back() > max_n) res.back() = max_n;
+        return res;
+    }
 }
 }

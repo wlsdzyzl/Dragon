@@ -9,21 +9,22 @@ namespace parameterization
 {
     //1d parameterization
     template<int T>
-        std::vector<double> Uniform(const geometry::PointList<T> &points)
+        geometry::ScalarList Uniform(const geometry::PointList<T> &points)
     {
         double step = 1.0 / (points.size()-1);
-        std::vector<double> results;
+        geometry::ScalarList results;
         for(size_t i = 0; i != points.size(); ++i)
         {
             results.push_back(i * step);
         }
+        if(results.back() > 1.0) results.back() = 1.0;
         return results;
     }
     template<int T>
-        std::vector<double> Chordal(const geometry::PointList<T> &points)
+        geometry::ScalarList Chordal(const geometry::PointList<T> &points)
     {
-        std::vector<double> dists;
-        std::vector<double> results;
+        geometry::ScalarList dists;
+        geometry::ScalarList results;
         double sum_dists = 0;
         for(size_t id = 1; id < points.size(); ++id)
         {
@@ -33,13 +34,14 @@ namespace parameterization
         results.push_back(0);
         for(auto d: dists)
             results.push_back(results.back() + d / sum_dists);
+        if(results.back() > 1.0) results.back() = 1.0;
         return results;
     }
     template<int T>
-        std::vector<double> Centripetal(const geometry::PointList<T> &points)
+        geometry::ScalarList Centripetal(const geometry::PointList<T> &points)
     {
-        std::vector<double> dists;
-        std::vector<double> results;
+        geometry::ScalarList dists;
+        geometry::ScalarList results;
         double sum_dists = 0;
         for(size_t id = 1; id < points.size(); ++id)
         {
@@ -49,15 +51,16 @@ namespace parameterization
         results.push_back(0);
         for(auto d: dists)
             results.push_back(results.back() + d / sum_dists);
+        if(results.back() > 1.0) results.back() = 1.0;
         return results;
     }
     template<int T>
-        std::vector<double> Foley(const geometry::PointList<T> &points)
+        geometry::ScalarList Foley(const geometry::PointList<T> &points)
     {
-        std::vector<double> dists;
-        std::vector<double> angles;
-        std::vector<double> foley_dists;
-        std::vector<double> results;
+        geometry::ScalarList dists;
+        geometry::ScalarList angles;
+        geometry::ScalarList foley_dists;
+        geometry::ScalarList results;
         double sum_dists = 0;
         double half_pi = M_PI/ 2.0;
         // get angles and dists
@@ -86,6 +89,7 @@ namespace parameterization
         results.push_back(0);
         for(auto d: foley_dists)
             results.push_back(results.back() + d / sum_dists);
+        if(results.back() > 1.0) results.back() = 1.0;
         return results;           
     }
 }

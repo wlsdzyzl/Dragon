@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <iostream>
 #include "IO/ConsoleColor.h"
+#include "Geometry/BasicGeometry.h"
 namespace dragon
 {
 namespace tool
@@ -26,6 +27,7 @@ namespace tool
     }
     bool DirExists(const std::string & folder_name);
     bool MakeDir(const std::string & folder_name);
+    geometry::ScalarList LinSpace(double min_n, double max_n, size_t n);
 
 }
 }

@@ -174,7 +174,7 @@ namespace geometry
             const SearchParameter &sp = SearchParameter())
         {
             indices.resize(k);
-            std::vector<geometry::scalar> out_dist_sqr(k);
+            geometry::ScalarList out_dist_sqr(k);
 
             const size_t search_num = kdtree_ptr->knnSearch(point.data(), k, &indices[0], &out_dist_sqr[0]);
             

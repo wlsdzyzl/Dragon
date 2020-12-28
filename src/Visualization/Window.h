@@ -90,15 +90,15 @@ namespace window
     {
         return mouse_buttons[GLFW_MOUSE_BUTTON_MIDDLE];
     }
-    void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color = geometry::Point3(0, 0, 0), bool filled = false, int n = 100);    
-    void DrawCircleFilled(const geometry::Point2 &p, double r, const geometry::Point3 &color = geometry::Point3(0, 0, 0), bool filled = false, int n = 100); 
+    void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2, int n = 100);    
+    void DrawCircleFilled(const geometry::Point2 &p, double r, const geometry::Point3 &color = geometry::Point3(0, 0, 0), int n = 100); 
     void DrawPoint(const geometry::Point2 &p, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 5);
     void DrawPoints(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 5);
     void DrawLine(const geometry::Point2 &p1, const geometry::Point2 &p2, const geometry::Point3 &color = geometry::Point3(0, 0, 0),  double thickness = 2);
     void DrawLines(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
     void DrawLineStrip(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
     void DrawPolygon(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
-    void DrawPolygonFilled(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0), double thickness = 2);
+    void DrawPolygonFilled(const geometry::Point2List &points, const geometry::Point3 &color = geometry::Point3(0, 0, 0));
 }
 }
 }

@@ -8,14 +8,14 @@ static float local_lambda = 0.1f;
 static float global_lambda = 0.1f;
 static int iteration_local = 200;
 static bool use_uniform_para = true;
-static geometry::mesh::TriangleMesh object;
+static geometry::TriangleMesh object;
 static std::string filename;
 static bool wireframe_mode = false;
 static double simplify_rate = 0.1f;
 static double voxel_len = 0.01f;
 bool updated = false;
 bool reorient = false;
-bool show_normal = false;
+visualization::Visualizer visualizer(1000, 750);
 void RenderGuiComponents()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -26,15 +26,21 @@ void RenderGuiComponents()
         //ImGui::SameLine();
         ImGui::Checkbox("Wireframe", &wireframe_mode); 
         ImGui::SameLine();
-        ImGui::Checkbox("NormalMapping", &show_normal);
+        ImGui::Checkbox("NormalMapping", &visualizer.draw_normal);
+        ImGui::SameLine();
+        ImGui::Checkbox("ColorMapping", &visualizer.draw_color);
+        ImGui::SameLine();
+        ImGui::Checkbox("PhongShading", &visualizer.draw_phong_shading); 
         // ImGui::BeginMenu("Curvature");
         if(ImGui::Button("Mean Curvature"))
         {
             geometry::HalfEdge he; 
             he.FromTriangleMesh(object);
             he.CheckBorder();
-            std::vector<double> mean_curvatures;
+            geometry::ScalarList mean_curvatures;
             geometry::mesh::ComputeMeanCurvature(he, mean_curvatures);
+            // for(int i = 0; i != mean_curvatures.size(); ++i)
+            // std::cout<<mean_curvatures[i]<<std::endl;
             geometry::Point3List colors;
             tool::ColorRemapping(mean_curvatures, colors);
             for(size_t i = 0; i != he.vertices.size(); ++i)
@@ -54,7 +60,7 @@ void RenderGuiComponents()
             geometry::HalfEdge he; 
             he.FromTriangleMesh(object);
             he.CheckBorder();
-            std::vector<double> gauss_curvatures;
+            geometry::ScalarList gauss_curvatures;
             geometry::mesh::ComputeGaussCurvature(he, gauss_curvatures);
             geometry::Point3List colors;
             tool::ColorRemapping(gauss_curvatures, colors);
@@ -158,6 +164,8 @@ void RenderGuiComponents()
             object.LoadFromFile(filename);
             if(!object.HasNormals())
             object.ComputeNormals();
+            if(!object.HasColors())
+            object.colors = geometry::Point3List(object.points.size(), geometry::Point3::Ones());
             updated = true;
             reorient = true;
         }
@@ -168,6 +176,7 @@ void RenderGuiComponents()
             std::cout << "save to ByDragon.ply."<<std::endl;
         }        
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::ColorEdit3("Background color", visualizer.clear_color.data());
         ImGui::End();
     }
     // Rendering
@@ -182,25 +191,22 @@ int main(int argc, char* argv[])
     }
     filename = argv[1];
     object.LoadFromFile(filename);
+    if(!object.HasColors())
+    object.colors = geometry::Point3List(object.points.size(), geometry::Point3::Ones());
     if(!object.HasNormals())
     object.ComputeNormals();
-    visualization::Visualizer visualizer(1000, 750);
+
     //visualizer.SetDrawColor(true);
     visualizer.AddTriangleMesh(object);
     visualizer.Initialize();
+    glDisable(GL_DEPTH_TEST);
+    visualizer.draw_color = true;
     visualization::window::RegisterMouseAndKeyboard();
     visualizer.dynamic_first_view = false;
     while(!glfwWindowShouldClose(visualization::window::window))
     {
         RenderGuiComponents();
         visualizer.wireframe_mode = wireframe_mode;
-        if(show_normal)
-        {
-            visualizer.draw_normal = true;
-            visualizer.draw_color_phong = false;
-        }
-        else
-        visualizer.draw_color_phong = true;
         if(updated)
         {
             visualizer.Reset();

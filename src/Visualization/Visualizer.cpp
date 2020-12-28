@@ -224,9 +224,10 @@ namespace visualization
     //     std::cout<<mvp<<std::endl;
         program->SetUniform(Uniform("MVP", mvp));
         int color_type = (draw_normal ? 1 : draw_color ? 2 : 0);
-        if(draw_color_phong) color_type = 3;
-        
         program->SetUniform(Uniform("colorType", color_type));
+        if(draw_phong_shading) 
+        program->SetUniform(Uniform("phong", 1));
+        else program->SetUniform(Uniform("phong", 0));
         float s_materialShininess = 8.0f;
         Eigen::Vector4f s_materialAmbient   = Eigen::Vector4f(0.85f, 0.85f, 0.85f, 1.0f);
         Eigen::Vector4f s_materialDiffuse   = Eigen::Vector4f(0.85f, 0.85f, 0.85f, 1.0f);
@@ -246,7 +247,7 @@ namespace visualization
         program->SetUniform(Uniform("lightDir", lightDir));        
     }
 
-    void Visualizer::AddTriangleMesh(const geometry::mesh::TriangleMesh &mesh)
+    void Visualizer::AddTriangleMesh(const geometry::TriangleMesh &mesh)
     {
         
         if( point_step != 0 &&geometry_type != GeometryType::TRIANGLE_MESH)

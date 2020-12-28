@@ -9,8 +9,6 @@ namespace dragon
 {
 namespace geometry
 {
-namespace mesh
-{
     class TriangleMesh
     {
         public:
@@ -50,7 +48,6 @@ namespace mesh
         Point3List colors; 
         
     };
-}
 }
 }
 

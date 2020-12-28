@@ -58,7 +58,7 @@ namespace geometry
         // 3d point
         // void FromPointCloud(const PointCloud &pcd);
         void FromPoints(const Point2List &points) { Reset(); site_points = points;}
-        void ToDualTriangleMesh(mesh::TriangleMesh &mesh) const;
+        void ToDualTriangleMesh(TriangleMesh &mesh) const;
         Point2List Relaxation();
         void GenerateDiagram();
         void Reset()

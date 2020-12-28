@@ -63,7 +63,7 @@ namespace geometry
         }
         return false;
     }
-    void Voronoi2D::ToDualTriangleMesh(mesh::TriangleMesh &mesh) const
+    void Voronoi2D::ToDualTriangleMesh(TriangleMesh &mesh) const
     {
         // to dual triangle mesh, which is also known as delaunay triangulation
         if(site_points.size()==0) return;

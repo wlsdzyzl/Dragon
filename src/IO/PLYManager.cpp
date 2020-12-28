@@ -210,7 +210,7 @@ namespace io
         }
 
         PlyFile geometry_file;
-        std::vector<geometry::scalar> vertices_buffer, normals_buffer;
+        geometry::ScalarList vertices_buffer, normals_buffer;
         std::vector<unsigned char> colors_buffer;
         std::vector<unsigned int> faces_buffer;
         for(size_t i = 0; i != points.size(); ++i)

@@ -4,7 +4,7 @@ namespace dragon
 namespace tool
 {
     //blue-> white-> red (0 0 1-> 1 1 1-> 1 0 0), 255 * 2/
-    void ColorRemapping(const std::vector<double> &values, geometry::Point3List &mapped_color)
+    void ColorRemapping(const geometry::ScalarList &values, geometry::Point3List &mapped_color)
     {
         mapped_color.clear();
         double min_value = std::numeric_limits<double>::max();
@@ -14,7 +14,7 @@ namespace tool
             if(values[i] < min_value) min_value = values[i];
             if(values[i] > max_value) max_value = values[i];
         }
-
+        std::cout<<BLUE<<"[INFO]::[ColorRemapping]::Min value: "<<min_value<<", Max value:"<<max_value<<RESET<<std::endl;
         std::vector<int> histogram(COLOR_RANGE, 0);
         std::vector<int> color_id;
         for(size_t i = 0; i != values.size(); ++i)
@@ -41,13 +41,15 @@ namespace tool
         }
         for(size_t i = 0; i != COLOR_RANGE; ++i)
         {
-            //std::cout<<histogram[i]<<" "<<values.size()<<std::endl;
+            
             current_n += histogram[i];
             map[i] = (COLOR_RANGE - 1) * (current_n + 0.0) / values.size();
+            // std::cout<<i<<" "<<histogram[i] <<" "<<map[i]<<std::endl;
+            
         }
         for(size_t i = 0; i != values.size(); ++i)
         {
-            mapped_color.push_back(color_table[color_id[i]]);
+            mapped_color.push_back(color_table[map[color_id[i]]]);
         }
     }
 }

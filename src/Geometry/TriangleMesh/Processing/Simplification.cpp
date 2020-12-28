@@ -174,7 +174,7 @@ namespace mesh
         {
             if( iteration % 5 == 0)
             UpdateMesh(q_helper);
-            error_threshold = 0.000000001*std::pow(float(iteration+3),6);
+            error_threshold = 0.000000001*std::pow(float(iteration+3),2);
             //std::cout<<"Iteration "<<iteration<<", deleted_triangle: "<<q_helper.deleted_triangle<<std::endl;
             for(size_t i=0;i!=q_helper.triangles_ptr->size(); ++i)
             {

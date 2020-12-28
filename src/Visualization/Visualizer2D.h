@@ -25,6 +25,7 @@ namespace visualization
         Visualizer2D(int w = 800, int h = 600):width(w), height(h)
         {
             Reset();
+            clear_color = geometry::Point3(0.95, 0.95, 0.95);
         }
         ~Visualizer2D()
         {
@@ -41,7 +42,7 @@ namespace visualization
         }
         void AddHalfEdge(const geometry::HalfEdge &he);
         void AddVoronoi(const geometry::Voronoi2D &v);
-        void AddTriangleMesh(const geometry::mesh::TriangleMesh &mesh);
+        void AddTriangleMesh(const geometry::TriangleMesh &mesh);
         void SetRange(double x_min, double x_max, double y_min, double y_max)
         {
             x_range = geometry::Point2(x_min, x_max);
@@ -50,7 +51,7 @@ namespace visualization
         void PreCall()
         {
             glfwPollEvents();
-            glClearColor(1.0f,1.0f, 1.0f,1.0f);
+            glClearColor(clear_color(0), clear_color(1), clear_color(2),1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
         void PostCall()
@@ -74,6 +75,7 @@ namespace visualization
         double point_radius = 0.01;
         geometry::Point2 x_range;
         geometry::Point2 y_range;
+        Eigen::Vector3f clear_color;
     
     };
 }

@@ -77,8 +77,8 @@ namespace geometry
             edges.clear();
             faces.clear();
         }
-        void FromTriangleMesh(const mesh::TriangleMesh &mesh);
-        void ToTriangleMesh(mesh::TriangleMesh &mesh);
+        void FromTriangleMesh(const TriangleMesh &mesh);
+        void ToTriangleMesh(TriangleMesh &mesh);
         void CheckBorder();
         void RearrangeFaceIncEdge();
         // add 2d line into the HalfEdge List

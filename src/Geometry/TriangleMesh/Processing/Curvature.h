@@ -11,9 +11,9 @@ namespace mesh
 {
     // compute mean curvature
     //void ComputeMeanCurvature(HalfEdge &he, Point3List &mean_curvature_vectors);
-    void ComputeMeanCurvature(HalfEdge &he, std::vector<double> &mean_curvatures);
+    void ComputeMeanCurvature(HalfEdge &he, geometry::ScalarList &mean_curvatures);
     // compute gauss curvature
-    void ComputeGaussCurvature(HalfEdge &he, std::vector<double> &gauss_curvature);
+    void ComputeGaussCurvature(HalfEdge &he, geometry::ScalarList &gauss_curvature);
     void ComputeCotanWeight(HalfEdge &he);
 }
 }

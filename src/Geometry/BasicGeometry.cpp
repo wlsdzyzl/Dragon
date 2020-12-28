@@ -448,5 +448,75 @@ namespace geometry
         double d = -n.dot(mid);
         return Line(n, d); 
     }
+    geometry::VectorX SolveBySVD(const geometry::MatrixX &A, const geometry::VectorX &b)
+    {
+        geometry::VectorX res(A.cols());
+        if(A.rows() >= A.cols())
+        {
+            //over determined
+            res = A.lu().solve(b);
+        }
+        else
+        {
+            //under determined
+            int start = A.cols() - A.rows();
+            geometry::MatrixX newA = A.block(0, start, A.rows(), A.rows());
+            geometry::VectorX new_res = newA.lu().solve(b);
+            res.setZero();
+            res.block(start, 0, A.rows(), 1) = new_res; 
+        }
+        return res;
+    }
+    geometry::VectorX SolveByThomas(const geometry::MatrixX &A, const geometry::VectorX &f)
+    {
+        int n = A.rows();
+        geometry::MatrixX P(n, n), Q(n, n);
+        P.setIdentity();
+        Q.setIdentity();
+        double last_q = 0;
+        for(int i = 0; i != n; ++i)
+        {
+            double p, q;
+            if(i == 0)
+                p = A(i, i);
+            else
+            {
+                p = A(i, i) - A(i, i-1) * last_q;
+                P(i, i-1) = A(i, i-1);
+            }
+            P(i, i) = p;
+            if(i != n-1)
+            {
+                q = A(i, i+1) / p;
+                last_q = q;
+                Q(i, i+1)= q;
+            }
+        }
+        geometry::VectorX y(P.cols());
+        // solve Py = f
+        double last_y = 0;
+        for(int i = 0; i != n; ++i)
+        {
+            double tmp_y;
+            if(i == 0) tmp_y = f(0) / P(0, 0);
+            else tmp_y = (f(i) - A(i, i-1) * last_y) / P(i, i);
+            y(i) = tmp_y;
+            last_y = tmp_y;
+        }
+        // solve Qx = y
+        geometry::VectorX x(Q.cols());
+        double last_x = 0;
+        for(int i = 0; i != n; ++i)
+        {
+            int real_id = n-1-i;
+            double tmp_x;
+            if(i == 0) tmp_x = y(real_id);
+            else tmp_x = (y(real_id) - Q(real_id, real_id+1) * last_x);
+            x(real_id) = tmp_x;
+            last_x = tmp_x;
+        }        
+        //x.reverseInPlace();
+        return x;
+    }
 }
 }

@@ -17,12 +17,12 @@ int main(int argc, char* argv[])
         std::cout << "Usage: GenerateMinimalSurface [filename]"<<std::endl;
         return 0;
     }
-    geometry::mesh::TriangleMesh mesh;
+    geometry::TriangleMesh mesh;
     mesh.LoadFromFile(argv[1]);
     geometry::HalfEdge he; 
     he.FromTriangleMesh(mesh);
     he.CheckBorder();
-    std::vector<double> mean_curvatures;
+    geometry::ScalarList mean_curvatures;
     geometry::mesh::ComputeMeanCurvature(he, mean_curvatures);
     if(!mesh.HasNormals())
         mesh.ComputeNormals();
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     //     he.vertices[i].color = colors[i];
     // }    
     he.has_colors = true;
-    geometry::mesh::TriangleMesh mapping_mesh;
+    geometry::TriangleMesh mapping_mesh;
     he.ToTriangleMesh(mapping_mesh);
 
     visualization::Visualizer visualizer;

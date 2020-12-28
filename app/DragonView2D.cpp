@@ -138,7 +138,7 @@ void RenderGuiComponents()
             vor.FromPoints(points);
             vor.GenerateDiagram();
             if(!remain_convex_hull) vor.BBTruncation(bb);
-            geometry::mesh::TriangleMesh mesh;
+            geometry::TriangleMesh mesh;
             vor.ToDualTriangleMesh(mesh);     
             visualizer.AddTriangleMesh(mesh);  
             // mesh.WriteToPLY("2dmesh.ply");     
@@ -159,6 +159,7 @@ void RenderGuiComponents()
         }    
         ImGui::Text("Points on canvas: %d", (int)pressed_points.size());
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::ColorEdit3("Background color", visualizer.clear_color.data());
         ImGui::End();
     }
     // Rendering

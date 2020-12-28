@@ -28,6 +28,7 @@ namespace visualization
             index_buffer = new int[MAX_BUFFER_SIZE];
             memset(point_buffer,0,MAX_BUFFER_SIZE*sizeof(float));
             memset(index_buffer,0,MAX_BUFFER_SIZE*sizeof(int));
+            clear_color = geometry::Point3(0.8, 0.8, 0.8);
 
         }
         ~Visualizer();
@@ -45,7 +46,7 @@ namespace visualization
         }
         void SetProjectionMatrix(int w, int h, float fu, float fv, float u0, 
             float v0, float zNear, float zFar);
-        void AddTriangleMesh(const geometry::mesh::TriangleMesh &mesh);
+        void AddTriangleMesh(const geometry::TriangleMesh &mesh);
         void Show();
         void ShowOnce();
         void SetModelViewMatrix(const geometry::TransformationMatrix &camera_pose, 
@@ -53,7 +54,7 @@ namespace visualization
         void PreCall()
         {
             glfwPollEvents();
-            glClearColor(1.0f,1.0f, 1.0f,1.0f);
+            glClearColor(clear_color(0), clear_color(1), clear_color(2),1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
         }
@@ -123,11 +124,12 @@ namespace visualization
         int width;
         int height;
         bool draw_color = false;
-        bool draw_color_phong = true;
+        bool draw_phong_shading = true;
         bool has_colors = true;
         bool has_normals = true;
         bool is_initialized = false;
         bool wireframe_mode = false;
+        Eigen::Vector3f clear_color;
         std::shared_ptr<Shader> program;
         GeometryType geometry_type;
         protected:

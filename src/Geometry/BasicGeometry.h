@@ -19,7 +19,7 @@ namespace geometry
 #else
     typedef float scalar;
 #endif
-
+    typedef std::vector<scalar> ScalarList;
     typedef Eigen::Matrix<scalar, 2, 1> Point2;
     typedef Eigen::Matrix<scalar, 3, 1> Point3;
     typedef Eigen::Matrix<scalar, 2, 1> Vector2;
@@ -48,12 +48,13 @@ namespace geometry
 
     typedef std::vector<Point2, Eigen::aligned_allocator<Point2> > Point2List;
     typedef std::vector<Point3, Eigen::aligned_allocator<Point3> > Point3List; 
-    typedef std::vector<PointX, Eigen::aligned_allocator<Point3> > PointXList; 
+    typedef std::vector<PointX, Eigen::aligned_allocator<PointX> > PointXList; 
     template <int T>
         using PointList = std::vector<Eigen::Matrix<scalar, T, 1>, 
             Eigen::aligned_allocator<Eigen::Matrix<scalar, T, 1>>>;
 
     typedef std::vector<Matrix4, Eigen::aligned_allocator<Matrix4> > Mat4List;
+    typedef std::vector<MatrixX, Eigen::aligned_allocator<MatrixX> > MatXList;
     typedef Matrix4 TransformationMatrix;
     //lie group and lie algebra
     //SE3 and se3
@@ -210,6 +211,10 @@ namespace geometry
                 return ( key(0) * p1 ^ key(1) * p2 ^ key(2) * p3);
             }
     };
+
+    //linear solver
+    geometry::VectorX SolveBySVD(const geometry::MatrixX &A, const geometry::VectorX &b);
+    geometry::VectorX SolveByThomas(const geometry::MatrixX &A, const geometry::VectorX &b);
 }
 }
 #endif

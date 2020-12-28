@@ -31,7 +31,7 @@ namespace visualization
         // std::cout<<"fuck: "<<res.transpose()<<std::endl;
         return res;
     }
-    void Visualizer2D::AddTriangleMesh(const geometry::mesh::TriangleMesh &mesh)
+    void Visualizer2D::AddTriangleMesh(const geometry::TriangleMesh &mesh)
     {
         auto &triangles = mesh.triangles;
         auto &points = mesh.points;

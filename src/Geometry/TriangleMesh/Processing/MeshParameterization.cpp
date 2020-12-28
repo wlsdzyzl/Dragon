@@ -55,7 +55,7 @@ namespace mesh
         {
             ordered_border.push_back(vertices[ordered_vid[i]]->coor);
         }
-        std::vector<double> t;
+        geometry::ScalarList t;
         if(para_type == 0)
         t = parameterization::Uniform<3>(ordered_border);
         else if(para_type == 1)
@@ -99,7 +99,7 @@ namespace mesh
         {
             ordered_border.push_back(vertices[ordered_vid[i]]->coor);
         }
-        std::vector<double> t;
+        geometry::ScalarList t;
         if(para_type == 0)
         t = parameterization::Uniform<3>(ordered_border);
         else if(para_type == 1)
