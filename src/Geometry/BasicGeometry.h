@@ -45,10 +45,11 @@ namespace geometry
     typedef std::vector<Point2i, Eigen::aligned_allocator<Point2i> > Point2iList;
     typedef std::vector<Point3i, Eigen::aligned_allocator<Point3i> > Point3iList;
     typedef std::vector<Point3ui, Eigen::aligned_allocator<Point3ui> > Point3uiList;
-
+    
     typedef std::vector<Point2, Eigen::aligned_allocator<Point2> > Point2List;
     typedef std::vector<Point3, Eigen::aligned_allocator<Point3> > Point3List; 
     typedef std::vector<PointX, Eigen::aligned_allocator<PointX> > PointXList; 
+    typedef std::vector<Vector4, Eigen::aligned_allocator<Vector4> > Vec4List;
     template <int T>
         using PointList = std::vector<Eigen::Matrix<scalar, T, 1>, 
             Eigen::aligned_allocator<Eigen::Matrix<scalar, T, 1>>>;

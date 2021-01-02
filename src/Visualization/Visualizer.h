@@ -119,7 +119,8 @@ namespace visualization
         //fragment shader
         const std::string shader_frag = "naive_color.frag";
 
-        std::string shader_path = "../../src/Visualization/Shaders";
+        // std::string shader_path = "../../src/Visualization/Shaders";
+        std::string shader_path = "/media/wlsdzyzl/wlsdzyzl_2/Dragon/src/Visualization/Shaders";
         bool draw_normal = false;
         int width;
         int height;

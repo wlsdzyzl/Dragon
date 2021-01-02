@@ -63,6 +63,11 @@ namespace mesh
             auto start_edge = vertices[i]->inc_edge;
             while(true)
             {
+                if(current_edge == nullptr || current_edge->twin_edge == nullptr)
+                {
+                    std::cout<<YELLOW<<"[WARNING]::[MeanCurvature]::Not a model which can be embedded into a halfedge, maybe there are some  non-connected vertices."<<RESET<<std::endl;
+                    break;
+                }
                 const Point3 &v_last =current_edge->twin_edge->next_edge->des_vertex->coor;
                 const Point3 &v_next = current_edge->next_edge->des_vertex->coor;
                 const Point3 &v_current = current_edge->des_vertex->coor;  ;
@@ -100,6 +105,7 @@ namespace mesh
                 }
                 current_edge = current_edge->twin_edge->next_edge;
                 if(current_edge == start_edge) break;
+
             }
             mean_curvatures.push_back( (mean_curvature_vector / sum_area / 4).norm());
         }
@@ -131,6 +137,11 @@ namespace mesh
 
             while(true)
             {
+                // if(current_edge == nullptr)
+                // {
+                //     std::cout<<YELLOW<<"[WARNING]::[MeanCurvature]::Not a model which can be embedded into a halfedge, maybe there are some  non-connected vertices."<<RESET<<std::endl;
+                //     break;
+                // }
                 const Point3 &v_next = current_edge->next_edge->des_vertex->coor;
                 const Point3 &v_current = current_edge->des_vertex->coor;  ;
                 const Point3 &v_ = current_edge->ori_vertex->coor; 

@@ -10,7 +10,7 @@ namespace mesh
 {
     bool Flipped(QuadricHelper &helper, int p1, int p2, geometry::Point3 v, std::vector<bool> &deleted)
     {
-        //a triangle flipped if the normal changed to much, or the three points are on a line 
+        //a triangle flipped if the normal changed too much, or the three points are on a line 
         Reference &reference = helper.references[p1];
         geometry::Point3uiList &triangles = *helper.triangles_ptr;
         geometry::Point3List &points = *helper.points_ptr;
@@ -178,7 +178,7 @@ namespace mesh
             //std::cout<<"Iteration "<<iteration<<", deleted_triangle: "<<q_helper.deleted_triangle<<std::endl;
             for(size_t i=0;i!=q_helper.triangles_ptr->size(); ++i)
             {
-                //std::cout<<q_helper.error[i][3]<<std::endl;
+                std::cout<<q_helper.error[i][3]<<std::endl;
                 if(q_helper.error[i][3] > error_threshold) continue;
                 if(q_helper.t_deleted[i]) continue;
                 if(q_helper.t_dirty[i]) continue;
@@ -505,7 +505,7 @@ namespace mesh
         {
             homo_new_p = Sysmetrics.inverse()*zero_one;
             new_p = homo_new_p.head<3>();
-            
+            // float e = (homo_new_p.transpose() * new_Q * homo_new_p)(0);
             return (homo_new_p.transpose() * new_Q * homo_new_p)(0);
 
         }

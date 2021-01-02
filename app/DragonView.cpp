@@ -1,6 +1,7 @@
 #include "Visualization/Visualizer.h"
 #include "Geometry/TriangleMesh/Processing/Smoothing.h"
 #include "Geometry/TriangleMesh/Processing/Curvature.h"
+#include "Geometry/TriangleMesh/Processing/Decimation.h"
 #include "Tool/ColorMapping.h"
 #include "Geometry/TriangleMesh/Processing/MeshParameterization.h"
 using namespace dragon;
@@ -11,8 +12,9 @@ static bool use_uniform_para = true;
 static geometry::TriangleMesh object;
 static std::string filename;
 static bool wireframe_mode = false;
-static double simplify_rate = 0.1f;
-static double voxel_len = 0.01f;
+static float simplify_rate = 0.1f;
+static float voxel_len = 0.01f;
+static char voxel_len_s[100] = "0.01";
 bool updated = false;
 bool reorient = false;
 visualization::Visualizer visualizer(1000, 750);
@@ -143,17 +145,24 @@ void RenderGuiComponents()
             reorient = true;
             updated = true;
         }
+        ImGui::SliderFloat("Percentage", &simplify_rate, 0.01f, 1.0f);
         if(ImGui::Button("Quadric Simplification"))
         {
-            auto result = object.QuadricSimplify(simplify_rate * object.triangles.size());
+            // auto result = object.QuadricSimplify(object.triangles.size() - 1);
+            auto result = geometry::mesh::QuadricDecimation(object,  simplify_rate * object.triangles.size());
             object = *result;
             if(!object.HasNormals())
             object.ComputeNormals();
             updated = true;
         }
+        if(ImGui::InputText("Grid Unit", voxel_len_s, 100))
+        {
+            // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
+            voxel_len = std::atof(voxel_len_s);
+        }
         if(ImGui::Button("Clustering Simplification"))
         {
-            auto result = object.QuadricSimplify(voxel_len);
+            auto result = object.ClusteringSimplify(voxel_len);
             object = *result;
             if(!object.HasNormals())
             object.ComputeNormals();
@@ -176,6 +185,7 @@ void RenderGuiComponents()
             std::cout << "save to ByDragon.ply."<<std::endl;
         }        
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("triangle: %d vertices: %d", (int)object.triangles.size(), (int)object.points.size());
         ImGui::ColorEdit3("Background color", visualizer.clear_color.data());
         ImGui::End();
     }
@@ -199,7 +209,6 @@ int main(int argc, char* argv[])
     //visualizer.SetDrawColor(true);
     visualizer.AddTriangleMesh(object);
     visualizer.Initialize();
-    glDisable(GL_DEPTH_TEST);
     visualizer.draw_color = true;
     visualization::window::RegisterMouseAndKeyboard();
     visualizer.dynamic_first_view = false;

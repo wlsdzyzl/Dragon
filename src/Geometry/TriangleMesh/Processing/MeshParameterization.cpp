@@ -20,6 +20,8 @@ namespace mesh
             }
         }
         // find the start edge
+        if(start_edge == nullptr)
+            return;
         ordered_vid.clear();
         HEEdge *current_edge = start_edge;
         while(true)
@@ -47,7 +49,11 @@ namespace mesh
         std::vector<int> ordered_vid;
        
         GetOrderedBorder(he, ordered_vid);
-        
+        if(ordered_vid.size() < 3)
+        {
+            std::cout<<YELLOW<<"[WARNING]::[Parameterization]::The number of border points is less than 3."<<RESET<<std::endl;
+            return std::make_shared<TriangleMesh>(mesh);
+        }
         geometry::Point3List ordered_border;
         //parameterize the border
         ordered_vid.push_back(ordered_vid[0]);
@@ -91,7 +97,11 @@ namespace mesh
         std::vector<int> ordered_vid;
        
         GetOrderedBorder(he, ordered_vid);
-        
+        if(ordered_vid.size() < 3)
+        {
+            std::cout<<YELLOW<<"[WARNING]::[Parameterization]::The number of border points is less than 3."<<RESET<<std::endl;
+            return std::make_shared<TriangleMesh>(mesh);
+        }        
         geometry::Point3List ordered_border;
         //parameterize the border
         ordered_vid.push_back(ordered_vid[0]);

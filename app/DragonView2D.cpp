@@ -55,7 +55,7 @@ void RenderGuiComponents()
             pressed_points.clear();
             visualizer.Reset();
             visualizer.points_group.resize(1);
-#if 1
+#if 0
             for(int i = 0; i != points_num; ++i)
             {
                 pressed_points.push_back(geometry::Point2(uni_real(rd), uni_real(rd)));
@@ -90,7 +90,7 @@ void RenderGuiComponents()
             for(size_t i = 0; i != pressed_points.size(); ++i)
             {
                 points.push_back(visualizer.RealCoordinate(pressed_points[i]));
-                std::cout<<i<<" "<<points.back().transpose()<<std::endl;
+                // std::cout<<i<<" "<<points.back().transpose()<<std::endl;
             }
             vor.FromPoints(points);
             vor.GenerateDiagram();
@@ -170,6 +170,7 @@ int main()
 
 
     visualizer.Initialize();
+    //glDisable(GL_DEPTH_TEST);
     bb.x_min = visualizer.x_range(0) * 0.99;
     bb.x_max = visualizer.x_range(1) * 0.99;
     bb.y_min = visualizer.y_range(0) * 0.99;

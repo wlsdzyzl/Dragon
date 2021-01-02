@@ -77,6 +77,7 @@ namespace geometry
             edges.clear();
             faces.clear();
         }
+        void UpdateHalfEdge();
         void FromTriangleMesh(const TriangleMesh &mesh);
         void ToTriangleMesh(TriangleMesh &mesh);
         void CheckBorder();

@@ -94,8 +94,10 @@ namespace mesh
             {
                 if(is_border[i])
                 continue;
+
                 auto start_edge = vertices[i]->inc_edge;
                 auto current_edge = start_edge->twin_edge->next_edge;
+
                 double sum_weight = 0.0;
                 geometry::Vector3 update_vector = geometry::Vector3::Zero();
                 sum_weight += start_edge->weight;

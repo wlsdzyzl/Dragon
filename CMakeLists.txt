@@ -10,10 +10,11 @@ find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenCV REQUIRED)
 
-include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${GLUT_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIRS})
-
+if(OpenCV_FOUND)
+include_directories(${OPENCV_INCLUDE_DIRS})
+endif()
 
 include_directories(3rdparty/Eigen)
 include_directories(3rdparty/tinyply/source)
@@ -75,14 +76,6 @@ set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -O0 -g -Wall -fopenmp -Wno-maybe-uninit
 # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -DUSING_FLOAT64") 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_executable(ReadMesh "app/ReadPLYMesh.cpp")
-# for test
-# add_executable(GenerateMinimalSurface "app/GenerateMinimalSurface.cpp")
-add_executable(MeanCurvature "app/MeanCurvature.cpp")
-# add_executable(GaussCurvature "app/GaussCurvature.cpp")
-add_executable(DragonView3D "app/DragonView.cpp")
-add_executable(DragonView2D "app/DragonView2D.cpp")
-add_executable(SpiderMan "app/SpiderMan.cpp")
 set(THIRD_LIB 
     tinyply 
     objloader
@@ -93,6 +86,25 @@ set(THIRD_LIB
     ${GLEW_LIBRARIES} 
     ${OPENGL_LIBRARIES} 
 )
+
+add_executable(ReadMesh "app/ReadPLYMesh.cpp")
+# for test
+# add_executable(GenerateMinimalSurface "app/GenerateMinimalSurface.cpp")
+add_executable(MeanCurvature "app/MeanCurvature.cpp")
+# add_executable(GaussCurvature "app/GaussCurvature.cpp")
+add_executable(DragonView3D "app/DragonView.cpp")
+add_executable(DragonView2D "app/DragonView2D.cpp")
+add_executable(SpiderMan "app/SpiderMan.cpp")
+
+if(OpenCV_FOUND)
+add_executable(ImageToMesh "app/ImageToMesh.cpp")
+target_link_libraries(ImageToMesh
+    dragon
+    ${THIRD_LIB}
+    ${OpenCV_LIBS}
+)
+endif()
+
 
 target_link_libraries(ReadMesh
     dragon
