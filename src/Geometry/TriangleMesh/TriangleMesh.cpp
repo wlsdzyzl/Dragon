@@ -3,13 +3,12 @@
 #include "IO/OBJManager.h"
 #include <iostream>
 #include <fstream>
-#include "./Processing/Simplification.h"
 #include "Tool/CppExtension.h"
 namespace dragon
 {
 namespace geometry
 {
-    
+    typedef std::vector<std::pair<int, int>> Reference;//For each vertex, reference is used to find contained triangles
     bool TriangleMesh::LoadFromPLY(const std::string &filename)
     {
         Reset();
@@ -45,32 +44,6 @@ namespace geometry
         if(HasNormals())
         TransformNormals(T,normals);
     }
-    std::shared_ptr<TriangleMesh> TriangleMesh::QuadricSimplify(size_t target_num) const
-    {
-        TriangleMesh s_mesh = *this;
-        mesh::QuadricSimplification(s_mesh,target_num);
-        return std::make_shared<TriangleMesh>(s_mesh);
-    }
-    std::shared_ptr<TriangleMesh> TriangleMesh::ClusteringSimplify(float grid_len) const
-    {
-        TriangleMesh s_mesh = *this;
-        mesh::ClusteringSimplification(s_mesh,grid_len);
-        return std::make_shared<TriangleMesh>(s_mesh);
-    }
-    std::shared_ptr<TriangleMesh> TriangleMesh::Prune(size_t min_points) const
-    {
-        TriangleMesh s_mesh = *this;
-        mesh::MeshPruning(s_mesh,min_points);
-        return std::make_shared<TriangleMesh>(s_mesh);
-    }
-    // std::shared_ptr<PointCloud> TriangleMesh::GetPointCloud() const
-    // {
-    //     PointCloud pcd;
-    //     pcd.normals = normals;
-    //     pcd.points = points;
-    //     pcd.colors = colors;
-    //     return std::make_shared<PointCloud>(pcd);
-    // }
     void TriangleMesh::LoadFromMeshes(const std::vector<TriangleMesh > &meshes)
     {
         Reset();
@@ -93,11 +66,22 @@ namespace geometry
             start_index += meshes[i].points.size();
         }
     }
+    void UpdateReferences(const geometry::Point3uiList &triangles, std::vector<Reference> &references)
+    {
+        for(size_t i=0; i<references.size();++i)
+        references[i].clear();
+        for(size_t i = 0;i!=triangles.size(); ++i)
+        {
+            references[triangles[i](0)].push_back(std::make_pair(i, 0)); 
+            references[triangles[i](1)].push_back(std::make_pair(i, 1));
+            references[triangles[i](2)].push_back(std::make_pair(i, 2));
+        }
+    }
     void TriangleMesh::ComputeNormals()
     {
-        std::vector<mesh::Reference> references;
+        std::vector<Reference> references;
         references.resize(points.size());
-        mesh::UpdateReferences(triangles,references);
+        UpdateReferences(triangles,references);
         normals.resize(points.size());
         Point3List triangle_normals;
         triangle_normals.resize(triangles.size());

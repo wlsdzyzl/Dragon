@@ -35,7 +35,6 @@ namespace geometry
         }
         std::shared_ptr<TriangleMesh> QuadricSimplify(size_t target_num) const;
         std::shared_ptr<TriangleMesh> ClusteringSimplify(float grid_len) const;
-        std::shared_ptr<TriangleMesh> Prune(size_t min_points) const;
         // std::shared_ptr<PointCloud> GetPointCloud() const;
         size_t GetPointSize() const{return points.size();}
         size_t GetTriangleSize() const{return triangles.size();}

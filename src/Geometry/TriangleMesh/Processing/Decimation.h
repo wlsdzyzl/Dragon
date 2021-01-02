@@ -3,6 +3,7 @@
 #include "Geometry/Structure/HalfEdge.h"
 #include "Geometry/TriangleMesh/TriangleMesh.h"
 #include <queue>
+#include <unordered_map>
 namespace dragon
 {
 namespace geometry
@@ -40,7 +41,8 @@ namespace mesh
         bool Flipped(HEVertex *v1, HEVertex *v2);
         void DeleteFace(HEFace *f);
         void DeleteEdge(HEEdge *e);
-        void Config();
+        void QuadricConfig();
+        void ClusteringConfig();
         void DirtyFace(HEFace *f);
         void DeleteDegeneratedFace();
         // void UpdateHalfEdge();
@@ -48,6 +50,8 @@ namespace mesh
         inline bool IsValid(HEEdge * e){return e && e->id != -1;}
         inline bool IsValid(HEFace * f){return f && f->id != -1;}
         inline bool IsValid(HEVertex *v){return v && he.vertices[v->id] == v;}
+
+        
         protected:
         std::tuple<Point3, double> ComputeEdgeError(int eid);
         Mat4List q_mat;
@@ -58,6 +62,7 @@ namespace mesh
         std::vector<bool> dirty;
         std::vector<int> updated;
         std::vector<std::vector<HEFace *>> vertex_to_faces;
+        std::vector<size_t> clustered_vertex_num;
         // new position of an contracted edge.
         Point3List new_pos;
         // if a vertex's id is -1, it's deleted.
@@ -65,8 +70,10 @@ namespace mesh
         Vec4List planes;
         // based on the error.
         std::priority_queue<HEEdgeWithNewPos , std::vector<HEEdgeWithNewPos >, GreaterHEEdge> edge_queue;
+        std::unordered_map<Point3i, HEVertex *, geometry::VoxelGridHasher > grid_map;
     };
     std::shared_ptr<TriangleMesh> QuadricDecimation(const TriangleMesh &mesh, size_t target_num);
+    std::shared_ptr<TriangleMesh> ClusteringDecimation(const TriangleMesh &mesh, double voxel_len);
 }
 }
 }

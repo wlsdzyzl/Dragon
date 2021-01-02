@@ -44,7 +44,7 @@ namespace mesh
         }        
         return std::make_tuple(np, e);
     }
-    void Decimator::Config()
+    void Decimator::QuadricConfig()
     {
         he.CheckBorder();
         auto &vertices = he.vertices;
@@ -115,11 +115,31 @@ namespace mesh
             edge_queue.push(HEEdgeWithNewPos(edges[i], new_p));
         }
     }
+    void Decimator::ClusteringConfig()
+    {
+        auto &vertices = he.vertices;
+        auto &faces = he.faces;
+        vertex_to_faces.clear();
+        vertex_to_faces.resize(vertices.size(), std::vector<HEFace *>());
+        clustered_vertex_num.clear();
+        clustered_vertex_num.resize(vertices.size(), 0);
+        for(size_t i = 0; i != faces.size(); ++i)
+        {
+            if(IsValid(faces[i]))
+            {   
+                int vid1 = faces[i]->inc_edge->ori_vertex->id;
+                int vid2 = faces[i]->inc_edge->des_vertex->id;
+                int vid3 = faces[i]->inc_edge->next_edge->des_vertex->id;
+                vertex_to_faces[vid1].push_back(faces[i]);
+                vertex_to_faces[vid2].push_back(faces[i]);
+                vertex_to_faces[vid3].push_back(faces[i]);
+            }
+        }
+    }
     void Decimator::LoadTriangleMesh(const TriangleMesh &mesh)
     {
         he.Reset();
         he.FromTriangleMesh(mesh);
-        Config();
     }
     bool Decimator::Flipped(HEVertex *v, const Point3 &np, HEFace *f1, HEFace *f2)
     {
@@ -290,7 +310,7 @@ namespace mesh
             int v3 = faces[i]->inc_edge->next_edge->des_vertex->id;
             if(v1 == v2 || v1 == v3 || v2 == v3)
             {
-                std::cout<<"degenerated face"<<RESET<<std::endl; 
+                // std::cout<<"degenerated face"<<RESET<<std::endl; 
                 DeleteFace(faces[i]);
             }
         }
@@ -332,10 +352,10 @@ namespace mesh
             }
             // std::cout<<"update halfedge"<<std::endl;
             // DeleteDegeneratedFace();
-            he.UpdateHalfEdge();
+            he.Update();
             if(current_triangle_num <= target_num) break;
             // std::cout<<iter<<" "<<current_triangle_num <<" "<<target_num <<std::endl;
-            Config();
+            QuadricConfig();
             // break;
         }
         // he.CheckBorder();
@@ -348,15 +368,44 @@ namespace mesh
         he.ToTriangleMesh(mesh);
         return std::make_shared<TriangleMesh>(mesh);
     }
+    Point3i GetGridIndex(const geometry::Point3 &points, double grid_len)
+    {
+        return Point3i(std::floor(points(0)/grid_len), std::floor(points(1)/grid_len),std::floor(points(2)/grid_len));
+    }    
     std::shared_ptr<TriangleMesh> Decimator::Cluster(double grid_len)
     {
-        
-        return std::make_shared<TriangleMesh>();
+        auto &vertices = he.vertices;
+        // auto &faces = he.faces;        
+        for(size_t i = 0; i != vertices.size(); ++i)
+        {
+            Point3i voxel_id = GetGridIndex(vertices[i]->coor, grid_len);
+            if(grid_map.find(voxel_id) == grid_map.end())
+            {
+                grid_map[voxel_id] = vertices[i];
+            }
+            else
+            {
+                grid_map[voxel_id]->coor += vertices[i]->coor;
+                vertices[i]->id = grid_map[voxel_id]->id;   
+            }
+            clustered_vertex_num[grid_map[voxel_id]->id] ++;
+        }
+        for(auto iter = grid_map.begin(); iter != grid_map.end(); ++iter)
+        {
+            iter->second->coor = iter->second->coor / clustered_vertex_num[iter->second->id];
+        }
+        he.Update();
+        DeleteDegeneratedFace();
+        he.Update();
+        TriangleMesh mesh; 
+        he.ToTriangleMesh(mesh);
+        return std::make_shared<TriangleMesh>(mesh);
     }
     std::shared_ptr<TriangleMesh> QuadricDecimation(const TriangleMesh &mesh, size_t target_num)
     {
         Decimator decimator;
         decimator.LoadTriangleMesh(mesh);
+        decimator.QuadricConfig();
         auto res = decimator.Collapse(target_num);
         std::cout<<GREEN<<"Finish decimation, "<<mesh.triangles.size() - res->triangles.size()<<" triangles are decimated."<<RESET<<std::endl;
         return res;
@@ -365,6 +414,7 @@ namespace mesh
     {
         Decimator decimator;
         decimator.LoadTriangleMesh(mesh);
+        decimator.ClusteringConfig();
         auto res = decimator.Cluster(voxel_len);
         std::cout<<GREEN<<"Finish decimation, "<<mesh.triangles.size() - res->triangles.size()<<" triangles are decimated."<<RESET<<std::endl;
         return res;        

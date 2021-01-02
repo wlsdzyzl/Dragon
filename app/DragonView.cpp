@@ -162,7 +162,8 @@ void RenderGuiComponents()
         }
         if(ImGui::Button("Clustering Simplification"))
         {
-            auto result = object.ClusteringSimplify(voxel_len);
+            // auto result = object.ClusteringSimplify(voxel_len);
+            auto result = geometry::mesh::ClusteringDecimation(object,  voxel_len);
             object = *result;
             if(!object.HasNormals())
             object.ComputeNormals();

@@ -124,9 +124,9 @@ namespace geometry
             edge1->parent_face = new_face; 
             edge2->parent_face = new_face;
         }
-        UpdateHalfEdge();
+        Update();
     }
-    void HalfEdge::UpdateHalfEdge()
+    void HalfEdge::Update()
     {
         // compact halfedge, update the vertex_to_face table
         // to do!
@@ -208,15 +208,7 @@ namespace geometry
                 ptr++;
             }
         }    
-        faces.resize(ptr);
-        for(size_t i = 0; i != edges.size(); ++i)
-        {
-
-            if(edges[i]->ori_vertex!= vertices[edges[i]->ori_vertex->id])
-            exit(0);
-            if(edges[i]->des_vertex != vertices[edges[i]->des_vertex->id])
-            exit(0);
-        }    
+        faces.resize(ptr);  
         // std::cout<<"All clear"<<RESET<<std::endl;
     }
     void HalfEdge::ToTriangleMesh(TriangleMesh &mesh)
