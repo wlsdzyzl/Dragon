@@ -107,7 +107,7 @@ namespace mesh
                 if(current_edge == start_edge) break;
 
             }
-            mean_curvatures.push_back( (mean_curvature_vector / sum_area / 4).norm());
+            mean_curvatures.push_back( (mean_curvature_vector / sum_area / 2).norm());
         }
     }
     void ComputeGaussCurvature(HalfEdge &he, geometry::ScalarList &gauss_curvatures)
