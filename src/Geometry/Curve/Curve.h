@@ -189,7 +189,7 @@ namespace curve
         }        
         return res;
     }
-        // through subdivision to get uniform cubic b spline 
+    // through subdivision to get uniform cubic b spline 
     template<int T>
         geometry::PointList<T> BSpline(const geometry::PointList<T> &control_points, int n = 1000)
     {

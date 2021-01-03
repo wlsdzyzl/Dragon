@@ -55,7 +55,7 @@ void RenderGuiComponents()
             pressed_points.clear();
             visualizer.Reset();
             visualizer.points_group.resize(1);
-#if 0
+#if 1
             for(int i = 0; i != points_num; ++i)
             {
                 pressed_points.push_back(geometry::Point2(uni_real(rd), uni_real(rd)));

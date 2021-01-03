@@ -29,7 +29,6 @@ void RenderGuiComponents()
         ImGui::Checkbox("Wireframe", &wireframe_mode); 
         ImGui::SameLine();
         ImGui::Checkbox("NormalMapping", &visualizer.draw_normal);
-        ImGui::SameLine();
         ImGui::Checkbox("ColorMapping", &visualizer.draw_color);
         ImGui::SameLine();
         ImGui::Checkbox("PhongShading", &visualizer.draw_phong_shading); 
