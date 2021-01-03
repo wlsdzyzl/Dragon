@@ -8,13 +8,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(OpenCV REQUIRED)
 
 include_directories(${GLUT_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIRS})
-if(OpenCV_FOUND)
-include_directories(${OPENCV_INCLUDE_DIRS})
-endif()
 
 include_directories(3rdparty/Eigen)
 include_directories(3rdparty/tinyply/source)
@@ -99,15 +95,6 @@ add_executable(MeanCurvature "app/MeanCurvature.cpp")
 add_executable(DragonView3D "app/DragonView.cpp")
 add_executable(DragonView2D "app/DragonView2D.cpp")
 add_executable(SpiderMan "app/SpiderMan.cpp")
-
-if(OpenCV_FOUND)
-add_executable(ImageToMesh "app/ImageToMesh.cpp")
-target_link_libraries(ImageToMesh
-    dragon
-    ${THIRD_LIB}
-    ${OpenCV_LIBS}
-)
-endif()
 
 
 target_link_libraries(ReadMesh
