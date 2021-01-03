@@ -34,6 +34,11 @@ file(GLOB_RECURSE Geometry_SRC
 "src/Geometry/*.hpp"
 )
 
+file(GLOB Reconstruction_SRC
+"src/Reconstruction/*.cpp"
+"src/Reconstruction/*.h"
+)
+
 file(GLOB_RECURSE Visualization_SRC
 "src/Visualization/Shaders/*.h"
 "src/Visualization/*.cpp"
@@ -65,7 +70,7 @@ add_library(objloader SHARED ${Objloader_SRC})
 
 
 
-add_library(dragon SHARED ${Geometry_SRC}  
+add_library(dragon SHARED ${Geometry_SRC}  ${Reconstruction_SRC}
     ${Visualization_SRC}  ${IO_SRC} ${Tool_SRC})
 
 
@@ -81,7 +86,6 @@ set(THIRD_LIB
     objloader
     imgui
     glfw
-    ${OpenCV_LIBS} 
     ${GLUT_LIBRARIES}  
     ${GLEW_LIBRARIES} 
     ${OPENGL_LIBRARIES} 
