@@ -292,15 +292,15 @@ namespace geometry
             if(edges[i]->id != -1)
             {
                 
-                if(edges[i]->parent_face == nullptr)
+                if(edges[i]->parent_face == nullptr && edges[i]->pre_edge != nullptr)
                 {
                     edges[i]->parent_face = edges[i]->pre_edge->parent_face;
                 }
-                if(edges[i]->parent_face == nullptr)
+                if(edges[i]->parent_face == nullptr && edges[i]->next_edge != nullptr)
                 {
                     edges[i]->parent_face = edges[i]->next_edge->parent_face;
                 }
-                if(edges[i]->parent_face->inc_edge->id == -1)
+                if(edges[i]->parent_face != nullptr && edges[i]->parent_face->inc_edge->id == -1)
                 edges[i]->parent_face->inc_edge = edges[i];
             }
         }

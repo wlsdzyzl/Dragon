@@ -182,6 +182,7 @@ namespace geometry
                     HEEdge *edge0 = he.edges.back();
                     edge0->id = he.edges.size()-1;
                     edge_to_decisive_point.push_back(Point2i(top->id, tmp_arc->id));
+                    
 
                     decisive_point_to_edge[Point2i(tmp_arc->id, top->id)] = he.edges.size();
                     he.edges.push_back(new HEEdge());
@@ -191,6 +192,13 @@ namespace geometry
                     // std::cout<<&edge1<<" "<<&he.edges.back()<<std::endl;
                     edge1->twin_edge = edge0;
                     edge0->twin_edge = edge1;
+
+                    edge0->parent_face = he.faces[top->id];
+                    edge1->parent_face = he.faces[tmp_arc->id];
+
+                    if(he.faces[top->id]->inc_edge == nullptr) he.faces[top->id]->inc_edge = edge0;
+                    if(he.faces[tmp_arc->id]->inc_edge == nullptr) he.faces[tmp_arc->id]->inc_edge = edge1;
+                    
                 }
                 else 
                 {
@@ -237,7 +245,12 @@ namespace geometry
                             // std::cout<<&edge1<<" "<<&he.edges.back()<<std::endl;
                             edge1->twin_edge = edge0;
                             edge0->twin_edge = edge1;
-                            
+
+                            edge0->parent_face = he.faces[top->id];
+                            edge1->parent_face = he.faces[tmp_arc->id];
+
+                            if(he.faces[top->id]->inc_edge == nullptr) he.faces[top->id]->inc_edge = edge0;
+                            if(he.faces[tmp_arc->id]->inc_edge == nullptr) he.faces[tmp_arc->id]->inc_edge = edge1;                            
                             // PrintArc();
                             CheckCircleEvent(narc, np(0));
                             CheckCircleEvent(tmp_arc, np(0));
@@ -278,8 +291,8 @@ namespace geometry
                 //connect the edge to the vertex. 
                 edge_id_0 = decisive_point_to_edge[Point2i(arc->pre_ptr->id, arc->id)];
                 edge_id_1 = decisive_point_to_edge[Point2i(arc->id, arc->next_ptr->id)];
-                if(he.edges[edge_id_0]->ori_vertex != nullptr) edge_id_0 = decisive_point_to_edge[Point2i(arc->id, arc->pre_ptr->id)];
-                if(he.edges[edge_id_1]->ori_vertex != nullptr) edge_id_1 = decisive_point_to_edge[Point2i(arc->next_ptr->id, arc->id)];
+                // if(he.edges[edge_id_0]->ori_vertex != nullptr) edge_id_0 = decisive_point_to_edge[Point2i(arc->id, arc->pre_ptr->id)];
+                // if(he.edges[edge_id_1]->ori_vertex != nullptr) edge_id_1 = decisive_point_to_edge[Point2i(arc->next_ptr->id, arc->id)];
                 he.vertices.push_back(new HEVertex());
                 HEVertex *hev_ptr = he.vertices.back();
                 hev_ptr->id = he.vertices.size() - 1;
@@ -299,17 +312,17 @@ namespace geometry
 
 
                 // add new edge
-                decisive_point_to_edge[Point2i(arc->pre_ptr->id, arc->next_ptr->id)] = he.edges.size();
+                decisive_point_to_edge[Point2i(arc->next_ptr->id, arc->pre_ptr->id)] = he.edges.size();
                 he.edges.push_back(new HEEdge());
                 HEEdge *nedge0 = he.edges.back();
                 nedge0->id = he.edges.size()-1;
-                edge_to_decisive_point.push_back(Point2i(arc->pre_ptr->id, arc->next_ptr->id));
+                edge_to_decisive_point.push_back(Point2i(arc->next_ptr->id, arc->pre_ptr->id));
 
-                decisive_point_to_edge[Point2i(arc->next_ptr->id, arc->pre_ptr->id)] = he.edges.size();
+                decisive_point_to_edge[Point2i(arc->pre_ptr->id, arc->next_ptr->id)] = he.edges.size();
                 he.edges.push_back(new HEEdge());
                 HEEdge *nedge1 = he.edges.back();
                 nedge1->id = he.edges.size()-1;
-                edge_to_decisive_point.push_back(Point2i(arc->next_ptr->id, arc->pre_ptr->id));
+                edge_to_decisive_point.push_back(Point2i(arc->pre_ptr->id, arc->next_ptr->id));
 
                 nedge0->ori_vertex = hev_ptr;
                 nedge1->des_vertex = hev_ptr;
@@ -329,39 +342,16 @@ namespace geometry
 
                 // face
                 nedge1->parent_face = he.faces[arc->pre_ptr->id];
-                he.edges[edge_id_0]->parent_face= he.faces[arc->pre_ptr->id];
+                // he.edges[edge_id_0]->parent_face= he.faces[arc->pre_ptr->id];
                 if(he.faces[arc->pre_ptr->id]->inc_edge == nullptr) he.faces[arc->pre_ptr->id]->inc_edge = nedge1;
 
                 nedge0->parent_face = he.faces[arc->next_ptr->id];
-                he.edges[edge_id_1]->twin_edge->parent_face = he.faces[arc->next_ptr->id];
+                // he.edges[edge_id_1]->twin_edge->parent_face = he.faces[arc->next_ptr->id];
                 if(he.faces[arc->next_ptr->id]->inc_edge == nullptr) he.faces[arc->next_ptr->id]->inc_edge = nedge0;
 
-                he.edges[edge_id_0]->twin_edge->parent_face = he.faces[arc->id];
-                he.edges[edge_id_1]->parent_face = he.faces[arc->id];                
-                if(he.faces[arc->id]->inc_edge == nullptr) he.faces[arc->id]->inc_edge = he.edges[edge_id_1];                
-
-                // // counter clock wise
-                // nedge1->next_edge = he.edges[edge_id_1];
-                // he.edges[edge_id_1]->pre_edge = nedge1;
-
-                // nedge0->pre_edge = he.edges[edge_id_0]->twin_edge;
-                // he.edges[edge_id_0]->twin_edge->next_edge = nedge0;
-
-                // he.edges[edge_id_1]->twin_edge->next_edge = he.edges[edge_id_0];
-                // he.edges[edge_id_0]->pre_edge = he.edges[edge_id_1]->twin_edge;
-
-                // // face
-                // nedge1->parent_face = he.faces[arc->next_ptr->id];
-                // he.edges[edge_id_1]->parent_face= he.faces[arc->next_ptr->id];
-                // if(he.faces[arc->next_ptr->id]->inc_edge == nullptr) he.faces[arc->next_ptr->id]->inc_edge = nedge1;
-
-                // nedge0->parent_face = he.faces[arc->pre_ptr->id];
-                // he.edges[edge_id_0]->twin_edge->parent_face = he.faces[arc->pre_ptr->id];
-                // if(he.faces[arc->pre_ptr->id]->inc_edge == nullptr) he.faces[arc->pre_ptr->id]->inc_edge = nedge0;
-
-                // he.edges[edge_id_1]->twin_edge->parent_face = he.faces[arc->id];
-                // he.edges[edge_id_0]->parent_face = he.faces[arc->id];                
-                // if(he.faces[arc->id]->inc_edge == nullptr) he.faces[arc->id]->inc_edge = he.edges[edge_id_0];
+                // he.edges[edge_id_0]->twin_edge->parent_face = he.faces[arc->id];
+                // he.edges[edge_id_1]->parent_face = he.faces[arc->id];                
+                // if(he.faces[arc->id]->inc_edge == nullptr) he.faces[arc->id]->inc_edge = he.edges[edge_id_1];                
             }
             else
             {
@@ -442,108 +432,6 @@ namespace geometry
         }
         std::cout << std::endl;
     }
-    // void Voronoi2D::BBTruncation()
-    // {
-    //     // this file is to use boundingbox to truncate the edges, which has a nullptr vertex
-    //     // auto &faces = he.faces;
-    //     auto &edges = he.edges;
-    //     auto &vertices = he.vertices;
-    //     for(size_t i = 0; i != site_points.size(); ++i)
-    //     {
-    //         bb.AddPoint(Point3(site_points[i](0), site_points[i](1), 0.0));
-    //     }
-    //     for(size_t i = 0; i != vertices.size(); ++i)
-    //     {
-    //         bb.AddPoint(Point3(vertices[i]->coor(0), vertices[i]->coor(1), 0.0));
-    //     }
-    //     bb.x_max += margin;
-    //     bb.x_min -= margin;
-    //     bb.y_max += margin;
-    //     bb.y_min -= margin;
-    //     Point2 left_top(bb.x_min, bb.y_max), left_bottom(bb.x_min, bb.y_min);
-    //     Point2 right_bottom(bb.x_max, bb.y_min), right_top(bb.x_max, bb.y_max);
-    //     LineSegment left(left_top, left_bottom), right(right_top, right_bottom);
-    //     LineSegment up(left_top, right_top), down(left_bottom, right_bottom);
-    //     for(size_t i = 0; i != edges.size(); ++i)
-    //     {
-    //         if(edges[i]->ori_vertex && edges[i]->des_vertex) continue;
-    //         if(!edges[i]->ori_vertex && !edges[i]->des_vertex)
-    //         {
-    //             std::cout<<YELLOW<<"[WARNING]::[BBTruncation]::Edge with two nullptr vertices is abnormal."<<RESET<<std::endl;
-    //             continue;
-    //             //exit(0);
-    //         }
-    //         int face_id = edges[i]->parent_face->id;
-    //         if(face_id != -1)
-    //         {
-    //             auto site_point =  site_points[face_id];
-    //             Line vb = VerticalBisector(site_points [ edge_to_decisive_point[i](0)], site_points[edge_to_decisive_point[i](1)]);
-    //             // compute the intersection of BB
-                
-    //             Point2List inter_points;
-    //             if(IsIntersecting(vb, left))
-    //             {
-    //                 inter_points.push_back(LineSegIntersect(vb, left));
-    //             }
-    //             if(IsIntersecting(vb, right))
-    //             {
-    //                 inter_points.push_back(LineSegIntersect(vb, right));
-    //             }
-    //             if(IsIntersecting(vb, up))
-    //             {
-    //                 inter_points.push_back(LineSegIntersect(vb, up));
-    //             }
-    //             if(IsIntersecting(vb, down))
-    //             {
-    //                 inter_points.push_back(LineSegIntersect(vb, down));
-    //             }
-    //             if(edges[i]->ori_vertex)
-    //             {
-
-    //                 auto ori_point = edges[i]->ori_vertex->coor;
-    //                 // std::cout<<site_points [ edge_to_decisive_point[i](0)].transpose()<<std::endl;
-    //                 // std::cout<<site_points [ edge_to_decisive_point[i](1)].transpose()<<std::endl;
-    //                 // std::cout<<ori_point.transpose()<<std::endl;
-    //                 // std::cout<<vb.n.transpose()<<std::endl;
-    //                 // std::cout<<"---"<<std::endl;
-    //                 for(size_t j = 0; j != inter_points.size(); ++j)
-    //                 {
-    //                     if(CheckPointToLine(ori_point, inter_points[j], site_point) > 0)
-    //                     {
-    //                         vertices.push_back(new HEVertex(inter_points[j]));
-    //                         vertices.back()->id = vertices.size() - 1;
-    //                         edges[i]->des_vertex = vertices.back() ;
-    //                         edges[i]->twin_edge->ori_vertex = vertices.back();
-    //                         break;
-    //                     }
-    //                 }
-    //                 if(edges[i]->des_vertex == nullptr) std::cout<<"Not assign a vertex."<<std::endl;
-    //             }
-    //             else
-    //             {
-    //                 auto des_point = edges[i]->des_vertex->coor;
-    //                 for(size_t j = 0; j != inter_points.size(); ++j)
-    //                 {
-    //                     if(CheckPointToLine(inter_points[j], des_point, site_point) > 0)
-    //                     {
-    //                         vertices.push_back(new HEVertex(inter_points[j]));
-    //                         vertices.back()->id = vertices.size() - 1;
-    //                         edges[i]->ori_vertex = vertices.back();
-    //                         edges[i]->twin_edge->des_vertex = vertices.back();
-    //                         break;
-    //                     }
-    //                 }
-    //                 if(edges[i]->ori_vertex == nullptr) std::cout<<"Not assign a vertex."<<std::endl;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             std::cout<<RED<<"[ERROR]::[BBTruncation]::Face id is -1."<<RESET<<std::endl;
-    //             continue;
-    //         }
-    //     }
-    // }
-
     // edge a split edge b, intersection v
     HEEdge * EdgeSplitEdge(HEEdge *b, HEEdge * a, HEVertex * v, bool ori)
     {
@@ -659,13 +547,13 @@ namespace geometry
                 continue;                
             }
             Point2 site_point = site_points[fid];
-            if(!edges[i]->ori_vertex && !edges[i]->des_vertex )
-            {
-                std::cout<<YELLOW<<"[WARNING]::[BBTruncation]::Edge with two nullptr vertices is abnormal."<<RESET<<std::endl;
-                continue;
-                //exit(0);
-            }
-            else if(edges[i]->ori_vertex && edges[i]->des_vertex)
+            // if(!edges[i]->ori_vertex && !edges[i]->des_vertex )
+            // {
+            //     std::cout<<YELLOW<<"[WARNING]::[BBTruncation]::Edge with two nullptr vertices is abnormal."<<RESET<<std::endl;
+            //     continue;
+            //     //exit(0);
+            // }
+            if(edges[i]->ori_vertex && edges[i]->des_vertex)
             {
                 LineSegment edge_seg(edges[i]->ori_vertex->coor, edges[i]->des_vertex->coor);
                 bool ori_inside = bb.IsInside(edges[i]->ori_vertex->coor);
@@ -838,10 +726,11 @@ namespace geometry
                 }
                 else if(inter_points.size() == 2)
                 {
-
+                    size_t inter_pid = 0;    
+                    bool finished = false;
                     if(edges[i]->ori_vertex) 
                     {
-                        size_t inter_pid = 0;
+                        
                         for(; inter_pid != inter_points.size(); ++inter_pid)
                         {
                             if(CheckPointToLine(edges[i]->ori_vertex->coor, inter_points[inter_pid].first, site_point) < 0)
@@ -849,49 +738,7 @@ namespace geometry
                                 break;
                             }
                         }
-                        if(!bb.IsInside(edges[i]->ori_vertex->coor))
-                        {
-                            edges[i]->ori_vertex->id = -1;
-                            // no intersection with border.
-                            if(inter_pid == inter_points.size())
-                            {
-                                edges[i]->id = -1;
-                                edges[i]->twin_edge->id = -1;             
-                                continue;                
-                            }
-                            else
-                            {
-                                
-                                if(CheckPointToLine(inter_points[0].first, inter_points[1].first, site_point) < 0)
-                                {
-                                    HEVertex *v0 = new HEVertex (inter_points[0].first);
-                                    HEVertex *v1 = new HEVertex (inter_points[1].first);
-                                    int eid0 = inter_points[0].second;
-                                    int eid1 = inter_points[1].second;
-                                    HEEdge *e0 = EdgeSplitEdge(edges[eid0], edges[i], v0, true);
-                                    HEEdge *e1 = EdgeSplitEdge(edges[eid1], edges[i], v1, false);
-                                    e0->id = edges.size();
-                                    edges.push_back(e0);
-                                    e1->id = edges.size();
-                                    edges.push_back(e1);  
-                                }
-                                else
-                                {
-                                    HEVertex *v0 = new HEVertex (inter_points[1].first);
-                                    HEVertex *v1 = new HEVertex (inter_points[0].first);
-                                    int eid0 = inter_points[1].second;
-                                    int eid1 = inter_points[0].second;
-                                    HEEdge *e0 = EdgeSplitEdge(edges[eid0], edges[i], v0, true);
-                                    HEEdge *e1 = EdgeSplitEdge(edges[eid1], edges[i], v1, false);
-                                    e0->id = edges.size();
-                                    edges.push_back(e0);
-                                    e1->id = edges.size();
-                                    edges.push_back(e1);  
-                                }
-                              
-                            }
-                        }
-                        else
+                        if(bb.IsInside(edges[i]->ori_vertex->coor))
                         {
                             size_t inter_eid = inter_points[inter_pid].second;
                             HEVertex *v = new HEVertex (inter_points[inter_pid].first);
@@ -901,13 +748,11 @@ namespace geometry
                             // std::cout<<"??????0---"<< edges[i]->id <<" "<<edges[i]->pre_edge->id<< std::endl;
                             e->id = edges.size();
                             edges.push_back(e);
-                            // std::cout<< e->id <<" "<<e->next_edge->id<< std::endl;
-                            // std::cout<< edges[inter_eid]->id <<" "<<edges[inter_eid]->next_edge->id<< std::endl;
+                            finished = true;
                         }
                     }
-                    else
+                    else if(edges[i]->des_vertex) 
                     {
-                        size_t inter_pid = 0;
                         for(; inter_pid != inter_points.size(); ++inter_pid)
                         {
                             if(CheckPointToLine(inter_points[inter_pid].first, edges[i]->des_vertex->coor, site_point) < 0)
@@ -915,50 +760,9 @@ namespace geometry
                                 break;
                             }
                         }
-                        if(!bb.IsInside(edges[i]->des_vertex->coor))
+                        // std::cout<<"??????1---"<< edges[i]->id <<" "<<edges[i]->next_edge->id<< std::endl;
+                        if(bb.IsInside(edges[i]->des_vertex->coor))
                         {
-                            edges[i]->des_vertex->id = -1;   
-                            if(inter_pid == inter_points.size())
-                            {
-                                edges[i]->id = -1;
-                                edges[i]->twin_edge->id = -1;   
-                                          
-                                continue;                
-                            }
-                            else
-                            {
-                                if(CheckPointToLine(inter_points[0].first, inter_points[1].first, site_point) < 0)
-                                {
-                                    HEVertex *v0 = new HEVertex (inter_points[0].first);
-                                    HEVertex *v1 = new HEVertex (inter_points[1].first);
-                                    int eid0 = inter_points[0].second;
-                                    int eid1 = inter_points[1].second;
-                                    HEEdge *e0 = EdgeSplitEdge(edges[eid0], edges[i], v0, true);
-                                    HEEdge *e1 = EdgeSplitEdge(edges[eid1], edges[i], v1, false);
-                                    e0->id = edges.size();
-                                    edges.push_back(e0);
-                                    e1->id = edges.size();
-                                    edges.push_back(e1);  
-                                }
-                                else
-                                {
-                                    HEVertex *v0 = new HEVertex (inter_points[1].first);
-                                    HEVertex *v1 = new HEVertex (inter_points[0].first);
-                                    int eid0 = inter_points[1].second;
-                                    int eid1 = inter_points[0].second;
-                                    HEEdge *e0 = EdgeSplitEdge(edges[eid0], edges[i], v0, true);
-                                    HEEdge *e1 = EdgeSplitEdge(edges[eid1], edges[i], v1, false);
-                                    e0->id = edges.size();
-                                    edges.push_back(e0);
-                                    e1->id = edges.size();
-                                    edges.push_back(e1);  
-                                }
-                              
-                            }
-                        }
-                        else
-                        {
-                            // std::cout<<"??????1---"<< edges[i]->id <<" "<<edges[i]->next_edge->id<< std::endl;
                             size_t inter_eid = inter_points[inter_pid].second;
                             HEVertex *v = new HEVertex (inter_points[inter_pid].first);
                             vertices.push_back(v);
@@ -966,15 +770,53 @@ namespace geometry
                             
                             e->id = edges.size();
                             edges.push_back(e);
-                            // std::cout<< e->id <<" "<<e->next_edge->id<< std::endl;
-                            // std::cout<< edges[inter_eid]->id <<" "<<edges[inter_eid]->next_edge->id<< std::endl;
+                            finished = true;
                         }
+                        // std::cout<< e->id <<" "<<e->next_edge->id<< std::endl;
+                        // std::cout<< edges[inter_eid]->id <<" "<<edges[inter_eid]->next_edge->id<< std::endl;
+                    }
+                    if(!finished)
+                    {
+                        if(edges[i]->des_vertex) edges[i]->des_vertex->id = -1;   
+                        if(edges[i]->ori_vertex) edges[i]->ori_vertex->id = -1;   
+                        if(inter_pid == inter_points.size())
+                        {
+                            edges[i]->id = -1;
+                            edges[i]->twin_edge->id = -1;   
+                            continue;                
+                        }
+                        if(CheckPointToLine(inter_points[0].first, inter_points[1].first, site_point) < 0)
+                        {
+                            HEVertex *v0 = new HEVertex (inter_points[0].first);
+                            HEVertex *v1 = new HEVertex (inter_points[1].first);
+                            int eid0 = inter_points[0].second;
+                            int eid1 = inter_points[1].second;
+                            HEEdge *e0 = EdgeSplitEdge(edges[eid0], edges[i], v0, true);
+                            HEEdge *e1 = EdgeSplitEdge(edges[eid1], edges[i], v1, false);
+                            e0->id = edges.size();
+                            edges.push_back(e0);
+                            e1->id = edges.size();
+                            edges.push_back(e1);  
+                        }
+                        else
+                        {
+                            HEVertex *v0 = new HEVertex (inter_points[1].first);
+                            HEVertex *v1 = new HEVertex (inter_points[0].first);
+                            int eid0 = inter_points[1].second;
+                            int eid1 = inter_points[0].second;
+                            HEEdge *e0 = EdgeSplitEdge(edges[eid0], edges[i], v0, true);
+                            HEEdge *e1 = EdgeSplitEdge(edges[eid1], edges[i], v1, false);
+                            e0->id = edges.size();
+                            edges.push_back(e0);
+                            e1->id = edges.size();
+                            edges.push_back(e1);  
+                        }                        
                     }
                 }
                 else
                 {
                     
-                    std::cout<<YELLOW<<"[WARNING]::[BBTruncation]::Special case: more than 2 intersection points. "<<inter_points.size()<<RESET<<std::endl;
+                    std::cout<<YELLOW<<"[WARNING]::[BBTruncation]::Special case: 1 or more than 2 intersection points. "<<inter_points.size()<<RESET<<std::endl;
                     edges[i]->id = -1;
                     edges[i]->twin_edge->id = -1;
                     continue;                                
