@@ -6,6 +6,7 @@
 #include "Window.h"
 #include "Geometry/TriangleMesh/TriangleMesh.h"
 #include "Geometry/Structure/BoundingBox.h"
+#include "Geometry/Structure/PointCloud.h"
 #define MAX_BUFFER_SIZE 1024*1024*30
 namespace dragon
 {
@@ -47,6 +48,7 @@ namespace visualization
         void SetProjectionMatrix(int w, int h, float fu, float fv, float u0, 
             float v0, float zNear, float zFar);
         void AddTriangleMesh(const geometry::TriangleMesh &mesh);
+        void AddPointCloud(const geometry::PointCloud &pcd);
         void Show();
         void ShowOnce();
         void SetModelViewMatrix(const geometry::TransformationMatrix &camera_pose, 

@@ -246,7 +246,68 @@ namespace visualization
         program->SetUniform(Uniform("lightSpecular", s_lightSpecular));
         program->SetUniform(Uniform("lightDir", lightDir));        
     }
+    void Visualizer::AddPointCloud(const geometry::PointCloud &pcd)
+    {
+        if(dynamic_first_view)
+        {
+            ChooseCameraPoseFromPoints(pcd.points);
+        }
+        if(point_step != 0 &&geometry_type != GeometryType::POINTCLOUD)
+        {
+            std::cout<<YELLOW<<"[Visualizer]::[WARNING]::Geometry type is not pointcloud, the visualizer will clear buffer."<<RESET<<std::endl;
+            Reset();
+        }
+        size_t size = pcd.GetSize();
+        size_t step = 3;
+        
+        if(pcd.HasColors()) step += 3;
+        if(pcd.HasNormals()) step += 3;
+        if((step != point_step || has_normals != pcd.HasNormals() || has_colors != pcd.HasColors()) && point_step != 0)
+        {
+            std::cout<<YELLOW<<"[Visualizer]::[WARNING]::Different types of pointcloud, the visualizer will clear buffer."<<RESET<<std::endl;
+            Reset();            
+        }
+        for(size_t i = 0;i!=size;++i)
+        {
+            //position
+            size_t start = 0;
+            for(size_t j = 0;j<3; ++j, ++start)
+                point_buffer[point_buffer_size + i*step+start] = static_cast<float>(pcd.points[i](j));
 
+            //normal
+            if(pcd.HasNormals())
+            {
+            for(size_t j = 0;j<3; ++j, ++start)
+                point_buffer[point_buffer_size + i*step+start] = static_cast<float>(pcd.normals[i](j));
+            }
+            //color
+            if(pcd.HasColors())
+            {
+            for(size_t j = 0;j<3; ++j, ++start)
+                point_buffer[point_buffer_size + i*step+start] = static_cast<float>(pcd.colors[i](j));
+            }
+
+        }
+        buffer_data_updated = true;
+        point_step = step;
+        
+        point_buffer_size +=step*size;
+
+        geometry_type = GeometryType::POINTCLOUD;
+
+        has_colors = pcd.HasColors();
+
+        has_normals = pcd.HasNormals();
+
+        SetShaderPath();
+#if DEBUG_MODE
+        std::cout<<BLUE<<"[Visualizer]::[INFO]::Point Buffer Size: "<<point_buffer_size;
+        std::cout<<" Points: "<<point_buffer_size/point_step<<RESET<<std::endl;
+#endif
+        if(point_buffer_size > MAX_BUFFER_SIZE || index_buffer_size > MAX_BUFFER_SIZE)
+        std::cout<<YELLOW<<"[Visualizer]::[WARNING]::Overflow."<<RESET<<std::endl;
+
+    }    
     void Visualizer::AddTriangleMesh(const geometry::TriangleMesh &mesh)
     {
         

@@ -8,12 +8,26 @@
 #include <iostream>
 #include <unordered_set>
 #include <omp.h>
-
+#include <queue>
 namespace dragon
 {
 namespace geometry 
 {
-
+    struct PCDEdge
+    {
+        PCDEdge() = default;
+        PCDEdge(size_t _v1, size_t _v2, double _d):v1(_v1), v2(_v2), dist(_d){}
+        size_t v1;
+        size_t v2;
+        double dist;
+    };
+    struct PCDEdgeGreater
+    {
+        bool operator()(const PCDEdge &e1, const PCDEdge &e2 )
+        {
+            return e1.dist > e2.dist;
+        }
+    };
     void PointCloud::MergePCD(const PointCloud & another_pcd)
     {
         int merged_point_size = points.size() + another_pcd.points.size();
@@ -35,32 +49,33 @@ namespace geometry
     }
 
     void PointCloud::EstimateNormals(float radius, int knn)
-    {
-
-        
+    {   
         normals.resize(points.size());        
 
         geometry::KDTree<> kdtree;
         kdtree.BuildTree(points);
         std::cout<<BLUE<<"[EstimateNormals]::[INFO]::RadiusSearch "<<knn<<" nearest points, radius: "<<radius<<RESET<<std::endl;
-
+        std::vector<std::vector<PCDEdge>> vertex_to_edge(points.size());
         for(size_t i = 0; i < points.size(); ++i)
         {
             
             std::vector<int> indices; 
             std::vector<float> dists; 
             
-            // kdtree.RadiusSearch(points[i], indices, dists, 
-            //     radius, knn, geometry::SearchParameter(128));
-            kdtree.RadiusSearch(points[i], indices, dists, radius, 
-                30, geometry::SearchParameter(30));
-            
+            // kdtree.KnnSearch(points[i], indices, dists, 
+            //     knn, geometry::SearchParameter(1024));
+            kdtree.KnnRadiusSearch(points[i], indices, dists,
+                knn, radius, geometry::SearchParameter(1024));
+            // kdtree.RadiusSearch(points[i], indices, dists, radius, 
+            //     knn, geometry::SearchParameter(1024));            
+            // std::cout<<dists.size()<<std::endl;
             geometry::Point3List nearest_points;
-
-
-            for(size_t j = 0; j!= indices.size() && j != static_cast<size_t>(knn);++j)
+            for(size_t j = 0; j!= indices.size();++j)
             {
+                
                 nearest_points.push_back(points[indices[j]]);
+                vertex_to_edge[i].push_back(PCDEdge(i, indices[j], dists[j]));
+                // vertex_to_edge[indices[j]].push_back(PCDEdge(indices[j], i, dists[j]));
                 //std::cout <<indices[j]<<" "<<std::endl;
             }
             
@@ -69,12 +84,46 @@ namespace geometry
             normals[i] = std::get<0>(result);
         }
 
-#if 0
-        for(size_t i = 0; i < cv_pcd.size(); ++i)
+#if 1
+        // for(size_t i = 0; i != vertex_to_edge.size(); ++i)
+        // std::cout<<vertex_to_edge[i].size()<<" ";
+        // minimal spanning tree to determine the orientation of normal
+        // flip normals
+        std::priority_queue<PCDEdge, std::vector<PCDEdge>, PCDEdgeGreater> edges_q;
+        std::unordered_set<size_t> visited;
+        for(size_t i = 0; i != vertex_to_edge[0].size(); ++i)
+        edges_q.push(vertex_to_edge[0][i]);
+
+
+        visited.insert(0);
+        size_t iter = 0;
+        while(visited.size() != points.size() && !edges_q.empty())
         {
-            if(normals[i].dot(points[i] - mean_point) < 0)
-            normals[i] = -normals[i];
+            auto top = edges_q.top();
+            edges_q.pop();
+            // std::cout<<"flip normal-----"<<top.v1<<" "<<top.v2<<std::endl;
+            iter ++;
+            // if(iter == 10000) break;
+            if(visited.find(top.v2) != visited.end())
+            continue;
+            
+            if(normals[top.v2].dot(normals[top.v1]) < 0)
+            {
+                // std::cout<<"flip normal"<<std::endl;
+                normals[top.v2] = - normals[top.v2];
+            }
+            visited.insert(top.v2);
+            
+            for(size_t i = 0; i != vertex_to_edge[top.v2].size(); ++i)
+            {
+                edges_q.push(vertex_to_edge[top.v2][i]);
+                // visited.insert(vertex_to_edge[top.v2][i].v2);
+            }
+            
         }
+        for(size_t i = 0; i != normals.size(); ++i)
+            if(visited.find(i) == visited.end())
+            normals[i].setZero();
 #endif 
     }
     std::shared_ptr<PointCloud> PointCloud::DownSample(float grid_len) const

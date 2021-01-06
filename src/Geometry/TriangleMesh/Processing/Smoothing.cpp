@@ -100,12 +100,18 @@ namespace mesh
 
                 double sum_weight = 0.0;
                 geometry::Vector3 update_vector = geometry::Vector3::Zero();
-                sum_weight += start_edge->weight;
-                update_vector += start_edge->weight * (start_edge->ori_vertex->coor - start_edge->des_vertex->coor);
+                if(!std::isnan( start_edge->weight))
+                {
+                    sum_weight += start_edge->weight;
+                    update_vector += start_edge->weight * (start_edge->ori_vertex->coor - start_edge->des_vertex->coor);
+                }
                 while(current_edge != start_edge)
                 {
-                    sum_weight += current_edge->weight;
-                    update_vector += current_edge->weight * (current_edge->ori_vertex->coor - current_edge->des_vertex->coor);
+                    if(!std::isnan( current_edge->weight))
+                    {
+                        sum_weight += current_edge->weight;
+                        update_vector += current_edge->weight * (current_edge->ori_vertex->coor - current_edge->des_vertex->coor);
+                    }
                     current_edge = current_edge->twin_edge->next_edge;
                 }
                 // std::cout<<update_vector.transpose()<<std::endl;
@@ -148,16 +154,22 @@ namespace mesh
             geometry::ScalarList cotan_weights;
             geometry::Vector3 weighted_position = geometry::Vector3::Zero();
             double sum_weight = 0.0;
-            first_neighbors.push_back(start_edge->des_vertex->id);
-            cotan_weights.push_back(start_edge->weight);
-            sum_weight += start_edge->weight;
-            weighted_position += start_edge->weight * start_edge->des_vertex->coor;
+            if(!std::isnan( start_edge->weight))
+            {
+                first_neighbors.push_back(start_edge->des_vertex->id);
+                cotan_weights.push_back(start_edge->weight);
+                sum_weight += start_edge->weight;
+                weighted_position += start_edge->weight * start_edge->des_vertex->coor;
+            }
             while(current_edge != start_edge)
             {
-                cotan_weights.push_back(current_edge->weight);
-                first_neighbors.push_back(current_edge->des_vertex->id);
-                sum_weight += current_edge->weight;
-                weighted_position += current_edge->weight * current_edge->des_vertex->coor;
+                if(!std::isnan( start_edge->weight))
+                {                
+                    cotan_weights.push_back(current_edge->weight);
+                    first_neighbors.push_back(current_edge->des_vertex->id);
+                    sum_weight += current_edge->weight;
+                    weighted_position += current_edge->weight * current_edge->des_vertex->coor;
+                }
                 current_edge = current_edge->twin_edge->next_edge;
                 
             }

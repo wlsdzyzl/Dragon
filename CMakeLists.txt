@@ -95,6 +95,7 @@ add_executable(MeanCurvature "app/MeanCurvature.cpp")
 add_executable(DragonView3D "app/DragonView.cpp")
 add_executable(DragonView2D "app/DragonView2D.cpp")
 add_executable(SpiderMan "app/SpiderMan.cpp")
+add_executable(RBFTest "app/RBFTest.cpp")
 
 
 target_link_libraries(ReadMesh
@@ -114,6 +115,10 @@ target_link_libraries(DragonView2D
     ${THIRD_LIB}
 )
 target_link_libraries(SpiderMan
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(RBFTest
     dragon
     ${THIRD_LIB}
 )

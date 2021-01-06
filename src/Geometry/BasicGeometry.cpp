@@ -455,6 +455,7 @@ namespace geometry
         {
             //over determined
             res = A.lu().solve(b);
+            // res = A.jacobiSvd().solve(b);
         }
         else
         {

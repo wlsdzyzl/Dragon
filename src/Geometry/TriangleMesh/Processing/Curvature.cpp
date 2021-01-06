@@ -12,7 +12,7 @@ namespace mesh
         for(size_t i = 0; i != edges.size(); ++i)
         {
             if(edges[i]->twin_edge == nullptr) continue;
-            else if(edges[i]->weight < 0)
+            else if(edges[i]->weight == 0)
             {
                 const Point3 &v_last = edges[i]->twin_edge->next_edge->des_vertex->coor;
                 const Point3 &v_next = edges[i]->next_edge->des_vertex->coor;
@@ -21,16 +21,8 @@ namespace mesh
 
                 double cot_weight =  ClampCot(v_ - v_last, v_current - v_last) + ClampCot(v_ - v_next, v_current - v_next);
                 cot_weight = std::max(0.1, cot_weight);
-                if(!std::isnan(cot_weight))
-                {
-                    edges[i]->weight = cot_weight;
-                    edges[i]->twin_edge->weight = cot_weight;
-                }
-                else
-                {
-                    edges[i]->weight = 0;
-                    edges[i]->twin_edge->weight = 0;
-                }            
+                edges[i]->weight = cot_weight;
+                edges[i]->twin_edge->weight = cot_weight;
             }
         }
     }
@@ -75,16 +67,7 @@ namespace mesh
 
                 double cot_weight =  ClampCot(v_ - v_last, v_current - v_last) + ClampCot(v_ - v_next, v_current - v_next);
                 cot_weight = std::max(0.1, cot_weight);
-                if(!std::isnan(cot_weight))
-                {
-                    current_edge->weight = cot_weight;
-                    current_edge->twin_edge->weight = cot_weight;
-                }
-                else
-                {
-                    current_edge->weight = 0;
-                    current_edge->twin_edge->weight = 0;
-                }                      
+                current_edge->weight = cot_weight;             
                 if(!std::isnan(cot_weight))
                 {
 

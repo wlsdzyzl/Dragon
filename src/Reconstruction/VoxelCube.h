@@ -90,6 +90,7 @@ namespace reconstruction
                 std::floor(point(1) / VoxelResolution), std::floor(point(2) / VoxelResolution));
             return GetVoxelID(point_bounded);
         }
+
     };
 
     class VoxelCube
@@ -146,11 +147,6 @@ namespace reconstruction
             buffer.push_back(-2.0);
             return;
         }
-        geometry::Point3 GetOrigin(const CubePara &c_para) const
-        {
-            float cube_resolution = CUBE_SIZE * c_para.VoxelResolution;
-            return geometry::Point3(cube_id(0) * cube_resolution, cube_id(1) * cube_resolution, cube_id(2) * cube_resolution);
-        }
         void ReadFromBuffer(const std::vector<float> & buffer, size_t &ptr)
         {
             while(buffer[ptr]!= -2.0)
@@ -165,31 +161,10 @@ namespace reconstruction
             ptr++;
             return;
         }
-        void ReadFromBufferFloat(const std::vector<float> & buffer, size_t &ptr)
+        geometry::Point3 GetOrigin(const CubePara &c_para) const
         {
-            ptr++;//size
-            while(buffer[ptr]!= -2.0)
-            {
-                int i = buffer[ptr++];
-                voxels[i].sdf = buffer[ptr++];
-                voxels[i].weight = buffer[ptr++];
-                //std::cout<<"sdf: "<<voxels[i].sdf<<" weight: "<<voxels[i].weight<<std::endl;
-            }
-            ptr++;
-            size_t count = buffer[ptr++];
-            //std::cout<<"count: "<<count<<std::endl;
-            size_t c = 0;
-            while(c<count)
-            {
-                c++;
-                int i = buffer[ptr++];
-                voxels[i].color(0) = buffer[ptr++]/255.0;
-                voxels[i].color(1) = buffer[ptr++]/255.0;
-                voxels[i].color(2) = buffer[ptr++]/255.0;
-                float color_weight = buffer[ptr++];
-                voxels[i].color /= color_weight;
-            }
-            return;
+            float cube_resolution = CUBE_SIZE * c_para.VoxelResolution;
+            return geometry::Point3(cube_id(0) * cube_resolution, cube_id(1) * cube_resolution, cube_id(2) * cube_resolution);
         }
         public:
         std::vector<TSDFVoxel> voxels;

@@ -88,7 +88,7 @@ namespace geometry
         void ResetWeight()
         {
             for(size_t i = 0; i != edges.size(); ++i)
-                edges[i]->weight = -1.0;
+                edges[i]->weight = 0.0;
         }
     };
 

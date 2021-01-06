@@ -138,7 +138,8 @@ namespace curve
         // std::cout<<"f: "<<f<<std::endl;
         // solve equation
         geometry::VectorX x_;
-        x_ = geometry::SolveByThomas(A, f);
+        // x_ = geometry::SolveByThomas(A, f);
+        x_ = geometry::SolveBySVD(A, f);
         // std::cout<<A * x_ - f<<std::endl;
         // compute a, b, c, d
         geometry::MatrixX res(4, h_vec.size());
