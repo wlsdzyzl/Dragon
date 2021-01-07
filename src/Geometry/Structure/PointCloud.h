@@ -1,6 +1,7 @@
 #ifndef POINT_CLOUD_H
 #define POINT_CLOUD_H
 #include "Geometry/BasicGeometry.h"
+#include "Geometry/Structure/BoundingBox.h"
 #include <Eigen/Core>
 #include <memory>
 namespace dragon
@@ -35,6 +36,25 @@ namespace geometry
             std::shared_ptr<PointCloud> DownSample(float grid_len) const;
             bool WriteToPLY(const std::string &fileName) const;
             void MergePCD(const PointCloud & another_pcd);
+            BoundingBox GetBoundingBox() const
+            {
+                BoundingBox bb;
+                for(size_t i = 0; i != points.size(); ++i)
+                {
+                    bb.AddPoint(points[i]);
+                }
+                return bb;
+            }
+            void FlipNormal()
+            {
+                for(size_t i = 0; i != normals.size(); ++i)
+                normals[i] = -normals[i];
+            }
+            void Scale(double scale)
+            {
+                for(size_t i = 0; i != points.size(); ++i)
+                points[i] *= scale;
+            }
             void Reset()
             {
                 points.clear();

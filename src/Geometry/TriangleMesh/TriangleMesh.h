@@ -5,6 +5,7 @@
 // #include "Geometry/PointCloud.h"
 #include <memory>
 #include "Geometry/Structure/BoundingBox.h"
+#include "Geometry/Structure/PointCloud.h"
 namespace dragon
 {
 namespace geometry
@@ -36,6 +37,14 @@ namespace geometry
         // std::shared_ptr<TriangleMesh> QuadricSimplify(size_t target_num) const;
         // std::shared_ptr<TriangleMesh> ClusteringSimplify(float grid_len) const;
         // std::shared_ptr<PointCloud> GetPointCloud() const;
+        std::shared_ptr<PointCloud> GetPointCloud() const
+        {
+            PointCloud p;
+            p.points = points;
+            p.normals = normals;
+            p.colors = colors;
+            return std::make_shared<PointCloud>(p);
+        }
         size_t GetPointSize() const{return points.size();}
         size_t GetTriangleSize() const{return triangles.size();}
         bool WriteToPLY(const std::string &fileName) const;

@@ -78,7 +78,7 @@ namespace reconstruction
         }
         float sdf = 999;
         float weight = 0;
-        geometry::Point3 color = geometry::Point3(-1,-1,-1);
+        geometry::Point3 color = geometry::Point3(1,1,1);
     };
 }
 }

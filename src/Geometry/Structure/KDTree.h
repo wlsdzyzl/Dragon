@@ -244,6 +244,7 @@ namespace geometry
             size_t in_radius = 0;
             for(; in_radius != search_num; ++in_radius)
             {
+                // std::cout<<"radius: "<<dists[in_radius] <<std::endl;
                 if(dists[in_radius] > radius) break;
             }
             indices.resize(in_radius);

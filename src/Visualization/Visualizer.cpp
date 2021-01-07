@@ -300,6 +300,13 @@ namespace visualization
         has_normals = pcd.HasNormals();
 
         SetShaderPath();
+        window::bb += pcd.GetBoundingBox();
+        if(dynamic_first_view)
+        {
+            ChooseCameraPoseThroughBB(window::bb);
+            // ChooseCameraPoseFromPoints(mesh.points);
+            SetModelViewMatrix(camera_pose_for_view);
+        }
 #if DEBUG_MODE
         std::cout<<BLUE<<"[Visualizer]::[INFO]::Point Buffer Size: "<<point_buffer_size;
         std::cout<<" Points: "<<point_buffer_size/point_step<<RESET<<std::endl;

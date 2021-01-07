@@ -114,16 +114,20 @@ namespace reconstruction
                 for(int k = min_cube_id(2)-1; k<= max_cube_id(2)+1; ++k)
                 {
                     double min_sdf = std::numeric_limits<double>::max();
+                    bool same_sign = true;
+                    bool start_sign = true;
                     for(size_t c = 0; c!= 8; ++c)
                     {
                         geometry::Point3 voxel = geometry::Point3(i*cube_resolution, j*cube_resolution, 
                             k*cube_resolution) + c_para.VoxelCentroidOffSet[voxel_index[c]];
                         double sdf = get_sdf(voxel);
+                        if(c == 0 && sdf < 0) start_sign = false;
+                        if( c > 0 && ((sdf > 0) != start_sign)) same_sign = false;
                         if(min_sdf > std::fabs(sdf))
                             min_sdf =std::fabs(sdf);
                     }
 
-                    if(min_sdf < truncation)
+                    if(min_sdf < truncation || !same_sign)
                     {
                         CubeID cube_id = CubeID(i,j,k);
                         // bool is_new_cube=false;
@@ -143,6 +147,7 @@ namespace reconstruction
     {
         std::vector<CubeID> cube_id_list;
         PrepareCubes(points, cube_id_list, get_sdf);
+        std::cout<<cube_id_list.size()<<" cubes are waitting to be integrated, which are "<< cube_id_list.size() * 512 << " voxels."<<std::endl;
         for(size_t i = 0; i != cube_id_list.size(); ++i)
         {
             CubeID &cube_id = cube_id_list[i];
@@ -157,11 +162,14 @@ namespace reconstruction
                         int voxel_id = x + y * CUBE_SIZE + z * CUBE_SIZE * CUBE_SIZE;
                         geometry::Point3 g_point = c_para.GetGlobalPoint(cube_id, voxel_id);
                         double sdf = get_sdf(g_point);
+                        cube.voxels[voxel_id].sdf = sdf;
                         if(std::fabs(sdf) < truncation)
                         {
                             cube.voxels[voxel_id].weight = 1;
-                            cube.voxels[voxel_id].sdf = sdf;
+                            
                         }
+                        if(std::fabs(sdf) > max_sdf)
+                        max_sdf = std::fabs(sdf);
                     }
                 }
             }
@@ -183,9 +191,12 @@ namespace reconstruction
                             // std::cout<<iter->second.voxels[voxel_id].weight<<" "<<std::fabs(iter->second.voxels[voxel_id].sdf)<<std::endl;
                             if(iter->second.voxels[voxel_id].weight !=0 && std::fabs(iter->second.voxels[voxel_id].sdf) <truncation)
                             {
-                                float fabs_sdf = std::fabs(iter->second.voxels[voxel_id].sdf) / truncation;
-                                pcd.points.push_back(iter->second.GetOrigin(c_para) + c_para.VoxelCentroidOffSet[voxel_id]);
-                                pcd.colors.push_back(geometry::Point3(fabs_sdf, fabs_sdf, fabs_sdf));
+                                // if(std::fabs(iter->second.voxels[voxel_id].sdf) <= max_sdf)
+                                // {
+                                    float fabs_sdf = std::fabs(iter->second.voxels[voxel_id].sdf) / truncation;
+                                    pcd.points.push_back(iter->second.GetOrigin(c_para) + c_para.VoxelCentroidOffSet[voxel_id]);
+                                    pcd.colors.push_back(geometry::Point3(fabs_sdf, fabs_sdf, fabs_sdf));
+                                // }
                             }
                         }
                     }

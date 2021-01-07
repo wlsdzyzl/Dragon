@@ -275,7 +275,7 @@ namespace reconstruction
         CubeMap cube_map;
         CubePara c_para;
         double truncation = 0.1;
-
+        double max_sdf = -1;
 
     };
 }

@@ -10,7 +10,8 @@ namespace dragon
 namespace reconstruction
 {
     // we choose basis function as phi(r) = r^3
-    std::shared_ptr<geometry::TriangleMesh> RBF(const geometry::PointCloud &pcd, CubeHandler &cube_handler);
+    void GenerateSamplePoints(const geometry::PointCloud &pcd, geometry::Vec4List &samp, double e = 1);
+    std::shared_ptr<geometry::TriangleMesh> RBF(const geometry::PointCloud &pcd, CubeHandler &cube_handler, double e = 1);
 }
 }
 #endif
