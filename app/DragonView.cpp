@@ -12,6 +12,7 @@ static int iteration_local = 200;
 static bool use_uniform_para = true;
 static geometry::TriangleMesh object;
 static geometry::PointCloud pcd;
+static geometry::Octree oct;
 static bool is_mesh = true;
 static std::string filename;
 static bool wireframe_mode = false;
@@ -27,6 +28,7 @@ static char scale_s[100] = "1.0";
 static bool r_normal = false;
 bool updated = false;
 bool reorient = false;
+bool draw_octree = false;
 visualization::Visualizer visualizer(1000, 750);
 void RenderGuiComponents()
 {
@@ -238,6 +240,13 @@ void RenderGuiComponents()
                 pcd.FlipNormal();
                 updated = true;
             }     
+            if(ImGui::Button("Draw Octree"))
+            {
+                oct.Reset();
+                oct.BuildTree(pcd);
+                updated = true;
+                draw_octree = true;
+            }  
             ImGui::Checkbox("Recompute Normal", &r_normal);
             // ImGui::SameLine();
             if(ImGui::Button("RBF Reconstruction"))
@@ -245,7 +254,7 @@ void RenderGuiComponents()
                 scale = 2 / (std::max(visualization::window::bb.y_max - visualization::window::bb.y_min, 
                     std::max(visualization::window::bb.x_max - visualization::window::bb.x_min, 
                         visualization::window::bb.z_max - visualization::window::bb.z_min)));
-                std::cout<<scale<<std::endl;
+                // std::cout<<scale<<std::endl;
                 pcd.Scale(scale);
                 if(r_normal)
                 pcd.EstimateNormals(1, 10); 
@@ -267,6 +276,7 @@ void RenderGuiComponents()
                 pcd.Reset();
                 updated = true;
                 reorient = true;
+                draw_octree = false;
             }    
             if(ImGui::Button("Poisson Reconstruction"))
             {
@@ -277,6 +287,7 @@ void RenderGuiComponents()
         if(ImGui::Button("Reload"))
         {
             is_mesh = true;
+            draw_octree = false;
             object.LoadFromFile(filename);
             if(!object.triangles.size())
             {
@@ -365,7 +376,11 @@ int main(int argc, char* argv[])
             if(is_mesh)
             visualizer.AddTriangleMesh(object);
             else
-            visualizer.AddPointCloud(pcd);
+            {
+                visualizer.AddPointCloud(pcd);
+                if(draw_octree)
+                visualizer.AddOctree(oct);
+            }
             updated = false;
             if(reorient)
             {

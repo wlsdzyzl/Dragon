@@ -189,11 +189,11 @@ namespace reconstruction
                         {       
                             size_t voxel_id = x + y * CUBE_SIZE + z * CUBE_SIZE * CUBE_SIZE;
                             // std::cout<<iter->second.voxels[voxel_id].weight<<" "<<std::fabs(iter->second.voxels[voxel_id].sdf)<<std::endl;
-                            if(iter->second.voxels[voxel_id].weight !=0 && std::fabs(iter->second.voxels[voxel_id].sdf) <truncation)
+                            if(iter->second.voxels[voxel_id].weight !=0 && std::fabs(iter->second.voxels[voxel_id].sdf) <truncation / 5)
                             {
                                 // if(std::fabs(iter->second.voxels[voxel_id].sdf) <= max_sdf)
                                 // {
-                                    float fabs_sdf = std::fabs(iter->second.voxels[voxel_id].sdf) / truncation;
+                                    float fabs_sdf = std::fabs(iter->second.voxels[voxel_id].sdf) / (truncation / 5);
                                     pcd.points.push_back(iter->second.GetOrigin(c_para) + c_para.VoxelCentroidOffSet[voxel_id]);
                                     pcd.colors.push_back(geometry::Point3(fabs_sdf, fabs_sdf, fabs_sdf));
                                 // }

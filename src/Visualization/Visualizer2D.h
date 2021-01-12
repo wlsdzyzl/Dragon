@@ -25,7 +25,7 @@ namespace visualization
         Visualizer2D(int w = 800, int h = 600):width(w), height(h)
         {
             Reset();
-            clear_color = geometry::Point3(0.95, 0.95, 0.95);
+            clear_color = Eigen::Vector3f(0.95, 0.95, 0.95);
         }
         ~Visualizer2D()
         {

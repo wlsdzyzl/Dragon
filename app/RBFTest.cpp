@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
     pcd.Scale(scale);
     if(!pcd.HasNormals()) pcd.EstimateNormals(1, 10); 
-    pcd.FlipNormal();
+    // pcd.FlipNormal();
     auto d_pcd = pcd.DownSample(0.16);
     pcd = *d_pcd;
 
@@ -32,15 +32,15 @@ int main(int argc, char* argv[])
 
     
     reconstruction::CubeHandler cube_handler;
-    cube_handler.SetTruncation(0.4);
-    cube_handler.SetVoxelResolution(0.05);
+    cube_handler.SetTruncation(0.32);
+    cube_handler.SetVoxelResolution(0.04);
     // cube_handler.ReadFromFile("/media/wlsdzyzl/wlsdzyzl_2/OnePiece/build/example/tsdf.map");
     // geometry::TriangleMesh mesh;
     // cube_handler.ExtractTriangleMesh(mesh);
     // auto result = geometry::mesh::ClusteringDecimation(mesh, 0.01);
     // result->WriteToPLY("./RBF.ply");
     auto result = reconstruction::RBF(pcd, cube_handler, 0.1);
-    result = geometry::mesh::ClusteringDecimation(*result, 0.05);
+    result = geometry::mesh::ClusteringDecimation(*result, 0.02);
     result->ComputeNormals();
     result->colors.clear();
     result->WriteToPLY("./RBF.ply");

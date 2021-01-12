@@ -395,6 +395,99 @@ namespace window
         }
         glEnd();        
     }
+
+
+     
+    void DrawPoint(const geometry::Point3 &p, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glPointSize(thickness);
+        glBegin(GL_POINTS);              // Each set of 4 vertices form a quad
+        glVertex3f(p(0), p(1), p(2));
+        glEnd();
+    }
+    void DrawPoints(const geometry::Point3List &points, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glPointSize(thickness);
+        glBegin(GL_POINTS);              // Each set of 4 vertices form a quad
+        for(size_t i = 0; i < points.size(); ++i)
+        glVertex3f(points[i](0), points[i](1), points[i](2));
+        glEnd();
+    }
+    void DrawLine(const geometry::Point3 &p1, const geometry::Point3 &p2, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
+        glBegin(GL_LINES);
+        glVertex3f(p1(0), p1(1), p1(2));
+        glVertex3f(p2(0), p2(1), p2(2));
+        glEnd();
+    }
+    void SetProjectionMatrix()
+    {
+        glMatrixMode(GL_PROJECTION);
+#ifdef USING_FLOAT64
+        glLoadMatrixd(projection_matrix.data());
+#else
+        glLoadMatrixf(projection_matrix.data());
+#endif
+    }
+    void SetModelViewMatrix()
+    {
+        glMatrixMode(GL_MODELVIEW);
+#ifdef USING_FLOAT64
+        glLoadMatrixd(model_view_matrix.data());
+#else
+        glLoadMatrixf(model_view_matrix.data());
+#endif
+    }
+    void DrawLines(const geometry::Point3List &points, const geometry::Point3 &color, double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
+        glBegin(GL_LINES);
+        for(size_t i = 0; i < points.size(); i+=2)
+        {
+            glVertex3f(points[i](0), points[i](1), points[i](2));
+            glVertex3f(points[i+1](0), points[i+1](1), points[i+1](2));
+        }
+        glEnd();
+    }
+    void DrawLineStrip(const geometry::Point3List &points, const geometry::Point3 &color, double thickness)
+    {
+        
+        glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
+        glBegin(GL_LINE_STRIP);
+        for(size_t i = 0; i < points.size(); i+=2)
+        {
+            glVertex3f(points[i](0), points[i](1), points[i](2));
+        }
+        glEnd();
+    }
+    void DrawPolygon(const geometry::Point3List &points, const geometry::Point3 &color,  double thickness)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glLineWidth(thickness);
+        glBegin(GL_LINE_LOOP);              
+        for(size_t i = 0; i < points.size(); ++i)
+        {
+            // std::cout<< points[i].transpose()<<std::endl;
+            glVertex3f(points[i](0), points[i](1), points[i](2));
+        }
+        glEnd();        
+    }
+    void DrawPolygonFilled(const geometry::Point3List &points, const geometry::Point3 &color)
+    {
+        glColor3f(color(0), color(1), color(2));
+        glBegin(GL_POLYGON);              
+        for(size_t i = 0; i < points.size(); ++i)
+        {
+            glVertex3f(points[i](0), points[i](1), points[i](2));
+        }
+        glEnd();        
+    }
 }
 }
 }

@@ -49,6 +49,7 @@ namespace reconstruction
             }
             b(i) = samp[i](3);
         }
+        std::cout<<BLUE<<"[INFO]::[RBF]::Center points: "<<samp.size()<<RESET<<std::endl;
         // geometry::MatrixX A(points.size(), points.size());
         // A.setOnes();
         // geometry::VectorX b(points.size());

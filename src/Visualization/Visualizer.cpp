@@ -7,7 +7,7 @@ namespace visualization
     {
         window::Initialize(width, height);
         program = std::make_shared<Shader>();
-
+        program_for_points = std::make_shared<Shader>();
         if(!program->Load(shader_path + "/" +shader_vert, 
             shader_path + "/" +shader_frag))
         {
@@ -15,7 +15,17 @@ namespace visualization
             std::cout<<RED<<"[ERROR]::[Visualizer]::Cannot load shaders."<<RESET<<std::endl;
             return false;
         }
-
+        if(!program_for_points->Load(shader_path + "/draw_point.vert", 
+            shader_path + "/" +shader_frag))
+        {
+            program_for_points = nullptr;
+            std::cout<<RED<<"[ERROR]::[Visualizer]::Cannot load shaders."<<RESET<<std::endl;
+            return false;
+        }
+        for(size_t i = 0; i < io::color_table.size(); ++i)
+        {
+            color_table.push_back( geometry::Point3(io::color_table[i][0] / 255.0, io::color_table[i][1] / 255.0, io::color_table[i][2] / 255.0 ));
+        }
         SetProjectionMatrix(width, height, width * 0.66, width * 0.66, width * 0.5, 
             width * 0.375, 0.1, 1000);
         SetModelViewMatrix(camera_pose_for_view);
@@ -59,7 +69,7 @@ namespace visualization
         window::aspect = w / h;
         window::up = tan(window::fovy / 2.0f) * window::near;
         window::right = window::aspect * window::up;
-
+        
             
     }
     Visualizer::~Visualizer()
@@ -126,6 +136,11 @@ namespace visualization
             buffer_data_updated = false;
         }
         PreCall();
+        
+        for(size_t i = 0; i != polygons.size(); ++i)
+        window::DrawPolygon(polygons[i]);
+        window::DrawLines(line_segments);
+
         program->Enable();
         ConfigProgram();
         
@@ -192,6 +207,8 @@ namespace visualization
         //glBindBuffer(GL_ARRAY_BUFFER, 0);
         program->Disable();
         //pangolin::glDrawAxis(3);
+
+
         PostCall();
     }
     void Visualizer::Show()
@@ -222,6 +239,7 @@ namespace visualization
 
     // //    std::cout<<mvp<<std::endl;
     //     std::cout<<mvp<<std::endl;
+        program_for_points->SetUniform(Uniform("MVP", mvp));
         program->SetUniform(Uniform("MVP", mvp));
         int color_type = (draw_normal ? 1 : draw_color ? 2 : 0);
         program->SetUniform(Uniform("colorType", color_type));
@@ -245,6 +263,73 @@ namespace visualization
         program->SetUniform(Uniform("lightDiffuse", s_lightDiffuse));
         program->SetUniform(Uniform("lightSpecular", s_lightSpecular));
         program->SetUniform(Uniform("lightDir", lightDir));        
+    }
+    void Visualizer::AddOctree(const geometry::Octree &oct)
+    {
+        auto &leaves = oct.all_leaves;
+        line_segments.clear();
+        for(size_t i = 0; i != leaves.size(); ++i)
+        {
+            geometry::Point3List v(8);
+            double half_width = leaves[i]->width / 2;
+            for(int j = 0; j != 8; ++j)
+            {
+                geometry::Point3 p = leaves[i]->center;
+                if(j & 1)
+                p(0) += half_width;
+                else
+                p(0) -= half_width;
+
+                if((j >> 1) & 1)
+                p(1) += half_width;
+                else
+                p(1) -= half_width;
+
+                if((j >> 2) & 1)
+                p(2) += half_width;
+                else
+                p(2) -= half_width;
+                
+                v[j] = p;
+            }
+
+            line_segments.push_back(v[0]);
+            line_segments.push_back(v[1]);
+
+            line_segments.push_back(v[0]);
+            line_segments.push_back(v[2]);
+
+            line_segments.push_back(v[1]);
+            line_segments.push_back(v[3]);
+
+            line_segments.push_back(v[2]);
+            line_segments.push_back(v[3]);
+
+            line_segments.push_back(v[0]);
+            line_segments.push_back(v[4]);
+
+            line_segments.push_back(v[1]);
+            line_segments.push_back(v[5]);
+
+            line_segments.push_back(v[3]);
+            line_segments.push_back(v[7]);
+
+            line_segments.push_back(v[2]);
+            line_segments.push_back(v[6]);   
+
+            line_segments.push_back(v[4]);
+            line_segments.push_back(v[5]);
+
+            line_segments.push_back(v[4]);
+            line_segments.push_back(v[6]);
+
+            line_segments.push_back(v[5]);
+            line_segments.push_back(v[7]);
+
+            line_segments.push_back(v[6]);
+            line_segments.push_back(v[7]);         
+        }
+        
     }
     void Visualizer::AddPointCloud(const geometry::PointCloud &pcd)
     {

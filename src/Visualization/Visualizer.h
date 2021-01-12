@@ -7,6 +7,7 @@
 #include "Geometry/TriangleMesh/TriangleMesh.h"
 #include "Geometry/Structure/BoundingBox.h"
 #include "Geometry/Structure/PointCloud.h"
+#include "Geometry/Structure/Octree.h"
 #define MAX_BUFFER_SIZE 1024*1024*30
 namespace dragon
 {
@@ -29,7 +30,7 @@ namespace visualization
             index_buffer = new int[MAX_BUFFER_SIZE];
             memset(point_buffer,0,MAX_BUFFER_SIZE*sizeof(float));
             memset(index_buffer,0,MAX_BUFFER_SIZE*sizeof(int));
-            clear_color = geometry::Point3(0.8, 0.8, 0.8);
+            clear_color = Eigen::Vector3f(0.8, 0.8, 0.8);
 
         }
         ~Visualizer();
@@ -43,12 +44,15 @@ namespace visualization
             point_buffer_size = 0;
             index_buffer_size = 0;
             geometry_type = GeometryType::TRIANGLE_MESH;
+            line_segments.clear();
+            polygons.clear();
             window::bb = geometry::BoundingBox();
         }
         void SetProjectionMatrix(int w, int h, float fu, float fv, float u0, 
             float v0, float zNear, float zFar);
         void AddTriangleMesh(const geometry::TriangleMesh &mesh);
         void AddPointCloud(const geometry::PointCloud &pcd);
+        void AddOctree(const geometry::Octree &oct);
         void Show();
         void ShowOnce();
         void SetModelViewMatrix(const geometry::TransformationMatrix &camera_pose, 
@@ -58,7 +62,8 @@ namespace visualization
             glfwPollEvents();
             glClearColor(clear_color(0), clear_color(1), clear_color(2),1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
+            window::SetProjectionMatrix();
+            window::SetModelViewMatrix();
         }
         void PostCall();
         void ChooseCameraPoseFromPoints(const geometry::Point3List &points)
@@ -134,7 +139,11 @@ namespace visualization
         bool wireframe_mode = false;
         Eigen::Vector3f clear_color;
         std::shared_ptr<Shader> program;
+        std::shared_ptr<Shader> program_for_points;
         GeometryType geometry_type;
+        geometry::Point3List line_segments;
+        std::vector<geometry::Point3List> polygons;
+        geometry::Point3List color_table;
         protected:
         GLuint vbo;
         GLuint ebo;

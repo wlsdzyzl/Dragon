@@ -74,7 +74,7 @@ add_library(dragon SHARED ${Geometry_SRC}  ${Reconstruction_SRC}
 set(CMAKE_CXX_FLAGS " -std=c++11 ")
 set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -O0 -g -Wall -fopenmp -Wno-maybe-uninitialized") 
 # if you want a double-precision
-# set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -DUSING_FLOAT64") 
+set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -DUSING_FLOAT64") 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(THIRD_LIB 
@@ -96,7 +96,7 @@ add_executable(DragonView3D "app/DragonView.cpp")
 add_executable(DragonView2D "app/DragonView2D.cpp")
 add_executable(SpiderMan "app/SpiderMan.cpp")
 add_executable(RBFTest "app/RBFTest.cpp")
-
+add_executable(PoissonTest "app/PoissonTest.cpp")
 
 target_link_libraries(ReadMesh
     dragon
@@ -119,6 +119,10 @@ target_link_libraries(SpiderMan
     ${THIRD_LIB}
 )
 target_link_libraries(RBFTest
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(PoissonTest
     dragon
     ${THIRD_LIB}
 )
