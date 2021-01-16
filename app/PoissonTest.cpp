@@ -4,9 +4,9 @@ using namespace dragon;
 
 int main(int argc, char* argv[])
 {
-    if(argc != 2)
+    if(argc != 3)
     {
-        std::cout << "Usage: ReadPLYMesh [filename]"<<std::endl;
+        std::cout << "Usage: ReadPLYMesh [filename] [depth]"<<std::endl;
         return 0;        
     }
     geometry::PointCloud pcd;
@@ -22,9 +22,19 @@ int main(int argc, char* argv[])
 
     pcd.Scale(scale);
     if(!pcd.HasNormals()) pcd.EstimateNormals(1, 10); 
+    auto d_pcd = pcd.DownSample(0.1);
+    pcd = *d_pcd;
+    int depth = atoi(argv[2]);
+    double offset = 1 / std::pow(2, depth);
+    // pcd.Translate( - geometry::Point3(bb.x_max + bb.x_min, bb.y_max + bb.y_min, bb.z_max + bb.z_min)  * scale/ 2.0 + 
+    //     geometry::Point3(offset, offset, offset));
+
     // pcd.FlipNormal();
     // pcd = *(pcd.DownSample(0.16));
     std::cout<<BLUE<<"[INFO]::[RBF]::Estimate normal."<<RESET<<std::endl;
-    reconstruction::Poisson(pcd, 6);
+    auto mesh_ptr = reconstruction::Poisson(pcd, depth);
+    mesh_ptr->FlipNormal();
+    mesh_ptr->ComputeNormals();
+    mesh_ptr->WriteToPLY("./poisson.ply");
     return 0;
 }

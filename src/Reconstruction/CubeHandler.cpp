@@ -2,6 +2,7 @@
 #include "Tool/MultiThreads.h"
 #include "MarchingCube.h"
 #include "Geometry/Structure/BoundingBox.h"
+#include <omp.h>
 #define SINGLE_THREAD 0
 namespace dragon
 {
@@ -152,12 +153,14 @@ namespace reconstruction
         {
             CubeID &cube_id = cube_id_list[i];
             VoxelCube &cube = cube_map[cube_id];
-
+            if(i % 10 == 0) std::cout<<"progress: "<<(i*100.0)/cube_id_list.size()<<"%"<<std::endl;
+       
             for(size_t x = 0 ; x != CUBE_SIZE; ++x)
             {
                 for(size_t y = 0 ; y != CUBE_SIZE; ++y)
                 {
-                    for(size_t z = 0 ; z != CUBE_SIZE; ++z)
+                    // #pragma omp parallel for     
+                    for(int z = 0 ; z != CUBE_SIZE; ++z)
                     {   
                         int voxel_id = x + y * CUBE_SIZE + z * CUBE_SIZE * CUBE_SIZE;
                         geometry::Point3 g_point = c_para.GetGlobalPoint(cube_id, voxel_id);

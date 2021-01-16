@@ -10,6 +10,7 @@ namespace geometry
     {
         public:
         bool is_leaf = true;
+        double weight;
         bool InNode(const Point3 &p)
         {
             double half_width = width / 2;
@@ -17,7 +18,40 @@ namespace geometry
                     && (p(1) >= center(1) - half_width ) && (p(1) <= center(1) + half_width)
                     && (p(2) >= center(2) - half_width ) && (p(2) <= center(2) + half_width);
         }
-        void AddPoint(const Point3List &points, int pid, int max_depth, std::vector<OctreeNode *> &point_to_leaf)
+        void Split(int max_depth)
+        {
+            if(is_leaf == true && depth < max_depth )
+            {
+                // split the nodes
+                nodes = new OctreeNode[8];
+                double next_half_width = width / 4;
+                double next_width = width / 2;
+                int next_depth = depth + 1;
+                for(int i = 0; i != 8; ++i)
+                {
+                    nodes[i].width = next_width;
+                    nodes[i].depth = next_depth;
+                    nodes[i].parent = this;
+                    
+                    if(i & 1)
+                    nodes[i].center(0) = center(0) + next_half_width;
+                    else
+                    nodes[i].center(0) = center(0) - next_half_width;
+                    if((i >> 1) & 1)
+                    nodes[i].center(1) = center(1) + next_half_width;
+                    else
+                    nodes[i].center(1) = center(1) - next_half_width;
+                    if((i >> 2) & 1)
+                    nodes[i].center(2) = center(2) + next_half_width;
+                    else
+                    nodes[i].center(2) = center(2) - next_half_width;
+                } 
+                for(int i = 0; i != 8; ++i)
+                nodes[i].Split(max_depth);
+                is_leaf = false;  
+            }            
+        }
+        void AddPoint(const Point3List &points, int pid, int max_depth)
         {
             
             if(is_leaf == false)
@@ -33,7 +67,7 @@ namespace geometry
                     if(nodes[i].InNode(points[pid]))
                     {
 
-                        nodes[i].AddPoint(points, pid, max_depth, point_to_leaf);
+                        nodes[i].AddPoint(points, pid, max_depth);
                         break;
                     }
                 }
@@ -46,7 +80,7 @@ namespace geometry
                 // the point is too far away from the center, or the points is much than 2
                 // std::cout<<(points[pid] - center).norm()<<" "<<width * 0.866 /  std::pow(2, max_depth)<<std::endl;
                 // || ((points[pid] - center).norm() > width * 0.866 /  std::pow(2, max_depth))
-                if(depth < max_depth && (pidlist.size() > 1  ))
+                if(depth < max_depth && (pidlist.size() > 0  ))
                 {
                     // split the nodes
                     nodes = new OctreeNode[8];
@@ -79,18 +113,13 @@ namespace geometry
 
                             if(nodes[i].InNode(points[pidlist[id]]))
                             {
-                                nodes[i].AddPoint(points, pidlist[id], max_depth, point_to_leaf);
+                                nodes[i].AddPoint(points, pidlist[id], max_depth);
                                 break;
                             }
                         }
                     }
-                    pidlist.clear();
+                    // pidlist.clear();
                     is_leaf = false;     
-                }
-                else
-                {
-                    // std::cout<<pid<<" "<<this<<std::endl;
-                    point_to_leaf[pid] = this;
                 }
             }
 
@@ -111,17 +140,16 @@ namespace geometry
             width = 0;
 
         }
-        void SetLeafIDAndGetAllLeaves(std::vector<OctreeNode *> &leaves)
+        void SetNodeIDAndGetAllNodes(std::vector<std::vector<OctreeNode *>> &all_nodes)
         {
-            if(is_leaf)
-            {
-                this->id = leaves.size();
-                leaves.push_back(this);
-            }
-            else
+            id = all_nodes[depth].size();
+            all_nodes[depth].push_back(this);
+            if(!is_leaf)
             {
                 for(int i = 0; i != 8; ++i)
-                nodes[i].SetLeafIDAndGetAllLeaves(leaves);
+                {
+                    nodes[i].SetNodeIDAndGetAllNodes(all_nodes);
+                }
             }
         }
         void GetAllLeaves(std::vector<OctreeNode *> &leaves)
@@ -135,6 +163,66 @@ namespace geometry
                 for(int i = 0; i != 8; ++i)
                 nodes[i].GetAllLeaves(leaves);
             }            
+        }
+        OctreeNode *LocateLeaf(const geometry::Point3 &p)
+        {
+            if(is_leaf) return this;
+            for(int i = 0; i != 8; ++i)
+            {
+                if(nodes[i].InNode(p)) return nodes[i].LocateLeaf(p);       
+            }
+            return nullptr;
+        }
+        OctreeNode *Locate(const geometry::Point3 &p, int d)
+        {
+            if(depth == d) return this;
+            else if( !is_leaf)
+            {
+                for(int i = 0; i != 8; ++i)
+                {
+                    if(nodes[i].InNode(p)) return nodes[i].Locate(p, d);       
+                }
+            }
+            std::cout<<"What happened ??"<<std::endl;
+            return nullptr;
+        }
+        OctreeNode *LocateAndSplit(const geometry::Point3 &p, int d)
+        {
+            if(depth == d) return this;
+            if(is_leaf)
+            {
+                // split the nodes
+                nodes = new OctreeNode[8];
+                double next_half_width = width / 4;
+                double next_width = width / 2;
+                int next_depth = depth + 1;
+                for(int i = 0; i != 8; ++i)
+                {
+                    nodes[i].width = next_width;
+                    nodes[i].depth = next_depth;
+                    nodes[i].parent = this;
+                    
+                    if(i & 1)
+                    nodes[i].center(0) = center(0) + next_half_width;
+                    else
+                    nodes[i].center(0) = center(0) - next_half_width;
+                    if((i >> 1) & 1)
+                    nodes[i].center(1) = center(1) + next_half_width;
+                    else
+                    nodes[i].center(1) = center(1) - next_half_width;
+                    if((i >> 2) & 1)
+                    nodes[i].center(2) = center(2) + next_half_width;
+                    else
+                    nodes[i].center(2) = center(2) - next_half_width;
+                } 
+                is_leaf = false;  
+            }
+            for(int i = 0; i != 8; ++i)
+            {
+                if(nodes[i].InNode(p)) return nodes[i].LocateAndSplit(p, d);       
+            }
+            std::cout<<"What happened ??"<<std::endl;
+            return nullptr;
         }
         ~OctreeNode()
         {
@@ -159,17 +247,47 @@ namespace geometry
 
         OctreeNode head;
         int max_depth = 6;
-        PointCloud pcd;
+        int node_size = 0;
+        geometry::PointCloud sampled_pcd;
         std::vector<OctreeNode *> point_to_leaf;
         std::vector<OctreeNode *> all_leaves;
+        std::vector< std::vector<OctreeNode *>> all_nodes;
         void Reset()
         {
             head.Reset();
-            pcd.Reset();
+            sampled_pcd.Reset();
             point_to_leaf.clear();
+            all_nodes.clear();
             all_leaves.clear();
         }
-
+        void UniformSplit()
+        {
+            head.Split(max_depth);
+        }
+        OctreeNode* LocateLeaf(const Point3 &p)
+        {
+            if(head.InNode(p))
+            return head.LocateLeaf(p);
+            else return nullptr;
+        }
+        OctreeNode* Locate(const Point3 &p, int depth)
+        {
+            if(head.InNode(p))
+            return head.Locate(p, depth);
+            else return nullptr;
+        }
+        OctreeNode* LocateAndSplit(const Point3 &p, int depth)
+        {
+            if(head.InNode(p))
+            return head.LocateAndSplit(p, depth);
+            else return nullptr;
+        }
+        void SetNodeIDAndGetAllNodes()
+        {
+            all_nodes.clear();
+            all_nodes.resize(max_depth + 1);
+            head.SetNodeIDAndGetAllNodes(all_nodes);
+        }
         std::shared_ptr<geometry::PointCloud> GetPointCloud() const;
     };
 }

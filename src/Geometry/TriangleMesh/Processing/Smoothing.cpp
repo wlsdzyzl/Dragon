@@ -190,7 +190,7 @@ namespace mesh
         // std::cout<<laplace_matrix<<std::endl;
         // std::cout<<std::endl;
         // std::cout<<sigma<<std::endl;
-         Eigen::SparseLU<Eigen::SparseMatrix<geometry::scalar>, Eigen::COLAMDOrdering<int>> slu_solver;
+        Eigen::SparseLU<Eigen::SparseMatrix<geometry::scalar>, Eigen::COLAMDOrdering<int>> slu_solver;
         slu_solver.compute(laplace_matrix);
         new_vertices = slu_solver.solve(sigma);
         // Eigen::SimplicialLDLT<Eigen::SparseMatrix<scalar>> sldlt_solver;

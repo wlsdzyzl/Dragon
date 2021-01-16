@@ -61,7 +61,11 @@ namespace geometry
                 normals.clear();
                 colors.clear();
             }
-            
+            void Translate(const Point3 & t)
+            {
+                for(size_t i = 0; i != points.size(); ++i)
+                points[i] += t;
+            }
             geometry::Point3List points;
             geometry::Point3List normals;
             geometry::Point3List colors;

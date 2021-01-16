@@ -45,6 +45,11 @@ namespace geometry
             p.colors = colors;
             return std::make_shared<PointCloud>(p);
         }
+        void FlipNormal()
+        {
+            for(size_t i = 0; i != triangles.size(); ++i)
+            triangles[i].reverseInPlace();
+        }
         size_t GetPointSize() const{return points.size();}
         size_t GetTriangleSize() const{return triangles.size();}
         bool WriteToPLY(const std::string &fileName) const;

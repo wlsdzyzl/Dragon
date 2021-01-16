@@ -98,6 +98,11 @@ namespace reconstruction
                 mesh.colors[i] = pcd.colors[indices[0]];           
             }
         }
+        else
+        {
+            for(size_t i = 0; i != mesh.points.size(); ++i)
+            mesh.colors[i] = geometry::Point3(1, 1, 1);
+        }
         return std::make_shared<geometry::TriangleMesh>(mesh);
     }
 }

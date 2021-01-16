@@ -4,6 +4,7 @@
 #include "Geometry/TriangleMesh/Processing/Decimation.h"
 #include "Tool/ColorMapping.h"
 #include "Reconstruction/RBF.h"
+#include "Reconstruction/Poisson.h"
 #include "Geometry/TriangleMesh/Processing/MeshParameterization.h"
 using namespace dragon;
 static float local_lambda = 0.1f;
@@ -29,6 +30,7 @@ static bool r_normal = false;
 bool updated = false;
 bool reorient = false;
 bool draw_octree = false;
+static int max_depth = 5;
 visualization::Visualizer visualizer(1000, 750);
 void RenderGuiComponents()
 {
@@ -239,14 +241,7 @@ void RenderGuiComponents()
             {
                 pcd.FlipNormal();
                 updated = true;
-            }     
-            if(ImGui::Button("Draw Octree"))
-            {
-                oct.Reset();
-                oct.BuildTree(pcd);
-                updated = true;
-                draw_octree = true;
-            }  
+            }      
             ImGui::Checkbox("Recompute Normal", &r_normal);
             // ImGui::SameLine();
             if(ImGui::Button("RBF Reconstruction"))
@@ -260,15 +255,10 @@ void RenderGuiComponents()
                 pcd.EstimateNormals(1, 10); 
                 auto d_pcd = pcd.DownSample(0.16);
                 pcd = *d_pcd;
-                std::cout<<BLUE<<"[INFO]::[RBF]::Estimate normal."<<RESET<<std::endl;
                 reconstruction::CubeHandler cube_handler;
                 cube_handler.SetTruncation(0.4);
                 cube_handler.SetVoxelResolution(0.05);
-                // cube_handler.ReadFromFile("/media/wlsdzyzl/wlsdzyzl_2/OnePiece/build/example/tsdf.map");
-                // geometry::TriangleMesh mesh;
-                // cube_handler.ExtractTriangleMesh(mesh);
-                // auto result = geometry::mesh::ClusteringDecimation(mesh, 0.01);
-                // result->WriteToPLY("./RBF.ply");
+
                 auto result = reconstruction::RBF(pcd, cube_handler, 0.1);
                 object = *(geometry::mesh::ClusteringDecimation(*result, 0.05));
                 object.ComputeNormals();
@@ -278,9 +268,33 @@ void RenderGuiComponents()
                 reorient = true;
                 draw_octree = false;
             }    
+            ImGui::SliderInt("Octree Depth", &max_depth, 1, 8);
+            if(ImGui::Button("Draw Octree"))
+            {
+                oct.Reset();
+                oct.max_depth = max_depth;
+                oct.BuildTree(pcd);
+                updated = true;
+                draw_octree = true;
+            } 
             if(ImGui::Button("Poisson Reconstruction"))
             {
-
+                scale = 2 / (std::max(visualization::window::bb.y_max - visualization::window::bb.y_min, 
+                    std::max(visualization::window::bb.x_max - visualization::window::bb.x_min, 
+                        visualization::window::bb.z_max - visualization::window::bb.z_min)));
+                // std::cout<<scale<<std::endl;
+                pcd.Scale(scale);
+                if(r_normal)
+                pcd.EstimateNormals(1, 10); 
+                auto result = reconstruction::Poisson(pcd,max_depth);
+                object = *(geometry::mesh::ClusteringDecimation(*result, 0.01));
+                object.FlipNormal();
+                object.ComputeNormals();
+                is_mesh = true;
+                pcd.Reset();
+                updated = true;
+                reorient = true;
+                draw_octree = false;
             }       
             ImGui::Text("points: %d", (int)pcd.points.size());
         }
