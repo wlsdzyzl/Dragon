@@ -4,9 +4,9 @@ using namespace dragon;
 
 int main(int argc, char* argv[])
 {
-    if(argc != 3)
+    if(argc < 3)
     {
-        std::cout << "Usage: ReadPLYMesh [filename] [depth]"<<std::endl;
+        std::cout << "Usage: ReadPLYMesh [filename] [depth] [outputfile='poisson_$depth$.ply']"<<std::endl;
         return 0;        
     }
     geometry::PointCloud pcd;
@@ -25,7 +25,10 @@ int main(int argc, char* argv[])
     auto d_pcd = pcd.DownSample(0.1);
     pcd = *d_pcd;
     int depth = atoi(argv[2]);
-    double offset = 1 / std::pow(2, depth);
+    
+    std::string output = "./poisson_"+std::to_string(depth)+".ply";
+    if(argc > 3) output = argv[3];
+    // double offset = 1 / std::pow(2, depth);
     // pcd.Translate( - geometry::Point3(bb.x_max + bb.x_min, bb.y_max + bb.y_min, bb.z_max + bb.z_min)  * scale/ 2.0 + 
     //     geometry::Point3(offset, offset, offset));
 
@@ -35,6 +38,11 @@ int main(int argc, char* argv[])
     auto mesh_ptr = reconstruction::Poisson(pcd, depth);
     mesh_ptr->FlipNormal();
     mesh_ptr->ComputeNormals();
-    mesh_ptr->WriteToPLY("./poisson.ply");
+    mesh_ptr->WriteToPLY(output);
+
+    // auto n_mesh_ptr = reconstruction::NaivePoisson(pcd, depth);
+    // n_mesh_ptr->FlipNormal();
+    // n_mesh_ptr->ComputeNormals();
+    // n_mesh_ptr->WriteToPLY("./naive_poisson_"+std::to_string(depth)+".ply");
     return 0;
 }

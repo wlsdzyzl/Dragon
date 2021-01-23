@@ -11,6 +11,7 @@ namespace dragon
 namespace reconstruction
 {
     std::shared_ptr<geometry::TriangleMesh> Poisson(const geometry::PointCloud &pcd, int max_depth);
+    std::shared_ptr<geometry::TriangleMesh> NaivePoisson(const geometry::PointCloud &pcd, int max_depth);
     // start: [-0.5, 0.5], and the n-th filter range is [-0.5 * n, 0.5 * n]
     double ThirdBoxFilter(double x);
     double  ThirdBoxFilter3D(const geometry::Point3 &p);

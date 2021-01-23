@@ -177,7 +177,7 @@ namespace mesh
             v2.normalize();
             Vector3 fn = planes[cor_faces[i]->id].head<3>();
 
-            if(v1.dot(v2) >= (1 - EPS)) 
+            if(v1.dot(v2) >= (1 - DRAGON_EPS)) 
             { 
                 return true;
             }

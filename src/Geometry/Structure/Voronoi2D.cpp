@@ -121,9 +121,9 @@ namespace geometry
         double r, d;
         std::tie(o, r, d) = CircumCenter(site_points[current_id], site_points[pre_id], site_points[next_id]);
         // std::cout<<"is clockwise? "<<d<<std::endl;
-        if(d >-EPS)
+        if(d >-DRAGON_EPS)
         {
-            // std::cout<<d<< " "<<-EPS<<std::endl;
+            // std::cout<<d<< " "<<-DRAGON_EPS<<std::endl;
             return;
         }
         if(o(0) + r >=swp || std::fabs(o(0) + r - swp) < 0.01)
@@ -579,7 +579,7 @@ namespace geometry
                 {
 
                     if(inter_points.size() == 0 || 
-                        geometry::Distance(tmp_inter_points[i].first, inter_points.back().first) > EPS)
+                        geometry::Distance(tmp_inter_points[i].first, inter_points.back().first) > DRAGON_EPS)
                     {
                         inter_points.push_back(tmp_inter_points[i]);
                     }
@@ -711,7 +711,7 @@ namespace geometry
                 {
 
                     if(inter_points.size() == 0 || 
-                        geometry::Distance(tmp_inter_points[i].first, inter_points.back().first) > EPS)
+                        geometry::Distance(tmp_inter_points[i].first, inter_points.back().first) > DRAGON_EPS)
                     {
                         // if(inter_points.size() != 0) std::cout<<"Distance: "<<tmp_inter_points[i].first.transpose()<<"\n"<<inter_points.back().first.transpose()<<std::endl;
                         inter_points.push_back(tmp_inter_points[i]);

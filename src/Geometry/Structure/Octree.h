@@ -60,10 +60,6 @@ namespace geometry
                 int i;
                 for(i = 0; i != 8; ++i)
                 {
-                    // std::cout<<i<<" "<<depth<<" "<<nodes[i].width<<std::endl;
-                    // std::cout<<"center: "<<nodes[i].center.transpose()<<std::endl;
-                    // std::cout<<(nodes[i].center + geometry::Point3(nodes[i].width / 2, nodes[i].width / 2, nodes[i].width / 2)).transpose()<<" "<<
-                    //     (nodes[i].center - geometry::Point3(nodes[i].width / 2, nodes[i].width / 2, nodes[i].width / 2)).transpose()<<" / "<<points[pid].transpose()<<std::endl;
                     if(nodes[i].InNode(points[pid]))
                     {
 
@@ -288,6 +284,7 @@ namespace geometry
             all_nodes.resize(max_depth + 1);
             head.SetNodeIDAndGetAllNodes(all_nodes);
         }
+        void BuildTreeUniformly(const geometry::PointCloud &pcd);
         std::shared_ptr<geometry::PointCloud> GetPointCloud() const;
     };
 }

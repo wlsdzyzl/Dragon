@@ -97,7 +97,7 @@ namespace geometry
         double a2 = ba.dot(bc);
         double a3 = ca.dot(cb);
         // right angle
-        if(std::fabs(a1) <EPS || std::fabs(a2) < EPS || std::fabs(a3) < EPS)
+        if(std::fabs(a1) <DRAGON_EPS || std::fabs(a2) < DRAGON_EPS || std::fabs(a3) < DRAGON_EPS)
         return 1;
         // obtuse angle
         if(a1 < 0 || a2 < 0 || a3 < 0)
@@ -108,7 +108,7 @@ namespace geometry
     int AngleType(const VectorX &a, const VectorX &b)
     {
         double dot = a.dot(b);
-        if(std::fabs(dot) < EPS)
+        if(std::fabs(dot) < DRAGON_EPS)
         return 1;
         if(std::fabs(dot) < 0)
         return 2;
@@ -149,6 +149,19 @@ namespace geometry
                 t(2), 0, -t(0),
                 -t(1), t(0), 0;
         return t_hat;        
+    }
+    geometry::SE3 RandomTransformation()
+    {
+        std::random_device rd;
+        std::default_random_engine e(rd());
+        std::uniform_real_distribution<double> u(-1.0, 1.0);
+        double a, b, c;
+        a = u(e);
+        b = u(e);
+        c = u(e);
+        Se3 se3 = Se3::Zero();
+        se3(0) = a; se3(1) = b; se3(2) = c;
+        return Se3ToSE3(se3);
     }
     std::tuple<Point3, double , double> FitPlane(const Point3List & _points)
     {
@@ -294,10 +307,10 @@ namespace geometry
         double d3 = Cross3(l2.p0, l2.p1, l1.p0);
         double d4 = Cross3(l2.p0, l2.p1, l1.p1);
         
-        if (((d1 < -EPS && d2 > EPS) || (d1 > EPS && d2 < -EPS)) && ((d3 < -EPS && d4 > EPS) || (d3 > EPS && d4 < -EPS)))
+        if (((d1 < -DRAGON_EPS && d2 > DRAGON_EPS) || (d1 > DRAGON_EPS && d2 < -DRAGON_EPS)) && ((d3 < -DRAGON_EPS && d4 > DRAGON_EPS) || (d3 > DRAGON_EPS && d4 < -DRAGON_EPS)))
             return 1;
-        if ((fabs(d1) <= EPS && InSegBounding(l1, l2.p0)) || (fabs(d2) <= EPS && InSegBounding(l1, l2.p1)) 
-            || (fabs(d3) <= EPS && InSegBounding(l2, l1.p0)) || (fabs(d4) <= EPS && InSegBounding(l2, l1.p1)))
+        if ((fabs(d1) <= DRAGON_EPS && InSegBounding(l1, l2.p0)) || (fabs(d2) <= DRAGON_EPS && InSegBounding(l1, l2.p1)) 
+            || (fabs(d3) <= DRAGON_EPS && InSegBounding(l2, l1.p0)) || (fabs(d4) <= DRAGON_EPS && InSegBounding(l2, l1.p1)))
             return 1;
         return 0;
     }
@@ -345,7 +358,7 @@ namespace geometry
     int CheckPointToLine(const Line &line, const Point2 &point)
     {
         double distance = line.n.transpose() * point + line.d;
-        if(std::fabs(distance) < EPS) return 0;
+        if(std::fabs(distance) < DRAGON_EPS) return 0;
         if(distance > 0) return 1;
         return -1;
         //if(distance == 0) return 0;
@@ -356,12 +369,12 @@ namespace geometry
         // equal to CheckPointToLine(LineFromSeg(LineSegment(a,b)), z);
         double d =  a(0)* b(1) + a(1) * z(0) + b(0) * z(1) - z(0)* b(1) - a(1)*b(0) - a(0) * z(1);
         //std::cout<<d<<std::endl;
-        // if(std::fabs(d) < EPS)
+        // if(std::fabs(d) < DRAGON_EPS)
         // {
         //     std::cout<<YELLOW<<"Special case: Point is On Line."<<RESET<<std::endl;
         //     exit(0);
         // }
-        if(std::fabs(d) < EPS) return 0;
+        if(std::fabs(d) < DRAGON_EPS) return 0;
         if(d > 0) return 1;
         return -1;
     }

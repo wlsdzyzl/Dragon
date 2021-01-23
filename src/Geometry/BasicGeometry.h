@@ -9,7 +9,7 @@
 #include "sophus/se3.hpp"
 #include "IO/ConsoleColor.h"
 #include <iostream>
-#define EPS 1e-6
+#define DRAGON_EPS 1e-6
 namespace dragon
 {
 namespace geometry
@@ -69,8 +69,9 @@ namespace geometry
     void TransformPoints(const Matrix4 &T, Point3List &points);
     Point3 TransformPoint(const Matrix4 &T, const Point3 &point);
     void TransformNormals(const Matrix4 &T, Point3List &normals);
-    double ComputeTriangleArea(const PointX &a, const PointX &b, const PointX &c);
 
+    TransformationMatrix RandomTransformation();
+    double ComputeTriangleArea(const PointX &a, const PointX &b, const PointX &c);
     // double inline cos(const Vector3 &a, const Vector3 &b){return a.dot(b) / (a.norm() * b.norm()); }
     // double inline sin(const Vector3 &a, const Vector3 &b){double cos_= cos(a, b); return sqrt(1-cos_ * cos_) ; }
     // double inline tan(const Vector3 &a, const Vector3 &b){return sin(a, b) / cos(a, b);}
@@ -78,22 +79,22 @@ namespace geometry
     double inline Cos(const VectorX &a, const VectorX &b)
     {
         double norm_prod = (a.norm() * b.norm());
-        if(norm_prod < EPS)
-            norm_prod = 2 * EPS;
+        if(norm_prod < DRAGON_EPS)
+            norm_prod = 2 * DRAGON_EPS;
         return a.dot(b) / norm_prod; 
     }
     double inline Sin(const VectorX &a, const VectorX &b){double cos_= Cos(a, b); return sqrt(1-cos_ * cos_) ; }
     double inline Tan(const VectorX &a, const VectorX &b)
     { 
         double cos_ = Cos(a, b); 
-        if(std::fabs(cos_) < EPS) 
-            cos_ = cos_ > 0 ? EPS * 2:-EPS * 2;
+        if(std::fabs(cos_) < DRAGON_EPS) 
+            cos_ = cos_ > 0 ? DRAGON_EPS * 2:-DRAGON_EPS * 2;
         return Sin(a, b) / cos_;}
     double inline Cot(const VectorX &a, const VectorX &b)
     { 
         double tan_ = Tan(a,b); 
-        if(std::fabs(tan_)<EPS) 
-            tan_ = tan_ > 0? EPS * 2: - EPS * 2;
+        if(std::fabs(tan_)<DRAGON_EPS) 
+            tan_ = tan_ > 0? DRAGON_EPS * 2: - DRAGON_EPS * 2;
         return 1 / tan_;
     }
     double inline ClampCot(double cot_value)

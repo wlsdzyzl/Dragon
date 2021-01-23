@@ -142,13 +142,20 @@ namespace geometry
             // reassign the vertex's inc_edge
             if(edges[i]->id != -1)
             {
-                if(edges[i]->ori_vertex!= vertices[edges[i]->ori_vertex->id])
-                edges[i]->ori_vertex = vertices[edges[i]->ori_vertex->id];
-                if(edges[i]->des_vertex != vertices[edges[i]->des_vertex->id])
-                edges[i]->des_vertex = vertices[edges[i]->des_vertex->id];
-                if(edges[i]->ori_vertex->inc_edge
-                    || edges[i]->ori_vertex->inc_edge->id == -1)
-                edges[i]->ori_vertex->inc_edge = edges[i];
+                if(edges[i]->ori_vertex->id == -1 || edges[i]->des_vertex->id == -1) 
+                {
+                    edges[i]->id = -1;
+                }
+                else
+                {
+                    if(edges[i]->ori_vertex!= vertices[edges[i]->ori_vertex->id])
+                    edges[i]->ori_vertex = vertices[edges[i]->ori_vertex->id];
+                    if(edges[i]->des_vertex != vertices[edges[i]->des_vertex->id])
+                    edges[i]->des_vertex = vertices[edges[i]->des_vertex->id];
+                    if(edges[i]->ori_vertex->inc_edge
+                        || edges[i]->ori_vertex->inc_edge->id == -1)
+                    edges[i]->ori_vertex->inc_edge = edges[i];
+                }
             }
         }
         for(size_t i = 0; i != vertices.size(); ++i)
