@@ -110,7 +110,7 @@ namespace geometry
         double dot = a.dot(b);
         if(std::fabs(dot) < DRAGON_EPS)
         return 1;
-        if(std::fabs(dot) < 0)
+        if(dot < 0)
         return 2;
         return 0;
     }  

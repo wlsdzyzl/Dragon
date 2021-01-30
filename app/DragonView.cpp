@@ -49,48 +49,52 @@ void RenderGuiComponents()
             ImGui::SameLine();
             ImGui::Checkbox("PhongShading", &visualizer.draw_phong_shading); 
             // ImGui::BeginMenu("Curvature");
-            if(ImGui::Button("Mean Curvature"))
+            if (ImGui::CollapsingHeader("Curvature", ImGuiTreeNodeFlags_None))
             {
-                geometry::HalfEdge he; 
-                he.FromTriangleMesh(object);
-                he.CheckBorder();
-                geometry::ScalarList mean_curvatures;
-                geometry::mesh::ComputeMeanCurvature(he, mean_curvatures);
-                // for(int i = 0; i != mean_curvatures.size(); ++i)
-                // std::cout<<mean_curvatures[i]<<std::endl;
-                geometry::Point3List colors;
-                tool::ColorRemapping(mean_curvatures, colors);
-                for(size_t i = 0; i != he.vertices.size(); ++i)
-                {   
-                    he.vertices[i]->color = colors[i];
-                }    
-        
-                he.has_colors = true;
-                he.ToTriangleMesh(object);
+                if(ImGui::Button("Mean Curvature"))
+                {
+                    geometry::HalfEdge he; 
+                    he.FromTriangleMesh(object);
+                    he.CheckBorder();
+                    geometry::ScalarList mean_curvatures;
+                    geometry::mesh::ComputeMeanCurvature(he, mean_curvatures);
+                    // for(int i = 0; i != mean_curvatures.size(); ++i)
+                    // std::cout<<mean_curvatures[i]<<std::endl;
+                    geometry::Point3List colors;
+                    tool::ColorRemapping(mean_curvatures, colors);
+                    for(size_t i = 0; i != he.vertices.size(); ++i)
+                    {   
+                        he.vertices[i]->color = colors[i];
+                    }    
+            
+                    he.has_colors = true;
+                    he.ToTriangleMesh(object);
 
-                if(!object.HasNormals())
-                object.ComputeNormals();
-                updated = true;
+                    if(!object.HasNormals())
+                    object.ComputeNormals();
+                    updated = true;
+                }
+                if(ImGui::Button("Gauss Curvature"))
+                {
+                    geometry::HalfEdge he; 
+                    he.FromTriangleMesh(object);
+                    he.CheckBorder();
+                    geometry::ScalarList gauss_curvatures;
+                    geometry::mesh::ComputeGaussCurvature(he, gauss_curvatures);
+                    geometry::Point3List colors;
+                    tool::ColorRemapping(gauss_curvatures, colors);
+                    for(size_t i = 0; i != he.vertices.size(); ++i)
+                    {   
+                        he.vertices[i]->color = colors[i];
+                    }    
+                    he.has_colors = true;
+                    he.ToTriangleMesh(object);
+                    if(!object.HasNormals())
+                    object.ComputeNormals();
+                    updated = true;
+                }
             }
-            if(ImGui::Button("Gauss Curvature"))
-            {
-                geometry::HalfEdge he; 
-                he.FromTriangleMesh(object);
-                he.CheckBorder();
-                geometry::ScalarList gauss_curvatures;
-                geometry::mesh::ComputeGaussCurvature(he, gauss_curvatures);
-                geometry::Point3List colors;
-                tool::ColorRemapping(gauss_curvatures, colors);
-                for(size_t i = 0; i != he.vertices.size(); ++i)
-                {   
-                    he.vertices[i]->color = colors[i];
-                }    
-                he.has_colors = true;
-                he.ToTriangleMesh(object);
-                if(!object.HasNormals())
-                object.ComputeNormals();
-                updated = true;
-            }
+            
             // if(ImGui::Button("Naive Laplacian Smoothing"))
             // {
             //     auto result = 
@@ -100,90 +104,100 @@ void RenderGuiComponents()
             //     object.ComputeNormals();
             //     updated = true;
             // }
-            ImGui::SliderFloat("local lambda", &local_lambda, 0.001f, 0.5f);
-            ImGui::SliderInt("Local Iteration", &iteration_local, 1, 1000);
-            if(ImGui::Button("Local Laplacian Smoothing"))
+            if(ImGui::CollapsingHeader("Smoothing", ImGuiTreeNodeFlags_None))
             {
-                auto result = 
-                    geometry::mesh::LocalLaplacianSmooting(object, local_lambda, iteration_local);            
-                object = *result;
-                if(!object.HasNormals())
-                object.ComputeNormals();
-                updated = true;
-            }
-            ImGui::SliderFloat("global lambda", &global_lambda, 0.01f, 1.0f);
-            if(ImGui::Button("Global Laplacian Smoothing"))
-            {
-                auto result = 
-                    geometry::mesh::GlobalLaplacianSmooting(object, 1 - global_lambda);            
-                object = *result;
-                if(!object.HasNormals())
-                object.ComputeNormals();
-                updated = true;
-            }
-            ImGui::Checkbox("Uniform", &use_uniform_para); 
-            if(ImGui::Button("UV Parameterization (Circle)"))
-            {
-                if(use_uniform_para)
+                ImGui::SliderFloat("local lambda", &local_lambda, 0.001f, 0.5f);
+                ImGui::SliderInt("Local Iteration", &iteration_local, 1, 1000);
+                if(ImGui::Button("Local Laplacian Smoothing"))
                 {
                     auto result = 
-                        geometry::mesh::MeshParameterizationCircle(object, 0);            
+                        geometry::mesh::LocalLaplacianSmooting(object, local_lambda, iteration_local);            
                     object = *result;
+                    if(!object.HasNormals())
+                    object.ComputeNormals();
+                    updated = true;
                 }
-                else
+                ImGui::SliderFloat("global lambda", &global_lambda, 0.01f, 1.0f);
+                if(ImGui::Button("Global Laplacian Smoothing"))
                 {
                     auto result = 
-                        geometry::mesh::MeshParameterizationCircle(object, 3);            
+                        geometry::mesh::GlobalLaplacianSmooting(object, 1 - global_lambda);            
                     object = *result;
+                    if(!object.HasNormals())
+                    object.ComputeNormals();
+                    updated = true;
                 }
-                if(!object.HasNormals())
-                object.ComputeNormals();
-                reorient = true;
-                updated = true;
             }
-            if(ImGui::Button("UV Parameterization (Square)"))
+             
+            if(ImGui::CollapsingHeader("Parameterization", ImGuiTreeNodeFlags_None))
             {
-                if(use_uniform_para)
+                ImGui::Checkbox("Uniform", &use_uniform_para);
+                if(ImGui::Button("UV Parameterization (Circle)"))
                 {
-                    auto result = 
-                        geometry::mesh::MeshParameterizationSquare(object, 0);            
-                    object = *result;
+                    if(use_uniform_para)
+                    {
+                        auto result = 
+                            geometry::mesh::MeshParameterizationCircle(object, 0);            
+                        object = *result;
+                    }
+                    else
+                    {
+                        auto result = 
+                            geometry::mesh::MeshParameterizationCircle(object, 3);            
+                        object = *result;
+                    }
+                    if(!object.HasNormals())
+                    object.ComputeNormals();
+                    reorient = true;
+                    updated = true;
                 }
-                else
+                if(ImGui::Button("UV Parameterization (Square)"))
                 {
-                    auto result = 
-                        geometry::mesh::MeshParameterizationSquare(object, 3);            
-                    object = *result;
+                    if(use_uniform_para)
+                    {
+                        auto result = 
+                            geometry::mesh::MeshParameterizationSquare(object, 0);            
+                        object = *result;
+                    }
+                    else
+                    {
+                        auto result = 
+                            geometry::mesh::MeshParameterizationSquare(object, 3);            
+                        object = *result;
+                    }
+                    if(!object.HasNormals())
+                    object.ComputeNormals();
+                    reorient = true;
+                    updated = true;
                 }
-                if(!object.HasNormals())
-                object.ComputeNormals();
-                reorient = true;
-                updated = true;
             }
-            ImGui::SliderFloat("Percentage", &simplify_rate, 0.01f, 1.0f);
-            if(ImGui::Button("Quadric Simplification"))
+            if(ImGui::CollapsingHeader("Simplification", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                // auto result = object.QuadricSimplify(object.triangles.size() - 1);
-                auto result = geometry::mesh::QuadricDecimation(object,  simplify_rate * object.triangles.size());
-                object = *result;
-                if(!object.HasNormals())
-                object.ComputeNormals();
-                updated = true;
+                ImGui::SliderFloat("Percentage", &simplify_rate, 0.01f, 1.0f);
+                if(ImGui::Button("Quadric Simplification"))
+                {
+                    // auto result = object.QuadricSimplify(object.triangles.size() - 1);
+                    auto result = geometry::mesh::QuadricDecimation(object,  simplify_rate * object.triangles.size());
+                    object = *result;
+                    if(!object.HasNormals())
+                    object.ComputeNormals();
+                    updated = true;
+                }
+                if(ImGui::InputText("Grid Unit", voxel_len_s, 100))
+                {
+                    // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
+                    voxel_len = std::atof(voxel_len_s);
+                }
+                if(ImGui::Button("Clustering Simplification"))
+                {
+                    // auto result = object.ClusteringSimplify(voxel_len);
+                    auto result = geometry::mesh::ClusteringDecimation(object,  voxel_len);
+                    object = *result;
+                    if(!object.HasNormals())
+                    object.ComputeNormals();
+                    updated = true;
+                }   
             }
-            if(ImGui::InputText("Grid Unit", voxel_len_s, 100))
-            {
-                // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
-                voxel_len = std::atof(voxel_len_s);
-            }
-            if(ImGui::Button("Clustering Simplification"))
-            {
-                // auto result = object.ClusteringSimplify(voxel_len);
-                auto result = geometry::mesh::ClusteringDecimation(object,  voxel_len);
-                object = *result;
-                if(!object.HasNormals())
-                object.ComputeNormals();
-                updated = true;
-            }   
             if(ImGui::Button("Get PointCloud"))
             {
                 is_mesh = false;
@@ -201,102 +215,112 @@ void RenderGuiComponents()
             ImGui::Checkbox("ColorMapping", &visualizer.draw_color);
             ImGui::SameLine();
             ImGui::Checkbox("PhongShading", &visualizer.draw_phong_shading); 
-            if(ImGui::InputText("Radius", radius_s, 100))
+            if(ImGui::CollapsingHeader("Normal Operation", ImGuiTreeNodeFlags_None))
             {
-                // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
-                radius = std::atof(radius_s);
+                if(ImGui::InputText("Radius", radius_s, 100))
+                {
+                    // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
+                    radius = std::atof(radius_s);
+                }
+                if(ImGui::InputText("KNN", knn_s, 100))
+                {
+                    // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
+                    knn = std::atoi(knn_s);
+                }
+                if(ImGui::Button("Estimate Normals"))
+                {
+                    pcd.EstimateNormals(radius, knn);
+                    updated = true;
+                }
+                if(ImGui::Button("Flip Normals"))
+                {
+                    pcd.FlipNormal();
+                    updated = true;
+                }  
             }
-            if(ImGui::InputText("KNN", knn_s, 100))
+            if(ImGui::CollapsingHeader("Processing", ImGuiTreeNodeFlags_None))
             {
-                // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
-                knn = std::atoi(knn_s);
-            }
-            if(ImGui::Button("Estimate Normals"))
-            {
-                pcd.EstimateNormals(radius, knn);
-                updated = true;
-            }
-            if(ImGui::InputText("Grid Unit", voxel_len_s, 100))
-            {
-                // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
-                voxel_len = std::atof(voxel_len_s);
-            }
-            if(ImGui::Button("Down Sample"))
-            {
+                if(ImGui::InputText("Grid Unit", voxel_len_s, 100))
+                {
+                    // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
+                    voxel_len = std::atof(voxel_len_s);
+                }
+                if(ImGui::Button("Down Sample"))
+                {
 
-                pcd = *(pcd.DownSample(voxel_len));
-                updated = true;
+                    pcd = *(pcd.DownSample(voxel_len));
+                    updated = true;
+                }
+                if(ImGui::InputText("Scale", scale_s, 100))
+                {
+                    // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
+                    scale = std::atof(scale_s);
+                }
+                if(ImGui::Button("Scaling"))
+                {
+                    pcd.Scale(scale);
+                    updated = true;
+                }
             }
-            if(ImGui::InputText("Scale", scale_s, 100))
+            if(ImGui::CollapsingHeader("Reconstruction", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                // std::cout << "grid unit: "<<voxel_len_s<<std::endl;
-                scale = std::atof(scale_s);
-            }
-            if(ImGui::Button("Scaling"))
-            {
-                pcd.Scale(scale);
-                updated = true;
-            }
-            if(ImGui::Button("Flip Normals"))
-            {
-                pcd.FlipNormal();
-                updated = true;
-            }      
-            ImGui::Checkbox("Recompute Normal", &r_normal);
-            // ImGui::SameLine();
-            if(ImGui::Button("RBF Reconstruction"))
-            {
-                scale = 2 / (std::max(visualization::window::bb.y_max - visualization::window::bb.y_min, 
-                    std::max(visualization::window::bb.x_max - visualization::window::bb.x_min, 
-                        visualization::window::bb.z_max - visualization::window::bb.z_min)));
-                // std::cout<<scale<<std::endl;
-                pcd.Scale(scale);
-                if(r_normal)
-                pcd.EstimateNormals(1, 10); 
-                auto d_pcd = pcd.DownSample(0.16);
-                pcd = *d_pcd;
-                reconstruction::CubeHandler cube_handler;
-                cube_handler.SetTruncation(0.4);
-                cube_handler.SetVoxelResolution(0.05);
+                ImGui::Checkbox("Recompute Normal", &r_normal);
+                // ImGui::SameLine();
+                if(ImGui::Button("RBF Reconstruction"))
+                {
+                    scale = 2 / (std::max(visualization::window::bb.y_max - visualization::window::bb.y_min, 
+                        std::max(visualization::window::bb.x_max - visualization::window::bb.x_min, 
+                            visualization::window::bb.z_max - visualization::window::bb.z_min)));
+                    // std::cout<<scale<<std::endl;
+                    pcd.Scale(scale);
+                    if(r_normal)
+                    pcd.EstimateNormals(1, 10); 
+                    auto d_pcd = pcd.DownSample(0.16);
+                    pcd = *d_pcd;
+                    reconstruction::CubeHandler cube_handler;
+                    cube_handler.SetTruncation(0.4);
+                    cube_handler.SetVoxelResolution(0.05);
 
-                auto result = reconstruction::RBF(pcd, cube_handler, 0.1);
-                object = *(geometry::mesh::ClusteringDecimation(*result, 0.05));
-                object.ComputeNormals();
-                is_mesh = true;
-                pcd.Reset();
-                updated = true;
-                reorient = true;
-                draw_octree = false;
-            }    
-            ImGui::SliderInt("Octree Depth", &max_depth, 1, 8);
-            if(ImGui::Button("Draw Octree"))
-            {
-                oct.Reset();
-                oct.max_depth = max_depth;
-                oct.BuildTree(pcd);
-                updated = true;
-                draw_octree = true;
-            } 
-            if(ImGui::Button("Poisson Reconstruction"))
-            {
-                scale = 2 / (std::max(visualization::window::bb.y_max - visualization::window::bb.y_min, 
-                    std::max(visualization::window::bb.x_max - visualization::window::bb.x_min, 
-                        visualization::window::bb.z_max - visualization::window::bb.z_min)));
-                // std::cout<<scale<<std::endl;
-                pcd.Scale(scale);
-                if(r_normal)
-                pcd.EstimateNormals(1, 10); 
-                auto result = reconstruction::Poisson(pcd,max_depth);
-                object = *(geometry::mesh::ClusteringDecimation(*result, 0.01));
-                object.FlipNormal();
-                object.ComputeNormals();
-                is_mesh = true;
-                pcd.Reset();
-                updated = true;
-                reorient = true;
-                draw_octree = false;
-            }       
+                    auto result = reconstruction::RBF(pcd, cube_handler, 0.1);
+                    object = *(geometry::mesh::ClusteringDecimation(*result, 0.05));
+                    object.ComputeNormals();
+                    is_mesh = true;
+                    pcd.Reset();
+                    updated = true;
+                    reorient = true;
+                    draw_octree = false;
+                }    
+                ImGui::SliderInt("Octree Depth", &max_depth, 1, 8);
+                if(ImGui::Button("Draw Octree"))
+                {
+                    oct.Reset();
+                    oct.max_depth = max_depth;
+                    oct.BuildTree(pcd);
+                    updated = true;
+                    draw_octree = true;
+                } 
+                if(ImGui::Button("Poisson Reconstruction"))
+                {
+                    scale = 2 / (std::max(visualization::window::bb.y_max - visualization::window::bb.y_min, 
+                        std::max(visualization::window::bb.x_max - visualization::window::bb.x_min, 
+                            visualization::window::bb.z_max - visualization::window::bb.z_min)));
+                    // std::cout<<scale<<std::endl;
+                    pcd.Scale(scale);
+                    if(r_normal)
+                    pcd.EstimateNormals(1, 10); 
+                    auto result = reconstruction::Poisson(pcd,max_depth);
+                    object = *(geometry::mesh::ClusteringDecimation(*result, 0.05));
+                    object.FlipNormal();
+                    object.ComputeNormals();
+                    is_mesh = true;
+                    pcd.Reset();
+                    updated = true;
+                    reorient = true;
+                    draw_octree = false;
+                }       
+            }
             ImGui::Text("points: %d", (int)pcd.points.size());
+        
         }
         if(ImGui::Button("Reload"))
         {
