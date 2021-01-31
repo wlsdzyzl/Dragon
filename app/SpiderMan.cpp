@@ -2,7 +2,7 @@
 #include "Visualization/Visualizer2D.h"
 #include <random>
 #include <fstream>
-#include "Geometry/Curve/Curve.h"
+#include "Geometry/Curve.h"
 #include <unistd.h>
 using namespace dragon;
 using namespace visualization;
@@ -55,7 +55,7 @@ int main()
         {
             for(int j = 0; j < i; ++j)
             {
-                DrawLine(border_points[i], border_points[j], Point3(1, 0, 0), 6);
+                DrawLine(border_points[i], border_points[j], Eigen::Vector3f(1, 0, 0), 6);
                 PostCall();
             }
         }  
@@ -72,7 +72,7 @@ int main()
                 nodes.push_back(Point2(cos((j + 0.0f) / group * 2 * M_PI) * tmp_r,  sin((j + 0.0f) / group * 2 * M_PI) * tmp_r));
             }
             if(i != inter_group - 1 && i != 0)
-            DrawPolygon(nodes,  Point3(0, 0, 0), 4); PostCall();
+            DrawPolygon(nodes,  Eigen::Vector3f(0, 0, 0), 4); PostCall();
             if(i == 0)
             first_nodes = nodes;
         
@@ -81,21 +81,22 @@ int main()
         for(int i = 0; i != group; ++i)
         {
             first_nodes[i] /= 1.5;
-            DrawLine(nodes[i], first_nodes[i], Point3(0, 0, 0), 4); PostCall();
+            DrawLine(nodes[i], first_nodes[i], Eigen::Vector3f(0, 0, 0), 4); PostCall();
         }
-        DrawPolygon(first_nodes,  Point3(0, 0, 0), 4); PostCall();
+        DrawPolygon(first_nodes,  Eigen::Vector3f(0, 0, 0), 4); PostCall();
         {
             Point2 lp0(-0.03, -0.05), lp1(-0.44, 0.33),lp2(-0.15, -0.3), lp3(-0.33, -0.3), lp4(-0.5, 0);
             Point2List inter_points = {lp0, lp2, lp3, lp4, lp1};
-            auto generate_points = curve::CubicSpline(inter_points, 500, 1); 
+            // auto generate_points = curve::CubicSpline(inter_points, 500, 1); 
+            auto generate_points = curve::Chaikin(inter_points, 500); 
             generate_points.push_back(lp1);
             for(size_t i = 1; i != generate_points.size() - 1; ++i)
             {
                 Point2List tmp_p = {lp0, generate_points[i], generate_points[i+1]};
-                DrawPolygonFilled(tmp_p, Point3(0.9, 0.9, 0.9));PostCall();
+                DrawPolygonFilled(tmp_p, Eigen::Vector3f(0.9, 0.9, 0.9));PostCall();
             }
-            DrawLineStrip(generate_points,  Point3(0, 0, 0), 6);PostCall();
-            DrawLine(lp0, lp1, Point3(0, 0, 0), 6); PostCall();
+            DrawLineStrip(generate_points,  Eigen::Vector3f(0, 0, 0), 6);PostCall();
+            DrawLine(lp0, lp1, Eigen::Vector3f(0, 0, 0), 6); PostCall();
         }
         {
             Point2 rp0(0.03, -0.05), rp1(0.44, 0.33), rp2(0.15, -0.3), rp3(0.33, -0.3), rp4(0.5, 0);
@@ -105,12 +106,12 @@ int main()
             for(size_t i = 1; i != generate_points.size() - 1; ++i)
             {
                 Point2List tmp_p = {rp0, generate_points[i], generate_points[i+1]};
-                DrawPolygonFilled(tmp_p, Point3(0.9, 0.9, 0.9));PostCall();
+                DrawPolygonFilled(tmp_p, Eigen::Vector3f(0.9, 0.9, 0.9));PostCall();
             }
-            DrawLineStrip(generate_points,  Point3(0, 0, 0), 6);PostCall();
-            DrawLine(rp0, rp1, Point3(0, 0, 0), 6); PostCall();
+            DrawLineStrip(generate_points,  Eigen::Vector3f(0, 0, 0), 6);PostCall();
+            DrawLine(rp0, rp1, Eigen::Vector3f(0, 0, 0), 6); PostCall();
         }
-        DrawCircle(Point2(0, 0), r, Point3(0, 0, 0), 6, 1000); PostCall();
+        DrawCircle(Point2(0, 0), r, Eigen::Vector3f(0, 0, 0), 6, 1000); PostCall();
         sleep(1);
     }
     while(true) ;

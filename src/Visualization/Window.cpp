@@ -303,7 +303,7 @@ namespace window
         last_y = ypos;
         last_point_valid = Map2Sphere(geometry::Point2i((int)last_x, (int)last_y), last_point_3d);
     }
-    void DrawCircle(const geometry::Point2 &p, double r, const geometry::Point3 &color, double thickness, int n)
+    void DrawCircle(const geometry::Point2 &p, double r, const Eigen::Vector3f &color, double thickness, int n)
     {
         glColor3f(color(0), color(1), color(2));
         glLineWidth(thickness);
@@ -314,7 +314,7 @@ namespace window
         }
         glEnd();
     }  
-    void DrawCircleFilled(const geometry::Point2 &p, double r, const geometry::Point3 &color, int n)
+    void DrawCircleFilled(const geometry::Point2 &p, double r, const Eigen::Vector3f &color, int n)
     {
         glColor3f(color(0), color(1), color(2));
         glBegin(GL_POLYGON);              // Each set of 4 vertices form a quad
@@ -324,7 +324,7 @@ namespace window
         }
         glEnd();
     }      
-    void DrawPoint(const geometry::Point2 &p, const geometry::Point3 &color, double thickness)
+    void DrawPoint(const geometry::Point2 &p, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glPointSize(thickness);
@@ -332,7 +332,7 @@ namespace window
         glVertex2f(p(0), p(1));
         glEnd();
     }
-    void DrawPoints(const geometry::Point2List &points, const geometry::Point3 &color, double thickness)
+    void DrawPoints(const geometry::Point2List &points, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glPointSize(thickness);
@@ -341,7 +341,7 @@ namespace window
         glVertex2f(points[i](0), points[i](1));
         glEnd();
     }
-    void DrawLine(const geometry::Point2 &p1, const geometry::Point2 &p2, const geometry::Point3 &color, double thickness)
+    void DrawLine(const geometry::Point2 &p1, const geometry::Point2 &p2, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glLineWidth(thickness);
@@ -350,7 +350,7 @@ namespace window
         glVertex2f(p2(0), p2(1));
         glEnd();
     }
-    void DrawLines(const geometry::Point2List &points, const geometry::Point3 &color, double thickness)
+    void DrawLines(const geometry::Point2List &points, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glLineWidth(thickness);
@@ -362,7 +362,7 @@ namespace window
         }
         glEnd();
     }
-    void DrawLineStrip(const geometry::Point2List &points, const geometry::Point3 &color, double thickness)
+    void DrawLineStrip(const geometry::Point2List &points, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glLineWidth(thickness);
@@ -373,7 +373,7 @@ namespace window
         }
         glEnd();
     }
-    void DrawPolygon(const geometry::Point2List &points, const geometry::Point3 &color,  double thickness)
+    void DrawPolygon(const geometry::Point2List &points, const Eigen::Vector3f &color,  double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glLineWidth(thickness);
@@ -385,7 +385,7 @@ namespace window
         }
         glEnd();        
     }
-    void DrawPolygonFilled(const geometry::Point2List &points, const geometry::Point3 &color)
+    void DrawPolygonFilled(const geometry::Point2List &points, const Eigen::Vector3f &color)
     {
         glColor3f(color(0), color(1), color(2));
         glBegin(GL_POLYGON);              
@@ -398,7 +398,7 @@ namespace window
 
 
      
-    void DrawPoint(const geometry::Point3 &p, const geometry::Point3 &color, double thickness)
+    void DrawPoint(const geometry::Point3 &p, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glPointSize(thickness);
@@ -406,7 +406,7 @@ namespace window
         glVertex3f(p(0), p(1), p(2));
         glEnd();
     }
-    void DrawPoints(const geometry::Point3List &points, const geometry::Point3 &color, double thickness)
+    void DrawPoints(const geometry::Point3List &points, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glPointSize(thickness);
@@ -415,7 +415,7 @@ namespace window
         glVertex3f(points[i](0), points[i](1), points[i](2));
         glEnd();
     }
-    void DrawLine(const geometry::Point3 &p1, const geometry::Point3 &p2, const geometry::Point3 &color, double thickness)
+    void DrawLine(const geometry::Point3 &p1, const geometry::Point3 &p2, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glLineWidth(thickness);
@@ -442,7 +442,7 @@ namespace window
         glLoadMatrixf(model_view_matrix.data());
 #endif
     }
-    void DrawLines(const geometry::Point3List &points, const geometry::Point3 &color, double thickness)
+    void DrawLines(const geometry::Point3List &points, const Eigen::Vector3f &color, double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glLineWidth(thickness);
@@ -454,7 +454,7 @@ namespace window
         }
         glEnd();
     }
-    void DrawLineStrip(const geometry::Point3List &points, const geometry::Point3 &color, double thickness)
+    void DrawLineStrip(const geometry::Point3List &points, const Eigen::Vector3f &color, double thickness)
     {
         
         glColor3f(color(0), color(1), color(2));
@@ -466,7 +466,7 @@ namespace window
         }
         glEnd();
     }
-    void DrawPolygon(const geometry::Point3List &points, const geometry::Point3 &color,  double thickness)
+    void DrawPolygon(const geometry::Point3List &points, const Eigen::Vector3f &color,  double thickness)
     {
         glColor3f(color(0), color(1), color(2));
         glLineWidth(thickness);
@@ -478,7 +478,7 @@ namespace window
         }
         glEnd();        
     }
-    void DrawPolygonFilled(const geometry::Point3List &points, const geometry::Point3 &color)
+    void DrawPolygonFilled(const geometry::Point3List &points, const Eigen::Vector3f &color)
     {
         glColor3f(color(0), color(1), color(2));
         glBegin(GL_POLYGON);              

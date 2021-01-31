@@ -192,14 +192,139 @@ namespace curve
     }
     // through subdivision to get uniform cubic b spline 
     template<int T>
-        geometry::PointList<T> BSpline(const geometry::PointList<T> &control_points, int n = 1000)
+        geometry::PointList<T> BCubicSpline(const geometry::PointList<T> &control_points, int n = 1000, bool closure = false)
     {
-
+        if((int)control_points.size() > n) return control_points;
+        geometry::PointList<T> new_points;
+        geometry::PointList<T> final_points;
+        if(closure)
+        {
+            // split
+            for(size_t i = 0; i != control_points.size(); ++i)
+            {
+                int next_id = (i+1) % control_points.size();
+                new_points.push_back((control_points[i] + control_points[next_id]) / 2);
+            }
+            // average
+            for(size_t i = 0; i != control_points.size(); ++i)
+            {
+                int next_id = (i+1) % control_points.size();
+                int last_id = i-1;
+                final_points.push_back( control_points[i] * 0.75 +  control_points[next_id] * 0.125 +
+                    control_points[last_id] * 0.125 );
+                final_points.push_back( new_points[i]);
+            }
+        }
+        else
+        {
+            // split
+            for(size_t i = 0; i != control_points.size() - 1; ++i)
+            {
+                int next_id = (i+1) % control_points.size();
+                new_points.push_back((control_points[i] + control_points[next_id]) / 2);
+            }
+            // average
+            for(size_t i = 0; i != control_points.size(); ++i)
+            {
+                int next_id = (i+1) % control_points.size();
+                int last_id = i-1;
+                final_points.push_back( control_points[i] * 0.75 +  control_points[next_id] * 0.125 +
+                    control_points[last_id]*0.125 );
+                if(i < new_points.size())
+                    final_points.push_back( new_points[i]);
+            }
+        }
+        return BCubicSpline(final_points, n, closure);
     }
+    // through subdivision to get uniform cubic b spline 
     template<int T>
-        geometry::PointList<T> FourPointsInterpolation(const geometry::PointList<T> &inter_points, int n = 1000)
+        geometry::PointList<T> Chaikin(const geometry::PointList<T> &control_points, int n = 1000, bool closure = false)
     {
 
+        if((int)control_points.size() > n) return control_points;
+        geometry::PointList<T> new_points;
+        geometry::PointList<T> final_points;
+        if(closure)
+        {
+            // split
+            for(size_t i = 0; i != control_points.size(); ++i)
+            {
+                int next_id = (i+1) % control_points.size();
+                new_points.push_back((control_points[i] + control_points[next_id]) / 2);
+            }
+            // average
+            for(size_t i = 0; i != control_points.size(); ++i)
+            {
+                int next_id = (i+1) % control_points.size();
+                final_points.push_back((control_points[i] + new_points[i]) / 2);
+                final_points.push_back((control_points[next_id] + new_points[i]) / 2);
+            }
+        }
+        else
+        {
+            // split
+            for (size_t i = 0; i != control_points.size() - 1; ++i)
+            {
+                int next_id = (i+1) % control_points.size();
+                new_points.push_back((control_points[i] + control_points[next_id]) / 2);
+            }
+            // average
+            for (size_t i = 0; i != control_points.size() - 1; ++i)
+            {
+                int next_id = (i+1) % control_points.size();
+                final_points.push_back((control_points[i] + new_points[i]) / 2);
+                final_points.push_back((control_points[next_id] + new_points[i]) / 2);
+            }
+        }
+        return Chaikin(final_points, n, closure);  
+    }
+    // if alpha is larger than 0.125, the curve is fractal
+    template<int T>
+        geometry::PointList<T> FourPointsInterpolation(const geometry::PointList<T> &inter_points, int n = 1000, double alpha = 0.12, bool closure = false)
+    {
+        if( (int)inter_points.size() >= n || inter_points.size() < 4) return inter_points;
+        geometry::PointList<T> new_points;
+        geometry::PointList<T> final_points;
+        if(closure)
+        {
+            for( size_t i = 0; i < inter_points.size(); ++i)
+            {
+                int last_id = i - 1;
+                int next_id_0 = (i + 1) % inter_points.size();
+                int next_id_1 = (i + 2) % inter_points.size();
+                geometry::Vector<T> new_p = (inter_points[i] + inter_points[next_id_0])/2 + 
+                    alpha * ((inter_points[i] + inter_points[next_id_0]) / 2 - (inter_points[next_id_1] + inter_points[last_id]) / 2);
+                new_points.push_back(new_p);
+            }
+            
+            for( size_t i = 0; i < inter_points.size(); ++i)
+            {
+                final_points.push_back(inter_points[i]);
+                final_points.push_back(new_points[i]);
+            }
+        }
+        else
+        {
+            for( size_t i = 0; i < inter_points.size() - 1; ++i)
+            {
+                int last_id = i - 1;
+                if (last_id < 0)
+                    last_id = 0;
+                int next_id_0 = i + 1;
+                int next_id_1 = i + 2;
+                if (next_id_1 >= (int)inter_points.size()) next_id_1 = inter_points.size() - 1;
+                geometry::Vector<T> new_p = (inter_points[i] + inter_points[next_id_0])/2 + 
+                    alpha *((inter_points[i] + inter_points[next_id_0]) / 2 - (inter_points[next_id_1] + inter_points[last_id]) / 2);
+                new_points.push_back(new_p);
+            }
+            for( size_t i = 0; i < inter_points.size() - 1; ++i)
+            {
+                final_points.push_back(inter_points[i]);
+                final_points.push_back(new_points[i]);  
+            }
+            final_points.push_back(inter_points.back());
+        }
+        return FourPointsInterpolation(final_points, n, alpha, closure);
     }
 }
 }

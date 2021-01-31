@@ -54,7 +54,10 @@ namespace visualization
             window::DrawPoints(points, color_table[gid % color_table.size()]);
         }
         window::DrawLines(line_segments);
-
+        for(size_t i = 0; i < line_strips.size(); ++i)
+        {
+            window::DrawLineStrip(line_strips[i], color_table[(i + 1) % color_table.size()], 3);
+        }
         for(size_t i = 0; i != circles.size(); ++i)
         {
             geometry::Point2 o;

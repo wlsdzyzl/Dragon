@@ -17,7 +17,7 @@ namespace visualization
             SetRange(-width / 2, width / 2, - height / 2, height / 2);
             for(size_t i = 0; i < io::color_table.size(); ++i)
             {
-                color_table.push_back( geometry::Point3(io::color_table[i][0] / 255.0, io::color_table[i][1] / 255.0, io::color_table[i][2] / 255.0 ));
+                color_table.push_back( Eigen::Vector3f(io::color_table[i][0] / 255.0, io::color_table[i][1] / 255.0, io::color_table[i][2] / 255.0 ));
             }
             return true;
         }
@@ -38,7 +38,7 @@ namespace visualization
             points_group.clear();
             line_segments.clear();
             polygons.clear();
-            line_strip.clear();
+            line_strips.clear();
         }
         void AddHalfEdge(const geometry::HalfEdge &he);
         void AddVoronoi(const geometry::Voronoi2D &v);
@@ -69,8 +69,8 @@ namespace visualization
         geometry::Point2List line_segments;
         std::vector<geometry::Point2List> points_group;
         std::vector<geometry::Point2List> polygons;
-        geometry::Point2List line_strip;
-        geometry::Point3List color_table;
+        std::vector<geometry::Point2List> line_strips;
+        std::vector<Eigen::Vector3f> color_table;
         ImVec4 default_color;
         double point_radius = 0.01;
         geometry::Point2 x_range;
