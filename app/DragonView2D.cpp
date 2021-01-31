@@ -83,41 +83,41 @@ void RenderGuiComponents()
         ImGui::Begin("Menu");                         
         //ImGui::SameLine();
         // ImGui::BeginMenu("Curvature");
-        ImGui::Text("Click the right mouse button to put point on the canvas");
+        ImGui::Text("Click the right mouse button to put point on the canvas, or");
+        if(ImGui::Button("Random points"))
+        {
+            pressed_points.clear();
+            visualizer.Reset();
+            visualizer.points_group.resize(1);
+#if 1
+            for(int i = 0; i != points_num; ++i)
+            {
+                pressed_points.push_back(geometry::Point2(uni_real(rd), uni_real(rd)));
+            }
+#else 
+            // pressed_points.push_back(visualizer.CanvasCoordinate( geometry::Point2(-189, 77)));
+            // pressed_points.push_back(visualizer.CanvasCoordinate( geometry::Point2(-189, -93)));
+            // pressed_points.push_back(visualizer.CanvasCoordinate( geometry::Point2(-17, -93)));
+            // pressed_points.push_back(visualizer.CanvasCoordinate( geometry::Point2(-17, 77)));
+            std::ifstream ifs("./error.txt");
+            std::string line;
+            while(getline(ifs, line))
+            {
+                std::istringstream iss(line);
+                int id;
+                double x, y;
+                iss>>id>>x>>y;
+                pressed_points.push_back(visualizer.CanvasCoordinate(geometry::Point2(x, y)));
+            }
+#endif
+            // pressed_points.resize(91);
+            visualizer.points_group[0] = pressed_points;
+
+        }
+        ImGui::SameLine();
+        ImGui::SliderInt("", &points_num, 3, 1000);
         if(ImGui::CollapsingHeader("Voronoi", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            if(ImGui::Button("Random points"))
-            {
-                pressed_points.clear();
-                visualizer.Reset();
-                visualizer.points_group.resize(1);
-#if 1
-                for(int i = 0; i != points_num; ++i)
-                {
-                    pressed_points.push_back(geometry::Point2(uni_real(rd), uni_real(rd)));
-                }
-#else 
-                // pressed_points.push_back(visualizer.CanvasCoordinate( geometry::Point2(-189, 77)));
-                // pressed_points.push_back(visualizer.CanvasCoordinate( geometry::Point2(-189, -93)));
-                // pressed_points.push_back(visualizer.CanvasCoordinate( geometry::Point2(-17, -93)));
-                // pressed_points.push_back(visualizer.CanvasCoordinate( geometry::Point2(-17, 77)));
-                std::ifstream ifs("./error.txt");
-                std::string line;
-                while(getline(ifs, line))
-                {
-                    std::istringstream iss(line);
-                    int id;
-                    double x, y;
-                    iss>>id>>x>>y;
-                    pressed_points.push_back(visualizer.CanvasCoordinate(geometry::Point2(x, y)));
-                }
-#endif
-                // pressed_points.resize(91);
-                visualizer.points_group[0] = pressed_points;
-
-            }
-            ImGui::SameLine();
-            ImGui::SliderInt("", &points_num, 3, 1000);
             if(ImGui::Button("Generate Voronoi Diagram"))
             {
                 Reset();
