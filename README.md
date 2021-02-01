@@ -24,14 +24,15 @@ Dragon is a library for geometry processing.
 - Simplified RBF reconstruction and Poisson reconstruction
 
 ![](./image/dragon_pcd.gif)
-**Reconstructed model using RBF and Poisson**
+
+##### Reconstructed model using RBF and Poisson
 ![](./image/arma_comp.jpg)
 
 ![](./image/dragon_comp.jpg)
 
 ![](./image/kitten_comp.jpg)
 
-**Reconstructed model with different depth (3-7)**
+##### Reconstructed model with different depth (3-7)
 ![](./image/arma.jpg)
 
 ![](./image/dragon.jpg)
