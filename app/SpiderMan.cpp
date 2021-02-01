@@ -88,7 +88,7 @@ int main()
             Point2 lp0(-0.03, -0.05), lp1(-0.44, 0.33),lp2(-0.15, -0.3), lp3(-0.33, -0.3), lp4(-0.5, 0);
             Point2List inter_points = {lp0, lp2, lp3, lp4, lp1};
             // auto generate_points = curve::CubicSpline(inter_points, 500, 1); 
-            auto generate_points = curve::Chaikin(inter_points, 500); 
+            auto generate_points = curve::CubicSpline(inter_points, 500, 1); 
             generate_points.push_back(lp1);
             for(size_t i = 1; i != generate_points.size() - 1; ++i)
             {

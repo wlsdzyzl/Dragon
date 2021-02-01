@@ -194,7 +194,7 @@ namespace curve
     template<int T>
         geometry::PointList<T> BCubicSpline(const geometry::PointList<T> &control_points, int n = 1000, bool closure = false)
     {
-        if((int)control_points.size() > n) return control_points;
+        if((int)control_points.size() >= n) return control_points;
         geometry::PointList<T> new_points;
         geometry::PointList<T> final_points;
         if(closure)
@@ -210,6 +210,7 @@ namespace curve
             {
                 int next_id = (i+1) % control_points.size();
                 int last_id = i-1;
+                if(last_id < 0) last_id = control_points.size() - 1;
                 final_points.push_back( control_points[i] * 0.75 +  control_points[next_id] * 0.125 +
                     control_points[last_id] * 0.125 );
                 final_points.push_back( new_points[i]);
@@ -228,6 +229,7 @@ namespace curve
             {
                 int next_id = (i+1) % control_points.size();
                 int last_id = i-1;
+                if(last_id < 0) last_id = control_points.size() - 1;
                 final_points.push_back( control_points[i] * 0.75 +  control_points[next_id] * 0.125 +
                     control_points[last_id]*0.125 );
                 if(i < new_points.size())
@@ -241,7 +243,7 @@ namespace curve
         geometry::PointList<T> Chaikin(const geometry::PointList<T> &control_points, int n = 1000, bool closure = false)
     {
 
-        if((int)control_points.size() > n) return control_points;
+        if((int)control_points.size() >= n) return control_points;
         geometry::PointList<T> new_points;
         geometry::PointList<T> final_points;
         if(closure)
@@ -290,6 +292,7 @@ namespace curve
             for( size_t i = 0; i < inter_points.size(); ++i)
             {
                 int last_id = i - 1;
+                if(last_id < 0) last_id = inter_points.size() - 1;
                 int next_id_0 = (i + 1) % inter_points.size();
                 int next_id_1 = (i + 2) % inter_points.size();
                 geometry::Vector<T> new_p = (inter_points[i] + inter_points[next_id_0])/2 + 
