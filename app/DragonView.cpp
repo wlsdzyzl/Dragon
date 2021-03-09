@@ -2,6 +2,7 @@
 #include "Geometry/TriangleMesh/Processing/Smoothing.h"
 #include "Geometry/TriangleMesh/Processing/Curvature.h"
 #include "Geometry/TriangleMesh/Processing/Decimation.h"
+#include "Geometry/TriangleMesh/Processing/Subdivision.h"
 #include "Tool/ColorMapping.h"
 #include "Reconstruction/RBF.h"
 #include "Reconstruction/Poisson.h"
@@ -197,6 +198,15 @@ void RenderGuiComponents()
                     object.ComputeNormals();
                     updated = true;
                 }   
+            }
+            if(ImGui::Button("Loop Subdivision"))
+            {
+                // auto result = object.QuadricSimplify(object.triangles.size() - 1);
+                auto result = geometry::mesh::LoopSubdivision(object, 1);
+                object = *result;
+                if(!object.HasNormals())
+                object.ComputeNormals();
+                updated = true;
             }
             if(ImGui::Button("Get PointCloud"))
             {
