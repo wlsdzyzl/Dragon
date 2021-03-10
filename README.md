@@ -18,6 +18,11 @@ Dragon is a library for geometry processing.
 - Mesh simplification
 
 ![](./image/dragon_mesh.gif)
+
+- Loop subdivision (updated in 2021/3/10)
+
+![](./image/dragon_loopsubdivision.gif)
+
 #### Point Cloud
 - Point Cloud Processing
 - Octree
