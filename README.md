@@ -66,5 +66,9 @@ Thanks to [GAMES 102](http://staff.ustc.edu.cn/~lgliu/Courses/GAMES102_2020/defa
 
 ## TODO
 Remeshing
+## ChangeLog
+- 2021/3/10: Loop subdivision
+- 2021/3/14: Apply real Phong model on visualization as following(the old shader is from elastic fusion and flashfusion, and the color on each vertex will not change as the moving object):
+![](./image/dragon_phong_model.gif)
 ## License 
 Under the MIT License, see http://opensource.org/licenses/MIT.
