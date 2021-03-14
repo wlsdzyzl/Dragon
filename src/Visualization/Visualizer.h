@@ -97,7 +97,7 @@ namespace visualization
             // camera_pose.block<3, 1>(0, 2) = geometry::Point3(0, 1, 0);
             camera_pose_for_view = camera_pose;            
             // set light source, for phong model
-            light_pos = (average_point - geometry::Vector3(0, back, 0)).cast<float>();
+            light_pos = (average_point + geometry::Vector3(0, back, 0)).cast<float>();
         }
         void SetShaderPath()
         {
