@@ -393,14 +393,15 @@ int main(int argc, char* argv[])
     if(is_mesh)
     {
         if(!object.HasColors())
-        object.colors = geometry::Point3List(object.points.size(), geometry::Point3::Ones());
+        object.colors = geometry::Point3List(object.points.size(), geometry::Point3(0.7, 0.7, 0.7));
+
         if(!object.HasNormals())
         object.ComputeNormals();
     }
     else
     {
         if(!pcd.HasColors())
-        pcd.colors = geometry::Point3List(pcd.points.size(), geometry::Point3::Ones());
+        pcd.colors = geometry::Point3List(pcd.points.size(), geometry::Point3(110, 110, 100));
         if(!pcd.HasNormals())
         pcd.normals = geometry::Point3List(pcd.points.size(), geometry::Point3::Zero());   
     }

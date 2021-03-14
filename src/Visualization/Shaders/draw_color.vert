@@ -2,7 +2,8 @@
 
 in vec3 position;
 in vec3 color;
-uniform mat4 MVP;
+uniform mat4 MV;
+uniform mat4 proj;
 uniform int colorType;
 uniform int phong;
 uniform float materialShininess;
@@ -20,6 +21,6 @@ void main()
 {
 
     vColor = vec4(color.xyz,1);
-    gl_Position = MVP * vec4(position.xyz, 1.0);
+    gl_Position = proj * MV * vec4(position.xyz, 1.0);
         
 }

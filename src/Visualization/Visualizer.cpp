@@ -230,30 +230,37 @@ namespace visualization
     {   
         if(!program) return;
         if(point_step == 0) return;
-        geometry::Matrix4 tmp_mvp = window::projection_matrix * window::model_view_matrix;
-        Eigen::Matrix4f mvp = tmp_mvp.cast<float>();
+        // geometry::Matrix4 tmp_mvp = window::projection_matrix * window::model_view_matrix;
+        Eigen::Matrix4f mv =  window::model_view_matrix.cast<float>();
+        Eigen::Matrix4f proj = window::projection_matrix.cast<float>();
     //      mvp     <<1.3125,          0,          0, -0.0508005,
     //      0,          0,       1.75,   -2.73389,
     //      0,     1.0002,          0,    4.98702,
     //      0,          1,          0,      5.186;
 
     // //    std::cout<<mvp<<std::endl;
-    //     std::cout<<mvp<<std::endl;
-        program_for_points->SetUniform(Uniform("MVP", mvp));
-        program->SetUniform(Uniform("MVP", mvp));
+        // std::cout<<mv<<std::endl;
+        program_for_points->SetUniform(Uniform("MV", mv));
+        program->SetUniform(Uniform("MV", mv));
+
+        program_for_points->SetUniform(Uniform("proj", proj));
+        program->SetUniform(Uniform("proj", proj));
         int color_type = (draw_normal ? 1 : draw_color ? 2 : 0);
         program->SetUniform(Uniform("colorType", color_type));
+        
+        program->SetUniform(Uniform("light_pos",  light_pos));
+        // program->SetUniform(Uniform("eye_pos", eye_pos));
         if(draw_phong_shading) 
         program->SetUniform(Uniform("phong", 1));
         else program->SetUniform(Uniform("phong", 0));
-        float s_materialShininess = 8.0f;
+        float s_materialShininess = 150.0f;
         Eigen::Vector4f s_materialAmbient   = Eigen::Vector4f(0.85f, 0.85f, 0.85f, 1.0f);
         Eigen::Vector4f s_materialDiffuse   = Eigen::Vector4f(0.85f, 0.85f, 0.85f, 1.0f);
-        Eigen::Vector4f s_materialSpecular  = Eigen::Vector4f(1.5f, 1.5f, 1.5f, 1.0f);
+        Eigen::Vector4f s_materialSpecular  = Eigen::Vector4f(1.f, 1.f, 1.f, 1.0f);
         Eigen::Vector4f s_lightAmbient 	  = Eigen::Vector4f(0.8f, 0.8f, 0.8f, 1.0f);
         Eigen::Vector4f s_lightDiffuse      = Eigen::Vector4f(0.6f, 0.52944f, 0.4566f, 0.6f);
-        Eigen::Vector4f s_lightSpecular     = Eigen::Vector4f(0.3f, 0.3f, 0.3f, 1.0f);
-        Eigen::Vector3f lightDir 	= Eigen::Vector3f(0.0f, -1.0f, 2.0f);
+        Eigen::Vector4f s_lightSpecular     = Eigen::Vector4f(1.f, 1.f, 1.f, 1.0f);
+        
 
         program->SetUniform(Uniform("materialShininess", s_materialShininess));
         program->SetUniform(Uniform("materialAmbient", s_materialAmbient));
@@ -262,7 +269,7 @@ namespace visualization
         program->SetUniform(Uniform("lightAmbient", s_lightAmbient));
         program->SetUniform(Uniform("lightDiffuse", s_lightDiffuse));
         program->SetUniform(Uniform("lightSpecular", s_lightSpecular));
-        program->SetUniform(Uniform("lightDir", lightDir));        
+               
     }
     void Visualizer::AddOctree(const geometry::Octree &oct)
     {

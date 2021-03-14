@@ -54,7 +54,6 @@ class Uniform
            v4(v),
            t(VEC4)
         {}
-
         Uniform(const std::string & id, const Eigen::Matrix4f & v)
          : id(id),
            m4(v),

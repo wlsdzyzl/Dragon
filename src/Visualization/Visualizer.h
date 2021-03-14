@@ -96,6 +96,8 @@ namespace visualization
             // camera_pose.block<3, 1>(0, 1) = geometry::Point3(0, 0, -1);
             // camera_pose.block<3, 1>(0, 2) = geometry::Point3(0, 1, 0);
             camera_pose_for_view = camera_pose;            
+            // set light source, for phong model
+            light_pos = (average_point - geometry::Vector3(0, back, 0)).cast<float>();
         }
         void SetShaderPath()
         {
@@ -138,6 +140,7 @@ namespace visualization
         bool is_initialized = false;
         bool wireframe_mode = false;
         Eigen::Vector3f clear_color;
+        Eigen::Vector3f light_pos;
         std::shared_ptr<Shader> program;
         std::shared_ptr<Shader> program_for_points;
         GeometryType geometry_type;
