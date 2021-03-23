@@ -8,6 +8,7 @@
 #include <Eigen/Eigen>
 #include "IO/ConsoleColor.h"
 #include <iostream>
+#include <random>
 #define DRAGON_EPS 1e-6
 namespace dragon
 {
