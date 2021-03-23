@@ -6,7 +6,6 @@
 #include <Eigen/StdVector>
 #include <Eigen/Eigenvalues> 
 #include <Eigen/Eigen>
-#include "sophus/se3.hpp"
 #include "IO/ConsoleColor.h"
 #include <iostream>
 #define DRAGON_EPS 1e-6
@@ -59,13 +58,13 @@ namespace geometry
     typedef Matrix4 TransformationMatrix;
     //lie group and lie algebra
     //SE3 and se3
-    typedef Vector6 Se3;
-    typedef Vector3 So3;
-    typedef Matrix4 SE3;
-    typedef Matrix3 SO3;
-    typedef Mat4List SE3List;
-    Vector6 SE3ToSe3(const Matrix4 &input);
-    Matrix4 Se3ToSE3(const Vector6 &input);
+    // typedef Vector6 Se3;
+    // typedef Vector3 So3;
+    // typedef Matrix4 SE3;
+    // typedef Matrix3 SO3;
+    // typedef Mat4List SE3List;
+    // Vector6 SE3ToSe3(const Matrix4 &input);
+    // Matrix4 Se3ToSE3(const Vector6 &input);
     void TransformPoints(const Matrix4 &T, Point3List &points);
     Point3 TransformPoint(const Matrix4 &T, const Point3 &point);
     void TransformNormals(const Matrix4 &T, Point3List &normals);

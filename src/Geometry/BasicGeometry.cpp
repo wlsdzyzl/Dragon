@@ -3,16 +3,16 @@ namespace dragon
 {
 namespace geometry
 {
-    Matrix4 Se3ToSE3(const Vector6 &input)
-    {
-        auto tmp = Sophus::SE3Group<scalar>::exp(input);
-        return tmp.matrix();
-    }
-    Vector6 SE3ToSe3(const Matrix4 &input)
-    {
-        Sophus::SE3Group<scalar>  tmp(input);
-        return tmp.log(); 
-    }
+    // Matrix4 Se3ToSE3(const Vector6 &input)
+    // {
+    //     auto tmp = Sophus::SE3Group<scalar>::exp(input);
+    //     return tmp.matrix();
+    // }
+    // Vector6 SE3ToSe3(const Matrix4 &input)
+    // {
+    //     Sophus::SE3Group<scalar>  tmp(input);
+    //     return tmp.log(); 
+    // }
     Point3 TransformPoint(const Matrix4 &T, const Point3 &point)
     {
             Vector4 new_point =
@@ -150,18 +150,21 @@ namespace geometry
                 -t(1), t(0), 0;
         return t_hat;        
     }
-    geometry::SE3 RandomTransformation()
+    geometry::Matrix4 RandomTransformation()
     {
         std::random_device rd;
         std::default_random_engine e(rd());
-        std::uniform_real_distribution<double> u(-1.0, 1.0);
-        double a, b, c;
-        a = u(e);
-        b = u(e);
-        c = u(e);
-        Se3 se3 = Se3::Zero();
-        se3(0) = a; se3(1) = b; se3(2) = c;
-        return Se3ToSE3(se3);
+        std::uniform_real_distribution<double> u(0, 1.0);
+        Eigen::Matrix3d R;
+        R = Eigen::AngleAxisd(u(e) * M_PI, ::Eigen::Vector3d::UnitZ())
+            * Eigen::AngleAxisd(u(e) * M_PI, ::Eigen::Vector3d::UnitY())
+            * Eigen::AngleAxisd(u(e) * M_PI, ::Eigen::Vector3d::UnitX());
+        Matrix4 t = Matrix4::Identity();
+        t.block<3, 3>(0, 0) = R.cast<scalar>();
+        t(0, 3) = u(e) * 5;
+        t(1, 3) = u(e) * 5;
+        t(2, 3) = u(e) * 5;
+        return t;
     }
     std::tuple<Point3, double , double> FitPlane(const Point3List & _points)
     {
