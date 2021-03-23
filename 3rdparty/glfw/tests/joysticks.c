@@ -30,7 +30,7 @@
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 #define NK_IMPLEMENTATION
 #define NK_INCLUDE_FIXED_TYPES

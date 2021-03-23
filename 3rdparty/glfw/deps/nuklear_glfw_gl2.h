@@ -13,7 +13,7 @@
 #ifndef NK_GLFW_GL2_H_
 #define NK_GLFW_GL2_H_
 
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 enum nk_glfw_init_state{
     NK_GLFW3_DEFAULT = 0,

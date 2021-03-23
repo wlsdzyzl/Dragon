@@ -32,7 +32,7 @@
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 #if defined(_MSC_VER)
  // Make MS math.h define M_PI

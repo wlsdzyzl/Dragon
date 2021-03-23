@@ -31,7 +31,7 @@
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 #include <math.h>
 #include <stdio.h>

@@ -35,7 +35,7 @@
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 #include <time.h>
 #include <stdio.h>

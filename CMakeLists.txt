@@ -17,6 +17,7 @@ include_directories(3rdparty/tinyply/source)
 include_directories(3rdparty/tinyobjloader)
 include_directories(3rdparty/imgui)
 include_directories(3rdparty/nanoflann/include)
+include_directories(3rdparty/glfw/include)
 include_directories(src)
 
 #message("tinyobjloader")
