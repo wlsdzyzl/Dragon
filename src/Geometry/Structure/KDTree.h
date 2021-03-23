@@ -254,8 +254,74 @@ namespace geometry
         NanoKDTreePtr kdtree_ptr;
         int max_leaf = 10;
         NanoPointList<T> nano_point_list;
+    };
+    // dim at runtime
+    class KDTreeEigenMatrix
+    {
+        public:
+        typedef nanoflann::KDTreeEigenMatrixAdaptor<Eigen::Matrix<geometry::scalar, 
+            Eigen::Dynamic, Eigen::Dynamic>> NanoKDTreeEigenMatrix;
+
+        typedef std::shared_ptr<NanoKDTreeEigenMatrix> NanoKDTreeEigenMatrixPtr; 
+        KDTreeEigenMatrix(int _dim, int _max_leaf = 10):dim(_dim), max_leaf(_max_leaf)
+        {
+            //kdtree = NanoKDTreeEigenMatrix();
+        }
+        void BuildTree(const geometry::MatrixX &points)
+        {
+            kdtree_ptr = NanoKDTreeEigenMatrixPtr(new NanoKDTreeEigenMatrix (dim, std::cref(points), max_leaf));
+            kdtree_ptr->index->buildIndex();
+        }
+        void KnnSearch(const geometry::VectorX &point, std::vector<int> &indices, 
+            std::vector<float > &dists, int k, 
+            const SearchParameter &sp = SearchParameter())
+        {
+            if(point.rows() != dim)
+            {
+                // std::cout<<point.rows()<<" "<<dim<<std::endl;
+                std::cout<<RED<<"[ERROR]::[KnnSearch]::Wrong dimension!"<<RESET<<std::endl;
+                return;
+            }
+            std::vector<size_t> _indices;
+            KnnSearch(point, _indices, dists, k, sp);
+            indices.resize(_indices.size());
+            for(size_t i = 0; i != _indices.size(); ++i)
+            indices[i] = static_cast<int> (_indices[i]);
+        }
+        void KnnSearch(const geometry::VectorX &point, std::vector<size_t> &indices, 
+            std::vector<float > &dists, int k, 
+            const SearchParameter &sp = SearchParameter())
+        {
+            if(point.rows() != dim)
+            {
+                std::cout<<RED<<"[ERROR]::[KnnSearch]::Wrong dimension!"<<RESET<<std::endl;
+                return;
+            }
+            nanoflann::KNNResultSet<geometry::scalar> result_set(k);
+            indices.resize(k);
+            dists.resize(k);
+            geometry::ScalarList out_dist_sqr(k);
+            result_set.init(&indices[0], &out_dist_sqr[0]);
+            kdtree_ptr->index->findNeighbors(result_set, point.data(),
+                                            nanoflann::SearchParams(sp.checks, sp.eps, sp.sorted));
+
+            for (int i = 0; i < k; ++i)
+            {
+                dists[i] = out_dist_sqr[i];
+            }           
+        }
+
+        void SetDim(const int _dim)
+        {
+            dim = _dim;
+        }
+        protected:
+        NanoKDTreeEigenMatrixPtr kdtree_ptr;
+        int dim;
+        int max_leaf = 10;
 
     };
 }
 }
 #endif
+
