@@ -69,7 +69,7 @@ namespace tool
     {
         struct stat st;
         if(stat(folder_name.c_str(),&st) == 0)
-            if((st.st_mode) & (S_IFDIR != 0))
+            if((st.st_mode & S_IFDIR) != 0)
                 return true;
         return false;
     }
