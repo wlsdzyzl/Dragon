@@ -139,6 +139,7 @@ namespace curve
         // solve equation
         geometry::VectorX x_;
         // x_ = geometry::SolveByThomas(A, f);
+        // x_ = geometry::SolveByLu(A, f);
         x_ = geometry::SolveBySVD(A, f);
         // std::cout<<A * x_ - f<<std::endl;
         // compute a, b, c, d
@@ -221,15 +222,16 @@ namespace curve
             // split
             for(size_t i = 0; i != control_points.size() - 1; ++i)
             {
-                int next_id = (i+1) % control_points.size();
+                int next_id = i+1;
                 new_points.push_back((control_points[i] + control_points[next_id]) / 2);
             }
             // average
             for(size_t i = 0; i != control_points.size(); ++i)
             {
-                int next_id = (i+1) % control_points.size();
+                int next_id = i+1;
                 int last_id = i-1;
-                if(last_id < 0) last_id = control_points.size() - 1;
+                if(next_id >= (int)control_points.size()) next_id = control_points.size() - 1;
+                if(last_id < 0) last_id = 0;
                 final_points.push_back( control_points[i] * 0.75 +  control_points[next_id] * 0.125 +
                     control_points[last_id]*0.125 );
                 if(i < new_points.size())

@@ -72,7 +72,8 @@ int main()
                 nodes.push_back(Point2(cos((j + 0.0f) / group * 2 * M_PI) * tmp_r,  sin((j + 0.0f) / group * 2 * M_PI) * tmp_r));
             }
             if(i != inter_group - 1 && i != 0)
-            DrawPolygon(nodes,  Eigen::Vector3f(0, 0, 0), 4); PostCall();
+            DrawPolygon(nodes,  Eigen::Vector3f(0, 0, 0), 4); 
+            PostCall();
             if(i == 0)
             first_nodes = nodes;
         

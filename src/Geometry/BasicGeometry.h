@@ -216,6 +216,7 @@ namespace geometry
 
     //linear solver
     geometry::VectorX SolveBySVD(const geometry::MatrixX &A, const geometry::VectorX &b);
+    geometry::MatrixX SolveByLu(const geometry::MatrixX &A, const geometry::MatrixX &b);
     geometry::VectorX SolveByThomas(const geometry::MatrixX &A, const geometry::VectorX &b);
 }
 }

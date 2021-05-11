@@ -464,26 +464,48 @@ namespace geometry
         double d = -n.dot(mid);
         return Line(n, d); 
     }
+    // choose svd if b is a vector
     geometry::VectorX SolveBySVD(const geometry::MatrixX &A, const geometry::VectorX &b)
     {
         geometry::VectorX res(A.cols());
+        if(A.rows() != b.rows())
+        {
+            std::cout<<RED<<"[ERROR]::[Solver]::A and b must have the same rows."<<RESET<<std::endl;
+            res.setZero();
+            return res;
+        }
         if(A.rows() >= A.cols())
         {
             //over determined
-            res = A.lu().solve(b);
-            // res = A.jacobiSvd().solve(b);
+            res = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
         }
         else
         {
             //under determined
             int start = A.cols() - A.rows();
             geometry::MatrixX newA = A.block(0, start, A.rows(), A.rows());
-            geometry::VectorX new_res = newA.lu().solve(b);
+            geometry::VectorX new_res = newA.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
             res.setZero();
             res.block(start, 0, A.rows(), 1) = new_res; 
         }
         return res;
     }
+    // choose lu if b is a matrix
+    geometry::MatrixX SolveByLu(const geometry::MatrixX &A, const geometry::MatrixX &b)
+    {
+        //lu can be used to solve matrix as long as A and b has the same rows
+        geometry::MatrixX res(A.cols(), b.cols());
+        if(A.rows() != b.rows())
+        {
+            std::cout<<RED<<"[ERROR]::[Solver]::A and b must have the same rows."<<RESET<<std::endl;
+            res.setZero();
+            return res;
+        }
+        res = A.fullPivLu().solve(b);
+        return res;
+    }
+
+    // for special cases, so it's not recommended
     geometry::VectorX SolveByThomas(const geometry::MatrixX &A, const geometry::VectorX &f)
     {
         int n = A.rows();
