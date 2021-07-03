@@ -22,7 +22,19 @@ Dragon is a library for geometry processing.
 - Loop subdivision (updated in 2021/3/10)
 
 ![](./image/dragon_loopsubdivision.gif)
+- Mesh to SDF (updated in 2021/7/2)
 
+![](./image/dragon_mesh2sdf.gif)
+
+We can estimate the quality of mesh2sdf algorithm by applying marching-cube algorithm on generated sdf to extract a new mesh, here are some results:
+
+**Bunny_head.obj, voxel resolution: 0.01**
+
+![](./image/generated_bunny_head.png)
+
+**happy_vrip.ply, voxel resolution: 0.002**
+
+![](./image/generated_happy.png)
 #### Point Cloud
 - Point Cloud Processing
 - Octree
@@ -70,5 +82,6 @@ Remeshing
 - 2021/3/10: Loop subdivision
 - 2021/3/14: Apply real Phong model on visualization as following(the old shader is from elastic fusion and flashfusion, and the color on each vertex will not change as the moving object):
 ![](./image/dragon_phong_model.gif)
+- 2021/7/2: Generate sdf from triangle mesh (mesh2sdf). 
 ## License 
 Under the MIT License, see http://opensource.org/licenses/MIT.
