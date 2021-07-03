@@ -225,53 +225,47 @@ namespace geometry
             std::cout<<RED<<"This halfedge is not used to store triangle mesh, so it cannot be converted into a triangle mesh."<<RESET<<std::endl;
             return;
         }
-        std::vector<int> visited_vertices(vertices.size(), -1);
-        size_t pos = 0;
-        for(size_t i = 0; i != faces.size(); ++i)
-        {
-            if(faces[i] && faces[i]->id != -1)
-            {
-                HEEdge *start_edge = faces[i]->inc_edge;
-                if(start_edge == nullptr) continue;
-                if(visited_vertices[start_edge->ori_vertex->id] == -1)
-                    visited_vertices[start_edge->ori_vertex->id] = pos++;
-                if(visited_vertices[start_edge->des_vertex->id] == -1)
-                    visited_vertices[start_edge->des_vertex->id] = pos++;
-                if(visited_vertices[start_edge->next_edge->des_vertex->id] == -1)
-                    visited_vertices[start_edge->next_edge->des_vertex->id] = pos ++;
-            }
-        }
+        // because we have the update function, so we do not need these process.
+        // std::vector<int> visited_vertices(vertices.size(), -1);
+        // size_t pos = 0;
+        // for(size_t i = 0; i != faces.size(); ++i)
+        // {
+        //     if(faces[i] && faces[i]->id != -1)
+        //     {
+        //         HEEdge *start_edge = faces[i]->inc_edge;
+        //         if(start_edge == nullptr) continue;
+        //         if(visited_vertices[start_edge->ori_vertex->id] == -1)
+        //             visited_vertices[start_edge->ori_vertex->id] = pos++;
+        //         if(visited_vertices[start_edge->des_vertex->id] == -1)
+        //             visited_vertices[start_edge->des_vertex->id] = pos++;
+        //         if(visited_vertices[start_edge->next_edge->des_vertex->id] == -1)
+        //             visited_vertices[start_edge->next_edge->des_vertex->id] = pos ++;
+        //     }
+        // }
         mesh.Reset();
-        mesh.points.resize(pos);
+        mesh.points.resize(vertices.size());
         mesh.triangles.reserve(faces.size());
         for(size_t i = 0; i != faces.size(); ++i)
         {
             if(faces[i] && faces[i]->id != -1)
             {
                 HEEdge *start_edge = faces[i]->inc_edge;
-                if(start_edge == nullptr) continue;
-                size_t vid0 = visited_vertices[start_edge->ori_vertex->id];
-                size_t vid1 = visited_vertices[start_edge->des_vertex->id];
-                size_t vid2 = visited_vertices[start_edge->next_edge->des_vertex->id];
+                size_t vid0 = start_edge->ori_vertex->id;
+                size_t vid1 = start_edge->des_vertex->id;
+                size_t vid2 = start_edge->next_edge->des_vertex->id;
                 mesh.triangles.push_back(geometry::Point3ui(vid0, vid1, vid2));
             }
         }
         for(size_t i = 0; i != vertices.size(); ++i)
         {
-            if(visited_vertices[i] != -1)
-            {
-                mesh.points[visited_vertices[i]] = vertices[i]->coor; 
-            }
+            mesh.points[i] = vertices[i]->coor; 
         }
         if(has_colors)
         {
-            mesh.colors.resize(pos);
+            mesh.colors.resize(vertices.size());
             for(size_t i = 0; i != vertices.size(); ++i)
             {
-                if(visited_vertices[i] != -1)
-                {
-                    mesh.colors[visited_vertices[i]] = vertices[i]->color; 
-                }
+                mesh.colors[i] = vertices[i]->color; 
             }
         }
     }
@@ -291,6 +285,37 @@ namespace geometry
             }
             
         }
+    }
+    std::vector<int> HalfEdge::FindConnectedFaces(size_t vid)
+    {   
+        auto start_edge = vertices[vid]->inc_edge;
+        auto current_edge =  vertices[vid]->inc_edge;
+        std::vector<int> connected_fids;
+        while(true)
+        {
+            connected_fids.push_back(current_edge->parent_face->id);
+            if(current_edge->twin_edge == nullptr) 
+            {
+                current_edge = nullptr;
+                break;
+            }
+            else
+            current_edge = current_edge->twin_edge->next_edge;
+            if(current_edge == start_edge) break;
+            
+        }
+        // we meet border, scan the faces reversely.
+        if(start_edge != current_edge)
+        {
+            current_edge = start_edge->pre_edge->twin_edge;
+            while(true)
+            {
+                if(current_edge == nullptr) break;
+                connected_fids.push_back(current_edge->parent_face->id);
+                current_edge = current_edge->pre_edge->twin_edge;
+            }
+        }
+        return connected_fids;
     }
     void HalfEdge::RearrangeFaceIncEdge()
     {

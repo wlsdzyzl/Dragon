@@ -6,22 +6,6 @@ namespace visualization
     bool Visualizer::Initialize()
     {
         window::Initialize(width, height);
-        program = std::make_shared<Shader>();
-        program_for_points = std::make_shared<Shader>();
-        if(!program->Load(shader_path + "/" +shader_vert, 
-            shader_path + "/" +shader_frag))
-        {
-            program = nullptr;
-            std::cout<<RED<<"[ERROR]::[Visualizer]::Cannot load shaders."<<RESET<<std::endl;
-            return false;
-        }
-        if(!program_for_points->Load(shader_path + "/draw_point.vert", 
-            shader_path + "/" +shader_frag))
-        {
-            program_for_points = nullptr;
-            std::cout<<RED<<"[ERROR]::[Visualizer]::Cannot load shaders."<<RESET<<std::endl;
-            return false;
-        }
         for(size_t i = 0; i < io::color_table.size(); ++i)
         {
             color_table.push_back( geometry::Point3(io::color_table[i][0] / 255.0, io::color_table[i][1] / 255.0, io::color_table[i][2] / 255.0 ));
@@ -146,6 +130,7 @@ namespace visualization
         
         if(point_step == 0)
         {
+            // test: render a triangle
             GLfloat vertices[] =
             {
                 -0.5f, -0.5f, 0.0f, // Left
@@ -375,6 +360,7 @@ namespace visualization
             //color
             if(pcd.HasColors())
             {
+                // std::cout<<"fuck!"<<std::endl;
             for(size_t j = 0;j<3; ++j, ++start)
                 point_buffer[point_buffer_size + i*step+start] = static_cast<float>(pcd.colors[i](j));
             }

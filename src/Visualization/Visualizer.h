@@ -31,6 +31,8 @@ namespace visualization
             memset(point_buffer,0,MAX_BUFFER_SIZE*sizeof(float));
             memset(index_buffer,0,MAX_BUFFER_SIZE*sizeof(int));
             clear_color = Eigen::Vector3f(0.8, 0.8, 0.8);
+            program = std::make_shared<Shader>();
+            program_for_points = std::make_shared<Shader>();
 
         }
         ~Visualizer();
@@ -109,6 +111,18 @@ namespace visualization
             shader_vert = "draw_normal.vert";
             if(has_colors && has_normals)
             shader_vert = "draw_all.vert";
+            if(!program->Load(shader_path + "/" +shader_vert, 
+                shader_path + "/" +shader_frag))
+            {
+                program = nullptr;
+                std::cout<<RED<<"[ERROR]::[Visualizer]::Cannot load shaders."<<RESET<<std::endl;
+            }
+            if(!program_for_points->Load(shader_path + "/draw_point.vert", 
+                shader_path + "/" +shader_frag))
+            {
+                program_for_points = nullptr;
+                std::cout<<RED<<"[ERROR]::[Visualizer]::Cannot load shaders."<<RESET<<std::endl;
+            }
             std::cout<<BLUE<<"[Visualizer]::[INFO]::Using shader: "<<shader_vert<<RESET<<std::endl;
         }
         size_t point_step;

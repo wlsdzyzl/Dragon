@@ -27,6 +27,7 @@ namespace reconstruction
         void SetVoxelResolution(double resolution)
         {
             c_para.SetVoxelResolution(resolution);
+            if(truncation > resolution * 10) truncation = resolution * 10;
         }
         // std::shared_ptr<geometry::PointCloud> GetPointCloud() const;
         void GenerateMeshByCube(const CubeID &cube_id, geometry::TriangleMesh &mesh);
@@ -39,7 +40,10 @@ namespace reconstruction
         {
             cube_map.clear();
         }       
-
+        size_t Size()
+        {
+            return cube_map.size();
+        }
         void Merge(const CubeHandler &another)
         {
             if(c_para.VoxelResolution != another.c_para.VoxelResolution)
@@ -237,6 +241,7 @@ namespace reconstruction
             std::cout<<YELLOW<<"[WARNING]::[SetCubeMap]::Note that you are changing the hashing map directly."<<RESET<<std::endl;
             cube_map = _cube_map;
         }
+        // not recommended
         void SetTruncation(double t){truncation = t;}
         bool ReadFromFile(const std::string &filename)
         {
@@ -268,6 +273,7 @@ namespace reconstruction
             std::cout<<GREEN<<"[CubeHandler]::[INFO]::Load TSDF field done!(From BinaryFile) "<<RESET<<std::endl;            
             return true;
         }
+        double GetTruncation(){return truncation;}
         void PrepareCubes(const geometry::Point3List &points, std::vector<CubeID> &cube_id_list, std::function<double(geometry::Point3)> get_sdf);
         void IntegratePoints(const geometry::Point3List &points, std::function<double(geometry::Point3)> get_sdf);
         void CollectGarbage();

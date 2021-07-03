@@ -114,6 +114,7 @@ namespace reconstruction
             {
                 for(int k = min_cube_id(2)-1; k<= max_cube_id(2)+1; ++k)
                 {
+                    
                     double min_sdf = std::numeric_limits<double>::max();
                     bool same_sign = true;
                     bool start_sign = true;
@@ -192,14 +193,18 @@ namespace reconstruction
                         {       
                             size_t voxel_id = x + y * CUBE_SIZE + z * CUBE_SIZE * CUBE_SIZE;
                             // std::cout<<iter->second.voxels[voxel_id].weight<<" "<<std::fabs(iter->second.voxels[voxel_id].sdf)<<std::endl;
-                            if(iter->second.voxels[voxel_id].weight !=0 && std::fabs(iter->second.voxels[voxel_id].sdf) <truncation / 5)
+                            if(iter->second.voxels[voxel_id].weight !=0 && std::fabs(iter->second.voxels[voxel_id].sdf) <= truncation / 2)
                             {
-                                // if(std::fabs(iter->second.voxels[voxel_id].sdf) <= max_sdf)
-                                // {
-                                    float fabs_sdf = std::fabs(iter->second.voxels[voxel_id].sdf) / (truncation / 5);
+                                    float sdf = iter->second.voxels[voxel_id].sdf / (truncation / 2);
                                     pcd.points.push_back(iter->second.GetOrigin(c_para) + c_para.VoxelCentroidOffSet[voxel_id]);
-                                    pcd.colors.push_back(geometry::Point3(fabs_sdf, fabs_sdf, fabs_sdf));
-                                // }
+                                    if(sdf > 0)
+                                    pcd.colors.push_back(geometry::Point3(1, 1 - sdf, 1 - sdf));
+                                    else 
+                                    pcd.colors.push_back(geometry::Point3(1 + sdf, 1 + sdf, 1)); 
+                                    // if(sdf > 0)
+                                    // pcd.colors.push_back(geometry::Point3(1, 0, 0));
+                                    // else 
+                                    // pcd.colors.push_back(geometry::Point3(0, 0, 0)); 
                             }
                         }
                     }

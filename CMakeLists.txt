@@ -97,6 +97,8 @@ add_executable(DragonView2D "app/DragonView2D.cpp")
 add_executable(SpiderMan "app/SpiderMan.cpp")
 add_executable(RBFTest "app/RBFTest.cpp")
 add_executable(PoissonTest "app/PoissonTest.cpp")
+add_executable(Mesh2SDFTest "app/Mesh2SDFTest.cpp")
+add_executable(NormalPCD2IndicatorTest "app/NormalPCD2IndicatorTest.cpp")
 
 target_link_libraries(ReadMesh
     dragon
@@ -123,6 +125,14 @@ target_link_libraries(RBFTest
     ${THIRD_LIB}
 )
 target_link_libraries(PoissonTest
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(Mesh2SDFTest
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(NormalPCD2IndicatorTest
     dragon
     ${THIRD_LIB}
 )

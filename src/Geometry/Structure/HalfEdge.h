@@ -82,6 +82,7 @@ namespace geometry
         void ToTriangleMesh(TriangleMesh &mesh);
         void CheckBorder();
         void RearrangeFaceIncEdge();
+        std::vector<int> FindConnectedFaces(size_t fid);
         // add 2d line into the HalfEdge List
         // if I have time
         // void AddLine();

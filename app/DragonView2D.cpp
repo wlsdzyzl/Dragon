@@ -299,8 +299,9 @@ void RenderGuiComponents()
 int main()
 {
 
-
     visualizer.Initialize();
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     Reset();
     bb.x_min = visualizer.x_range(0) * 0.99;
     bb.x_max = visualizer.x_range(1) * 0.99;

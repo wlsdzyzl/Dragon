@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
 {
     if(argc < 3)
     {
-        std::cout << "Usage: ReadPLYMesh [filename] [depth] [outputfile='poisson_$depth$.ply']"<<std::endl;
+        std::cout << "Usage: PoissonTest [filename] [depth] [outputfile='poisson_$depth$.ply']"<<std::endl;
         return 0;        
     }
     geometry::PointCloud pcd;

@@ -137,8 +137,15 @@ namespace geometry
     int CheckPointToLine(const Line &line, const Point2 &point);
     int CheckPointToLine(const Point2 &a, const Point2 &b, const Point2 &z );
     int CheckPointInTriangle(const Point2 & a, const Point2 &b, const Point2 & c, const Point2 &p);
+    int CheckPointProjectionInTriangle(const Point3& query_point,
+                        const Point3& triangle_vertex_0,
+                        const Point3& triangle_vertex_1,
+                        const Point3& triangle_vertex_2, Point3 &projected_p);
+    int CheckPointProjectionOnLineSegment(const Point3 &query_point, const Point3 &start, const Point3 &end,
+                        Point3 &projected_p);
     double ComputeAreaTriangle(Point2 a, Point2 b, Point2 c);
     double ComputeAreaConvexPoly(const Point2List &points);
+
 
     Line VerticalBisector(const Point2 & a, const Point2 &b);
     struct LineSegment

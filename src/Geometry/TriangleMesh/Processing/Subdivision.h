@@ -9,7 +9,6 @@ namespace geometry
 namespace mesh
 {
     std::shared_ptr<TriangleMesh> LoopSubdivision(const TriangleMesh &mesh, int iteration = 1);
-    
 }
 }
 }

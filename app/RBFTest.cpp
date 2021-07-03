@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
 {
     if(argc != 2)
     {
-        std::cout << "Usage: ReadPLYMesh [filename]"<<std::endl;
+        std::cout << "Usage: RBFTest [filename]"<<std::endl;
         return 0;        
     }
     geometry::PointCloud pcd;

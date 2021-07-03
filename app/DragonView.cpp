@@ -6,6 +6,7 @@
 #include "Tool/ColorMapping.h"
 #include "Reconstruction/RBF.h"
 #include "Reconstruction/Poisson.h"
+#include "Reconstruction/Mesh2SDF.h"
 #include "Geometry/TriangleMesh/Processing/MeshParameterization.h"
 using namespace dragon;
 static float local_lambda = 0.1f;
@@ -208,13 +209,32 @@ void RenderGuiComponents()
                 object.ComputeNormals();
                 updated = true;
             }
+            if(ImGui::Button("Generate SDF"))
+            {
+                is_mesh = false;
+                scale = 1 / (std::max(visualization::window::bb.y_max - visualization::window::bb.y_min, 
+                    std::max(visualization::window::bb.x_max - visualization::window::bb.x_min, 
+                        visualization::window::bb.z_max - visualization::window::bb.z_min)));
+                object.Scale(scale);
+                reconstruction::CubeHandler cube_handler;
+                reconstruction::Mesh2SDF(object, cube_handler, 0.01);
+                pcd = *(cube_handler.GetPointCloud());
+                pcd.Scale(1 / scale);
+                pcd.normals.resize(pcd.points.size(), geometry::Point3(0, 0, 0));
+
+                object.Reset();
+                updated = true;
+            }  
             if(ImGui::Button("Get PointCloud"))
             {
                 is_mesh = false;
                 pcd = *(object.GetPointCloud());
+                // for(size_t i = 0; i != pcd.colors.size(); ++i)
+                // std::cout<<pcd.colors[i].transpose()<<std::endl;
                 object.Reset();
                 updated = true;
             }     
+ 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Text("triangle: %d vertices: %d", (int)object.triangles.size(), (int)object.points.size());
         }
@@ -347,14 +367,14 @@ void RenderGuiComponents()
             if(is_mesh)
             {
                 if(!object.HasColors())
-                object.colors = geometry::Point3List(object.points.size(), geometry::Point3::Ones());
+                object.colors = geometry::Point3List(object.points.size(), geometry::Point3(0.7, 0.7, 0.7));
                 if(!object.HasNormals())
                 object.ComputeNormals();
             }
             else
             {
                 if(!pcd.HasColors())
-                pcd.colors = geometry::Point3List(pcd.points.size(), geometry::Point3::Ones());
+                pcd.colors = geometry::Point3List(pcd.points.size(), geometry::Point3(0.7, 0.7, 0.7));
                 if(!pcd.HasNormals())
                 pcd.normals = geometry::Point3List(pcd.points.size(), geometry::Point3::Zero());   
             }
@@ -401,20 +421,21 @@ int main(int argc, char* argv[])
     else
     {
         if(!pcd.HasColors())
-        pcd.colors = geometry::Point3List(pcd.points.size(), geometry::Point3(110, 110, 100));
+        pcd.colors = geometry::Point3List(pcd.points.size(), geometry::Point3(0.7, 0.7, 0.7));
         if(!pcd.HasNormals())
         pcd.normals = geometry::Point3List(pcd.points.size(), geometry::Point3::Zero());   
     }
     //visualizer.SetDrawColor(true);
+    visualizer.Reset();
+    visualizer.Initialize();
     if(is_mesh)
     visualizer.AddTriangleMesh(object);
     else
     visualizer.AddPointCloud(pcd);
-
-    visualizer.Initialize();
     visualizer.draw_color = true;
     visualization::window::RegisterMouseAndKeyboard();
     visualizer.dynamic_first_view = false;
+    // if(!is_mesh)    glDisable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(visualization::window::window))
     {
         RenderGuiComponents();
@@ -423,9 +444,13 @@ int main(int argc, char* argv[])
         {
             visualizer.Reset();
             if(is_mesh)
-            visualizer.AddTriangleMesh(object);
+            {
+                // glEnable(GL_DEPTH_TEST);
+                visualizer.AddTriangleMesh(object);
+            }
             else
             {
+                // glDisable(GL_DEPTH_TEST);
                 visualizer.AddPointCloud(pcd);
                 if(draw_octree)
                 visualizer.AddOctree(oct);

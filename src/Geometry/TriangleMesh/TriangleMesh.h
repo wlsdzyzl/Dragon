@@ -45,6 +45,11 @@ namespace geometry
             p.colors = colors;
             return std::make_shared<PointCloud>(p);
         }
+        void Scale(double scale)
+        {
+            for(size_t i = 0; i != points.size(); ++i)
+            points[i] *= scale;
+        }
         void FlipNormal()
         {
             for(size_t i = 0; i != triangles.size(); ++i)

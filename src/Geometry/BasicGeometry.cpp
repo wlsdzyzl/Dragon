@@ -398,6 +398,45 @@ namespace geometry
 
         return 0;
     }
+    // this code is from https://math.stackexchange.com/questions/544946/determine-if-projection-of-3d-point-onto-plane-is-within-a-triangle
+    // an elegant solution.
+    int CheckPointProjectionInTriangle(const Point3& query_point,
+                        const Point3& triangle_vertex_0,
+                        const Point3& triangle_vertex_1,
+                        const Point3& triangle_vertex_2, Point3 &projected_p)
+    {
+        // u=P2−P1
+        Point3 u = triangle_vertex_1 - triangle_vertex_0;
+        // v=P3−P1
+        Point3 v = triangle_vertex_2 - triangle_vertex_0;
+        // n=u×v
+        Point3 n = u.cross(v);
+        // w=P−P1
+        Point3 w = query_point - triangle_vertex_0;
+        // Barycentric coordinates of the projection P′of P onto T:
+        // γ=[(u×w)⋅n]/n²
+        float gamma = u.cross(w).dot(n) / n.dot(n);
+        // β=[(w×v)⋅n]/n²
+        float beta = w.cross(v).dot(n) / n.dot(n);
+        float alpha = 1 - gamma - beta;
+        // The point P′ lies inside T if:
+        projected_p = alpha * triangle_vertex_0 + beta * triangle_vertex_1 + gamma * triangle_vertex_2;
+        return ((0 <= alpha) && (alpha <= 1) &&
+                (0 <= beta)  && (beta  <= 1) &&
+                (0 <= gamma) && (gamma <= 1));
+    }
+    //
+    int CheckPointProjectionOnLineSegment(const Point3 &query_point, const Point3 &start, const Point3 &end,
+                        Point3 &projected_p)
+    {
+        Point3 u = end - start;
+        Point3 v = query_point - start;
+        float beta = u.dot(v) / u.squaredNorm();
+        float alpha = 1 - beta;
+        projected_p = alpha * start + beta * end;
+        return ((0 <= alpha) && (alpha <= 1) &&
+                (0 <= beta) && (beta <= 1));
+    }
     double ComputeAreaTriangle(Point2 a, Point2 b, Point2 c)
     {
         return std::fabs(0.5*(a(0) * b(1) + b(0) * c(1) + c(0) * a(1) - 
