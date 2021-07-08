@@ -99,6 +99,7 @@ add_executable(RBFTest "app/RBFTest.cpp")
 add_executable(PoissonTest "app/PoissonTest.cpp")
 add_executable(Mesh2SDFTest "app/Mesh2SDFTest.cpp")
 add_executable(NormalPCD2IndicatorTest "app/NormalPCD2IndicatorTest.cpp")
+add_executable(CenterLine2SDFTest "app/CenterLine2SDFTest.cpp")
 
 target_link_libraries(ReadMesh
     dragon
@@ -133,6 +134,10 @@ target_link_libraries(Mesh2SDFTest
     ${THIRD_LIB}
 )
 target_link_libraries(NormalPCD2IndicatorTest
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(CenterLine2SDFTest
     dragon
     ${THIRD_LIB}
 )

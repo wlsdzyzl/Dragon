@@ -15,6 +15,7 @@ namespace reconstruction
 {
     void Mesh2SDF(const geometry::TriangleMesh &mesh, CubeHandler &cube_handler, float voxel_resolution = 0.01);
     void NormalPCD2Indicator(const geometry::PointCloud &pcd, CubeHandler &cube_handler, float voxel_resolution = 0.01);
+    void CenterLine2SDF(const geometry::Point3List &centers, const std::vector<double> &radius, CubeHandler &cube_handler, float voxel_resolution = 0.01);
 }
 }
 #endif

@@ -95,7 +95,8 @@ namespace reconstruction
         {
             bb.AddPoint(points[i]);
         }
-        geometry::Point3 max_point(bb.x_max, bb.y_max, bb.z_max), min_point(bb.x_min, bb.y_min, bb.z_min);
+        geometry::Point3 max_point(bb.x_max + truncation, bb.y_max + truncation, bb.z_max + truncation), 
+            min_point(bb.x_min - truncation, bb.y_min - truncation, bb.z_min - truncation);
         CubeID max_cube_id = GetCubeID(max_point);
         CubeID min_cube_id = GetCubeID(min_point);        
 

@@ -25,8 +25,10 @@ int main(int argc, char* argv[])
     reconstruction::CubeHandler cube_handler;
     reconstruction::Mesh2SDF(mesh, cube_handler, voxel_resolution);
     auto cube_pcd = cube_handler.GetPointCloud();
+    cube_pcd->Scale(1 / scale);
     cube_pcd->WriteToPLY("./tsdf.ply");
     cube_handler.ExtractTriangleMesh(generated_mesh);
+    generated_mesh.Scale(1 / scale);
     generated_mesh.WriteToPLY("./generated_mesh.ply");
     return 0;
 }

@@ -69,6 +69,7 @@ namespace geometry
     void TransformPoints(const Matrix4 &T, Point3List &points);
     Point3 TransformPoint(const Matrix4 &T, const Point3 &point);
     void TransformNormals(const Matrix4 &T, Point3List &normals);
+    Vector3 TransformNormal(const Matrix4 &T, const Vector3 &normal);
 
     TransformationMatrix RandomTransformation();
     double ComputeTriangleArea(const PointX &a, const PointX &b, const PointX &c);
@@ -145,8 +146,7 @@ namespace geometry
                         Point3 &projected_p);
     double ComputeAreaTriangle(Point2 a, Point2 b, Point2 c);
     double ComputeAreaConvexPoly(const Point2List &points);
-
-
+    geometry::Matrix3 RotationMatrixBetweenVectors(const Vector3 &a, const Vector3 &b);
     Line VerticalBisector(const Point2 & a, const Point2 &b);
     struct LineSegment
     {
