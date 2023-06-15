@@ -368,17 +368,17 @@ namespace mesh
         he.ToTriangleMesh(mesh);
         return std::make_shared<TriangleMesh>(mesh);
     }
-    Point3i GetGridIndex(const geometry::Point3 &points, double grid_len)
-    {
-        return Point3i(std::floor(points(0)/grid_len), std::floor(points(1)/grid_len),std::floor(points(2)/grid_len));
-    }    
+    // Point3i GetGridIndex(const geometry::Point3 &points, double grid_len)
+    // {
+    //     return Point3i(std::floor(points(0)/grid_len), std::floor(points(1)/grid_len),std::floor(points(2)/grid_len));
+    // }    
     std::shared_ptr<TriangleMesh> Decimator::Cluster(double grid_len)
     {
         auto &vertices = he.vertices;
         // auto &faces = he.faces;        
         for(size_t i = 0; i != vertices.size(); ++i)
         {
-            Point3i voxel_id = GetGridIndex(vertices[i]->coor, grid_len);
+            Point3i voxel_id = geometry::GetGridIndex(vertices[i]->coor, grid_len);
             if(grid_map.find(voxel_id) == grid_map.end())
             {
                 grid_map[voxel_id] = vertices[i];

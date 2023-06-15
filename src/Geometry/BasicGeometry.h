@@ -49,6 +49,7 @@ namespace geometry
     typedef std::vector<Point2, Eigen::aligned_allocator<Point2> > Point2List;
     typedef std::vector<Point3, Eigen::aligned_allocator<Point3> > Point3List; 
     typedef std::vector<PointX, Eigen::aligned_allocator<PointX> > PointXList; 
+    typedef std::vector<Vector3, Eigen::aligned_allocator<Vector3> > Vec3List;
     typedef std::vector<Vector4, Eigen::aligned_allocator<Vector4> > Vec4List;
     template <int T>
         using PointList = std::vector<Eigen::Matrix<scalar, T, 1>, 
@@ -66,9 +67,9 @@ namespace geometry
     // typedef Mat4List SE3List;
     // Vector6 SE3ToSe3(const Matrix4 &input);
     // Matrix4 Se3ToSE3(const Vector6 &input);
-    void TransformPoints(const Matrix4 &T, Point3List &points);
+    Point3List TransformPoints(const Matrix4 &T, const Point3List &points);
     Point3 TransformPoint(const Matrix4 &T, const Point3 &point);
-    void TransformNormals(const Matrix4 &T, Point3List &normals);
+    Vec3List TransformNormals(const Matrix4 &T, const Vec3List &normals);
     Vector3 TransformNormal(const Matrix4 &T, const Vector3 &normal);
 
     TransformationMatrix RandomTransformation();
@@ -132,6 +133,7 @@ namespace geometry
     Point2 SegIntersect(const LineSegment &s1, const LineSegment &s2);
     Point2 LineSegIntersect(const Line &a, const LineSegment & b);
     double Distance(const Point2 &a, const Point2 &b);
+    double Distance(const Point3 &a, const Point3 &b);
     Point2 ProjectionPointToLine(const Line &a, const Point2 &p);
     Point2 ProjectionPointToLineSegment(const LineSegment &a, const Point2 &p);
     int CheckPointInConvexPoly(const geometry::Point2List &points, const Point2 &p);
@@ -148,6 +150,9 @@ namespace geometry
     double ComputeAreaConvexPoly(const Point2List &points);
     geometry::Matrix3 RotationMatrixBetweenVectors(const Vector3 &a, const Vector3 &b);
     Line VerticalBisector(const Point2 & a, const Point2 &b);
+    std::vector<std::vector<size_t>> VoxelClustering(const Point3List &pcd, double grid_len);
+    std::vector<std::vector<size_t>> RadiusClustering(const Point3List &pcd, const ScalarList & radius, double search_factor = 0.5);
+    Point3i GetGridIndex(const geometry::Point3 &points, double grid_len);
     struct LineSegment
     {
         Point2 p0, p1;

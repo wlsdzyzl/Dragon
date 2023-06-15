@@ -13,9 +13,15 @@ namespace dragon
 {
 namespace reconstruction
 {
+
     void Mesh2SDF(const geometry::TriangleMesh &mesh, CubeHandler &cube_handler, float voxel_resolution = 0.01);
-    void NormalPCD2Indicator(const geometry::PointCloud &pcd, CubeHandler &cube_handler, float voxel_resolution = 0.01);
-    void CenterLine2SDF(const geometry::Point3List &centers, const std::vector<double> &radius, CubeHandler &cube_handler, float voxel_resolution = 0.01);
+    // std::vector<double> Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution)
+    std::vector<double> Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01);
+    std::vector<double> Mesh2Indicator(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01);
+    std::vector<double> NormalPCD2Indicator(const geometry::PointCloud &pcd, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01);
+
+    void CenterLine2SDF(const geometry::Point3List &centers, const std::vector<double> &radius, CubeHandler &cube_handler, float voxel_resolution = 0.01, bool ordered = true, int knn = 2);
+    geometry::PointCloud Centerline2SurfacePoints(const geometry::Point3List &centers, const std::vector<double> &radius, size_t n_points = 10);
 }
 }
 #endif

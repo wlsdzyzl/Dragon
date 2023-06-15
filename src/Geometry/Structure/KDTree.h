@@ -86,7 +86,7 @@ namespace geometry
             kdtree_ptr->buildIndex();
         }
         void RadiusSearch(const geometry::VectorX &point, std::vector<int> &indices, 
-            std::vector<float > &dists, double radius, size_t max_result, 
+            std::vector<float > &dists, double radius, size_t max_result = 100, 
             const SearchParameter &sp = SearchParameter())
         {
             std::vector<size_t> _indices;
@@ -96,7 +96,7 @@ namespace geometry
             indices[i] = static_cast<int> (_indices[i]);
         }
         void RadiusSearch(const geometry::VectorX &point, std::vector<size_t> &indices, 
-            std::vector<float > &dists, double radius, size_t max_result, 
+            std::vector<float > &dists, double radius, size_t max_result = 100, 
             const SearchParameter &sp = SearchParameter())
         {
             if(point.rows() != T)
@@ -108,7 +108,7 @@ namespace geometry
             RadiusSearch(_point, indices, dists, radius, max_result, sp);
         }
         void RadiusSearch(const geometry::Vector<T> &point, std::vector<int> &indices, 
-            std::vector<float > &dists, double radius, size_t max_result, 
+            std::vector<float > &dists, double radius, size_t max_result = 100, 
             const SearchParameter sp = SearchParameter())
         {
             std::vector<size_t> _indices;
@@ -118,7 +118,7 @@ namespace geometry
             indices[i] = static_cast<int> (_indices[i]);
         }
         void RadiusSearch(const geometry::Vector<T> &point, std::vector<size_t> &indices, 
-            std::vector<float > &dists, double radius, size_t max_result, 
+            std::vector<float > &dists, double radius, size_t max_result = 100, 
             const SearchParameter sp = SearchParameter())
         {
             std::vector<std::pair<size_t, geometry::scalar> >   ret_matches;

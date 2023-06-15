@@ -47,7 +47,37 @@ namespace geometry
         colors.insert(colors.end(), another_pcd.colors.begin(), another_pcd.colors.end());
         normals.insert(normals.end(), another_pcd.normals.begin(), another_pcd.normals.end());
     }
-
+    void PointCloud::VoxelClustering(double grid_len)
+    {
+        auto clusters = geometry::VoxelClustering(points, grid_len);
+        geometry::Point3List cpoints;
+        geometry::Point3List cnormals;
+        geometry::Point3List ccolors;
+        for(auto &c: clusters)
+        {
+            geometry::Point3 tmp_point = geometry::Point3::Zero();
+            geometry::Point3 tmp_normal = geometry::Point3::Zero();
+            geometry::Point3 tmp_color = geometry::Point3::Zero();
+            for(auto &id: c)
+            tmp_point += points[id];
+            cpoints.push_back(tmp_point / c.size());
+            if(HasNormals())
+            {
+                for(auto &id: c)
+                tmp_normal += normals[id];
+                cnormals.push_back(tmp_normal / c.size());               
+            }
+            if(HasColors())
+            {
+                for(auto &id: c)
+                tmp_color += colors[id];
+                ccolors.push_back(tmp_color / c.size());
+            }
+        }
+        points = cpoints;
+        normals = cnormals;
+        colors = ccolors;
+    }
     void PointCloud::EstimateNormals(float radius, int knn)
     {   
         normals.resize(points.size());        
@@ -206,9 +236,9 @@ namespace geometry
     }
     void PointCloud::Transform(const TransformationMatrix &T)
     {
-        geometry::TransformPoints(T,points);
+        points = geometry::TransformPoints(T,points);
         if(HasNormals())
-        geometry::TransformNormals(T,normals);
+        normals = geometry::TransformNormals(T,normals);
     }
 
     bool PointCloud::WriteToPLY(const std::string &filename) const

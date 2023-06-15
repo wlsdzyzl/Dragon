@@ -90,17 +90,24 @@ namespace reconstruction
     }
     void CubeHandler::PrepareCubes(const geometry::Point3List &points, std::vector<CubeID> &cube_id_list, std::function<double(geometry::Point3)> get_sdf)
     {
+        cube_id_list.clear();
         geometry::BoundingBox bb;
         for(size_t i = 0; i != points.size(); ++i)
         {
             bb.AddPoint(points[i]);
+            CubeID cube_id = GetCubeID(points[i]);
+            if(cube_map.find(cube_id) == cube_map.end())
+            {
+                // is_new_cube = true;
+                cube_map[cube_id] = VoxelCube(cube_id);
+                cube_id_list.push_back(cube_id);
+            }
         }
         geometry::Point3 max_point(bb.x_max + truncation, bb.y_max + truncation, bb.z_max + truncation), 
             min_point(bb.x_min - truncation, bb.y_min - truncation, bb.z_min - truncation);
         CubeID max_cube_id = GetCubeID(max_point);
         CubeID min_cube_id = GetCubeID(min_point);        
 
-        cube_id_list.clear();
         std::vector<int> voxel_index
              {0, CUBE_SIZE -1, (CUBE_SIZE-1)*CUBE_SIZE, (CUBE_SIZE-1)*CUBE_SIZE + CUBE_SIZE-1,
             CUBE_SIZE * CUBE_SIZE * (CUBE_SIZE-1), CUBE_SIZE * CUBE_SIZE * (CUBE_SIZE-1) + CUBE_SIZE-1,
@@ -115,31 +122,30 @@ namespace reconstruction
             {
                 for(int k = min_cube_id(2)-1; k<= max_cube_id(2)+1; ++k)
                 {
-                    
-                    double min_sdf = std::numeric_limits<double>::max();
-                    bool same_sign = true;
-                    bool start_sign = true;
-                    for(size_t c = 0; c!= 8; ++c)
-                    {
-                        geometry::Point3 voxel = geometry::Point3(i*cube_resolution, j*cube_resolution, 
-                            k*cube_resolution) + c_para.VoxelCentroidOffSet[voxel_index[c]];
-                        double sdf = get_sdf(voxel);
-                        if(c == 0 && sdf < 0) start_sign = false;
-                        if( c > 0 && ((sdf > 0) != start_sign)) same_sign = false;
-                        if(min_sdf > std::fabs(sdf))
-                            min_sdf =std::fabs(sdf);
-                    }
-
-                    if(min_sdf < truncation || !same_sign)
-                    {
-                        CubeID cube_id = CubeID(i,j,k);
-                        // bool is_new_cube=false;
-                        if(cube_map.find(cube_id) == cube_map.end())
+                    CubeID cube_id = CubeID(i,j,k);
+                    // bool is_new_cube=false;
+                    if(cube_map.find(cube_id) == cube_map.end())
+                    {   
+                        double min_sdf = std::numeric_limits<double>::max();
+                        bool same_sign = true;
+                        bool start_sign = true;
+                        for(size_t c = 0; c!= 8; ++c)
                         {
-                            // is_new_cube = true;
-                            cube_map[cube_id] = VoxelCube(cube_id);
+                            geometry::Point3 voxel = geometry::Point3(i*cube_resolution, j*cube_resolution, 
+                                k*cube_resolution) + c_para.VoxelCentroidOffSet[voxel_index[c]];
+                            double sdf = get_sdf(voxel);
+                            if(c == 0 && sdf < 0) start_sign = false;
+                            if( c > 0 && ((sdf > 0) != start_sign)) same_sign = false;
+                            if(min_sdf > std::fabs(sdf))
+                                min_sdf =std::fabs(sdf);
                         }
-                        cube_id_list.push_back(cube_id);
+
+                        if(min_sdf < truncation || !same_sign)
+                        {
+                                // is_new_cube = true;
+                            cube_map[cube_id] = VoxelCube(cube_id);
+                            cube_id_list.push_back(cube_id);
+                        }
                     }
                     //std::cout<<k<<std::endl;
                 }
@@ -155,13 +161,13 @@ namespace reconstruction
         {
             CubeID &cube_id = cube_id_list[i];
             VoxelCube &cube = cube_map[cube_id];
-            if(i % 10 == 0) std::cout<<"progress: "<<(i*100.0)/cube_id_list.size()<<"%"<<std::endl;
-       
+            // if(i % 100 == 0) std::cout<<"progress: "<<(i*100.0)/cube_id_list.size()<<"%"<<std::endl;
+#pragma omp parallel for 
             for(size_t x = 0 ; x != CUBE_SIZE; ++x)
             {
                 for(size_t y = 0 ; y != CUBE_SIZE; ++y)
                 {
-                    // #pragma omp parallel for     
+                     
                     for(int z = 0 ; z != CUBE_SIZE; ++z)
                     {   
                         int voxel_id = x + y * CUBE_SIZE + z * CUBE_SIZE * CUBE_SIZE;

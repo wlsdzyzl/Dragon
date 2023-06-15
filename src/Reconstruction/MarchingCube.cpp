@@ -9,10 +9,12 @@ namespace reconstruction
     geometry::Point3 InterpolateEdgeVetex(const geometry::Point3 &corner1, const geometry::Point3 &corner2, 
         float sdf1, float sdf2)
     {
-        float sdf_diff = sdf2 - sdf1;
-        float t = sdf1 / sdf_diff;
-        //std::cout<<"sdf diff: "<<sdf_diff<<" corner1: "<<corner1<<" corner2: "<<corner2<<std::endl;
-        return  corner1 - t*(corner2 - corner1);
+        float sdf_diff = std::abs(sdf2 - sdf1);
+        // if(std2 - sdf1)
+        float t = std::abs(sdf1 / sdf_diff);
+
+        // std::cout<<"sdf diff: "<<sdf_diff<<" corner1: "<<sdf1<<" corner2: "<<sdf2<<std::endl;
+        return  (1 - t) * corner1 + t*corner2;
     }
 
     int DetermineCase(const std::vector<TSDFVoxel > &corner_sdf)

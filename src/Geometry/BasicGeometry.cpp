@@ -1,4 +1,6 @@
 #include "BasicGeometry.h"
+#include "Geometry/Structure/KDTree.h"
+#include <unordered_map>
 namespace dragon
 {
 namespace geometry
@@ -19,23 +21,27 @@ namespace geometry
                 T *Vector4(point(0), point(1), point(2), 1.0);
             return new_point.head<3>() / new_point(3);        
     }
-    void TransformPoints(const Matrix4 &T, Point3List &points)
+    Point3List TransformPoints(const Matrix4 &T, const Point3List &points)
     {
-        for (auto& point : points) 
+        Point3List res = points;
+        for (auto& point : res) 
         {
             Vector4 new_point =
                 T *Vector4(point(0), point(1), point(2), 1.0);
             point = new_point.head<3>() / new_point(3);
         }
+        return res;
     }
-    void TransformNormals(const Matrix4 &T, Point3List &normals)
+    Vec3List TransformNormals(const Matrix4 &T, const Vec3List &normals)
     {
-        for (auto& normal : normals) 
+        Point3List res = normals;
+        for (auto& normal : res) 
         {
             Vector4 new_normal =
                 T *Vector4(normal(0), normal(1), normal(2), 0.0);
             normal = new_normal.head<3>();
         }
+        return res;
     }  
     Vector3 TransformNormal(const Matrix4 &T, const Vector3 &normal)
     {
@@ -354,6 +360,10 @@ namespace geometry
     {
         return (a - b).norm();
     }
+    double Distance(const Point3 &a, const Point3 &b)
+    {
+        return (a - b).norm();
+    }
     Point2 ProjectionPointToLine(const Line &a, const Point2 &p)
     {
         double tmp = a.n.transpose() * a.n;
@@ -526,12 +536,54 @@ namespace geometry
     geometry::Matrix3 RotationMatrixBetweenVectors(const Vector3 &a, const Vector3 &b)
     {
         auto v = a.cross(b);
+        if (v.norm() <= DRAGON_EPS)
+        return geometry::Matrix3::Identity();
         double c = a.dot(b);
         double s = v.norm();
         geometry::Matrix3 kmat = GetSkewSymmetricMatrix(v);
         return geometry::Matrix3::Identity() + kmat + kmat * kmat *((1 - c) / (s * s));
     }
+    Point3i GetGridIndex(const geometry::Point3 &points, double grid_len)
+    {
+        return Point3i(std::floor(points(0)/grid_len), std::floor(points(1)/grid_len),std::floor(points(2)/grid_len));
+    }   
+    std::vector<std::vector<size_t>> VoxelClustering(const Point3List & pcd, double grid_len)
+    {
+        std::unordered_map<Point3i, std::vector<size_t>, geometry::VoxelGridHasher > grid_map;
+        std::vector<std::vector<size_t>> res;
+        for(size_t i = 0; i != pcd.size(); ++i)
+        {
+            Point3i voxel_id = GetGridIndex(pcd[i], grid_len);
+            grid_map[voxel_id].push_back(i);
+        }
+        for(auto iter = grid_map.begin(); iter != grid_map.end(); ++iter)
+        {
+            res.push_back(iter->second);
+        }
+        return res;
+    }
+    std::vector<std::vector<size_t>> RadiusClustering(const Point3List &pcd, const ScalarList & radius, double search_factor)
+    {
+        geometry::KDTree<3> kdtree;
+        kdtree.BuildTree(pcd);
+        std::vector<std::vector<size_t>> clusters;
+        std::vector<bool> flags(pcd.size(), false);
+        for(size_t i = 0; i != pcd.size(); ++i)
+        {
+            if(flags[i])
+            continue;
 
+            std::vector<size_t> indices;
+            std::vector<float> dists;
+            kdtree.RadiusSearch(pcd[i], indices, dists, radius[i] * search_factor );
+            clusters.push_back(indices);
+            for(size_t j = 0; j != indices.size(); ++j)
+            {
+                flags[indices[j]] = true;
+            }
+        }
+        return clusters;
+    }
     // choose svd if b is a vector
     geometry::VectorX SolveBySVD(const geometry::MatrixX &A, const geometry::VectorX &b)
     {

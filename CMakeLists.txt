@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
+project(Dragon)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 set (CMAKE_BUILD_TYPE "Release")
 set (CMAKE_BINARY_DIR "./app")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+cmake_policy(SET CMP0072 OLD)
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
@@ -18,6 +20,7 @@ include_directories(3rdparty/tinyobjloader)
 include_directories(3rdparty/imgui)
 include_directories(3rdparty/nanoflann/include)
 include_directories(3rdparty/glfw/include)
+include_directories(3rdparty/cnpy)
 include_directories(src)
 
 #message("tinyobjloader")
@@ -60,7 +63,7 @@ file(GLOB IO_SRC
 )
 add_subdirectory(3rdparty/glfw)
 add_subdirectory(3rdparty/imgui)
-
+add_subdirectory(3rdparty/cnpy)
 add_library(tinyply SHARED ${TinyPly_SRC})
 add_library(objloader SHARED ${Objloader_SRC})
 
@@ -76,12 +79,12 @@ set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -O0 -g -Wall -fopenmp -Wno-maybe-uninit
 # if you want a double-precision
 set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -DUSING_FLOAT64") 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
 set(THIRD_LIB 
     tinyply 
     objloader
     imgui
     glfw
+    cnpy
     ${GLUT_LIBRARIES}  
     ${GLEW_LIBRARIES} 
     ${OPENGL_LIBRARIES} 
@@ -98,8 +101,9 @@ add_executable(SpiderMan "app/SpiderMan.cpp")
 add_executable(RBFTest "app/RBFTest.cpp")
 add_executable(PoissonTest "app/PoissonTest.cpp")
 add_executable(Mesh2SDFTest "app/Mesh2SDFTest.cpp")
-add_executable(NormalPCD2IndicatorTest "app/NormalPCD2IndicatorTest.cpp")
-add_executable(CenterLine2SDFTest "app/CenterLine2SDFTest.cpp")
+add_executable(Mesh2Indicator "app/Mesh2Indicator.cpp")
+add_executable(CenterLine2SDF "app/CenterLine2SDF.cpp")
+add_executable(CenterLine2SurfacePoints "app/CenterLine2SurfacePoints.cpp")
 
 target_link_libraries(ReadMesh
     dragon
@@ -133,11 +137,15 @@ target_link_libraries(Mesh2SDFTest
     dragon
     ${THIRD_LIB}
 )
-target_link_libraries(NormalPCD2IndicatorTest
+target_link_libraries(Mesh2Indicator
     dragon
     ${THIRD_LIB}
 )
-target_link_libraries(CenterLine2SDFTest
+target_link_libraries(CenterLine2SDF
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(CenterLine2SurfacePoints
     dragon
     ${THIRD_LIB}
 )

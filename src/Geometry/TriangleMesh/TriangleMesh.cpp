@@ -40,9 +40,9 @@ namespace geometry
     }
     void TriangleMesh::Transform(const TransformationMatrix & T)
     {
-        TransformPoints(T,points);
+        points = TransformPoints(T,points);
         if(HasNormals())
-        TransformNormals(T,normals);
+        normals = TransformNormals(T,normals);
     }
     void TriangleMesh::LoadFromMeshes(const std::vector<TriangleMesh > &meshes)
     {

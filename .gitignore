@@ -2,3 +2,6 @@
 /TestData/
 /.vs/
 /.vscode/
+*.out
+*.ply
+*.npy

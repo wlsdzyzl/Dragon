@@ -36,6 +36,7 @@ namespace geometry
             std::shared_ptr<PointCloud> DownSample(float grid_len) const;
             bool WriteToPLY(const std::string &fileName) const;
             void MergePCD(const PointCloud & another_pcd);
+            void VoxelClustering(double grid_len);
             BoundingBox GetBoundingBox() const
             {
                 BoundingBox bb;
