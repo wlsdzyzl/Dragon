@@ -74,6 +74,7 @@ namespace mesh
     };
     std::shared_ptr<TriangleMesh> QuadricDecimation(const TriangleMesh &mesh, size_t target_num);
     std::shared_ptr<TriangleMesh> ClusteringDecimation(const TriangleMesh &mesh, double voxel_len);
+    std::shared_ptr<TriangleMesh> ToManifoldMesh(const TriangleMesh &mesh);
 }
 }
 }

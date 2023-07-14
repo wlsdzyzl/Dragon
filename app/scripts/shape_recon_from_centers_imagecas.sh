@@ -1,8 +1,8 @@
 #!/bin/bash
 
 cpp_program="../../build/app/CenterLine2SDF"
-inputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/xyzr/"
-outputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr/"
+inputfolder="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/xyzr/"
+outputfolder="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/processed_skeleton/"
 files=$(find "$inputfolder" -type f)
 total_time=0
 file_count=0
@@ -18,7 +18,7 @@ for file in $files; do
   output_file="${outputfolder}/${filename_without_extension}.ply"
   start_time=$(date +%s.%N)
   # 使用编译好的C++程序处理文件，并指定输出文件路径
-  $cpp_program "$file" "$output_file" "0.005" "0" "0.01"
+  $cpp_program "$file" "$output_file" "0.005" "0" "0.75"
   end_time=$(date +%s.%N)
   duration=$(echo "$end_time - $start_time" | bc)
   total_time=$(echo "$total_time + $duration" | bc)

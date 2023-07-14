@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
 {
     if(argc < 2)
     {
-        std::cout << "Usage: Mesh2SDFTest [filename] [voxel resolution = 0.01]"<<std::endl;
+        std::cout << "Usage: Mesh2SDFTest [filename] [voxel_resolution = 0.01]"<<std::endl;
         return 0;        
     }
     geometry::TriangleMesh mesh, generated_mesh;
@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     mesh.Scale(scale);
     float voxel_resolution = 0.01;
     if(argc > 2)
-    voxel_resolution = std::atof(argv[2]);
+    voxel_resolution = std::atof(argv[3]);
 
     reconstruction::CubeHandler cube_handler;
     reconstruction::Mesh2SDF(mesh, cube_handler, voxel_resolution);

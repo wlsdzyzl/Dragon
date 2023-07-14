@@ -44,35 +44,36 @@ int main(int argc, char* argv[])
     if(argc > 4)
     radius_factor = std::atof(argv[4]);
 
-    // pre-processing: voxel clustering
-    if(voxel_resolution > 0)
-    {
-        auto clusters = geometry::VoxelClustering(centers, voxel_resolution * 2);
-        geometry::Point3List ccenters;
-        std::vector<double> cradius;
-        for(auto &c: clusters)
-        {
-            geometry::Point3 tmp_center = geometry::Point3::Zero();
-            double tmp_r = 0;
-            for(auto &id: c)
-            {
-                tmp_center += centers[id];
-                tmp_r += radius[id];
-            }
-            ccenters.push_back(tmp_center / c.size());
-            cradius.push_back(tmp_r / c.size());
-        }
-        centers = ccenters;
-        radius = cradius;
-    }
+    // // pre-processing: voxel clustering
+    // if(voxel_resolution > 0)
+    // {
+    //     auto clusters = geometry::VoxelClustering(centers, voxel_resolution * 2);
+    //     geometry::Point3List ccenters;
+    //     std::vector<double> cradius;
+    //     for(auto &c: clusters)
+    //     {
+    //         geometry::Point3 tmp_center = geometry::Point3::Zero();
+    //         double tmp_r = 0;
+    //         for(auto &id: c)
+    //         {
+    //             tmp_center += centers[id];
+    //             tmp_r += radius[id];
+    //         }
+    //         ccenters.push_back(tmp_center / c.size());
+    //         cradius.push_back(tmp_r / c.size());
+    //     }
+    //     centers = ccenters;
+    //     radius = cradius;
+    // }
     // pre-processing: radius clustering
-    if(radius_factor > 0)
+    if(radius_factor > 100)
     {
-        geometry::Point3List ccenters;
-        std::vector<double> cradius;
+		
+	geometry::Point3List ccenters;
+	std::vector<double> cradius;
         auto clusters = geometry::RadiusClustering(centers, radius, radius_factor);
-        for(auto &c: clusters)
-        {
+	for (auto &c: clusters)
+	{
             geometry::Point3 tmp_center = geometry::Point3::Zero();
             double tmp_r = 0;
             for(auto &id: c)
@@ -80,15 +81,19 @@ int main(int argc, char* argv[])
                 tmp_center += centers[id];
                 tmp_r += radius[id];
             }
-            ccenters.push_back(tmp_center / c.size());
+            ccenters.push_back(tmp_center /c.size());
             cradius.push_back(tmp_r / c.size());
         }
         centers = ccenters;
         radius = cradius;    
+        std::cout<<"After clustering: "<<centers.size()<<std::endl;
     }      
     
     geometry::PointCloud surface_pcd = reconstruction::Centerline2SurfacePoints(centers, radius);
+    std::cout<<surface_pcd.points.size()<<std::endl;
     surface_pcd.VoxelClustering(voxel_resolution);
     surface_pcd.WriteToPLY(output_filename);
+    
+    std::cout<<surface_pcd.points.size()<<std::endl;
     return 0;
 }

@@ -66,28 +66,28 @@ int main(int argc, char* argv[])
     reconstruction::CubeHandler cube_handler;
     cube_handler.SetTruncation(voxel_resolution * 5);
 
-    // pre-processing: voxel clustering
-    {
-        auto clusters = geometry::VoxelClustering(centers, voxel_resolution * 2);
-        geometry::Point3List ccenters;
-        std::vector<double> cradius;
-        for(auto &c: clusters)
-        {
-            geometry::Point3 tmp_center = geometry::Point3::Zero();
-            double tmp_r = 0;
-            for(auto &id: c)
-            {
-                tmp_center += centers[id];
-                tmp_r += radius[id];
-            }
-            ccenters.push_back(tmp_center / c.size());
-            cradius.push_back(tmp_r / c.size());
-        }
-        centers = ccenters;
-        radius = cradius;
-    }
+    // // pre-processing: voxel clustering
+    // {
+    //     auto clusters = geometry::VoxelClustering(centers, voxel_resolution * 2);
+    //     geometry::Point3List ccenters;
+    //     std::vector<double> cradius;
+    //     for(auto &c: clusters)
+    //     {
+    //         geometry::Point3 tmp_center = geometry::Point3::Zero();
+    //         double tmp_r = 0;
+    //         for(auto &id: c)
+    //         {
+    //             tmp_center += centers[id];
+    //             tmp_r += radius[id];
+    //         }
+    //         ccenters.push_back(tmp_center / c.size());
+    //         cradius.push_back(tmp_r / c.size());
+    //     }
+    //     centers = ccenters;
+    //     radius = cradius;
+    // }
     // pre-processing: radius clustering
-    if(radius_factor > 0)
+    if(radius_factor > 100)
     {
         geometry::Point3List ccenters;
         std::vector<double> cradius;
@@ -109,24 +109,23 @@ int main(int argc, char* argv[])
     }    
 
 
-    // cube_handler.SetVoxelResolution(voxel_resolution);
+    cube_handler.SetVoxelResolution(voxel_resolution);
     reconstruction::CenterLine2SDF(centers, radius, cube_handler, voxel_resolution, ordered, 2);
 
 
-    for(size_t i = 0; i != centers.size(); ++i)
-    {
-        centers[i] /= scale;
-    }
-    geometry::PointCloud pcd;
-    pcd.points = centers;
-    pcd.WriteToPLY("./centers.ply");
+    //for(size_t i = 0; i != centers.size(); ++i)
+    //{
+      //  centers[i] /= scale;
+    //}
+    //geometry::PointCloud pcd;
+    //pcd.points = centers;
+    //pcd.WriteToPLY(output_filename+".centers.ply");
 
-    auto cube_pcd = cube_handler.GetPointCloud();
-    cube_pcd->Scale(1.0 / scale);
     cube_handler.ExtractTriangleMesh(generated_mesh);
     auto simplified_mesh = geometry::mesh::ClusteringDecimation(generated_mesh, voxel_resolution);
-    simplified_mesh->Scale(1.0 / scale);
-    simplified_mesh-> WriteToPLY(output_filename);
+    auto res_mesh = geometry::mesh::ToManifoldMesh(*simplified_mesh);
+    res_mesh->Scale(1.0 / scale);
+    res_mesh-> WriteToPLY(output_filename);
 
     return 0;
 }

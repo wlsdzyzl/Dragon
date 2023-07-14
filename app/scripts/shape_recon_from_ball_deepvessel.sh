@@ -2,8 +2,8 @@
 
 cpp_program_surface="../../build/app/CenterLine2SurfacePoints"
 python_program_ballpivoting="./ballpivoting_recon.py"
-inputfolder="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/xyzr/"
-outputfolder="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mesh_from_xyzr_ballpivoting/"
+inputfolder="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/xyzr/"
+outputfolder="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/mesh_from_xyzr_ballpivoting/"
 files=$(find "$inputfolder" -type f)
 total_time=0
 file_count=0
@@ -19,7 +19,7 @@ for file in $files; do
   output_file="${outputfolder}/${filename_without_extension}.ply"
   start_time=$(date +%s.%N)
   # 使用编译好的C++程序处理文件，并指定输出文件路径
-  $cpp_program_surface "$file" "./surf.ply"  "0.25" "0.01"
+  $cpp_program_surface "$file" "./surf.ply" "1.0" "0.75"
   python $python_program_ballpivoting "./surf.ply" "$output_file"
   end_time=$(date +%s.%N)
   duration=$(echo "$end_time - $start_time" | bc)

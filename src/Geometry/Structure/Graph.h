@@ -33,15 +33,47 @@ class Graph
                         AddEdge(j, i);
                     }
         }
-        void ConstructEdgeThreshold(const std::vector<double> & radius)
+        void ConstructEdgeRadius(const std::vector<double> & radius)
         {
-            for (size_t i = 0; i < vertices.size(); i++) 
-                for (size_t j = i + 1; j < vertices.size(); j++) 
-                    if (geometry::Distance(vertices[i], vertices[j]) <= radius[i] || geometry::Distance(vertices[i], vertices[j]) <= radius[j]) 
+            geometry::KDTree<3> kdtree;
+            kdtree.BuildTree(vertices);
+            std::vector<size_t> indices;
+            std::vector<float> dists;
+            for (size_t i = 0; i < vertices.size(); ++i)
+            {
+                kdtree.RadiusSearch(vertices[i], indices, dists, 9 * radius[i] * radius[i]);
+                
+                if(indices.size() <= 1)
+                {
+                    std::cout<<YELLOW<<"[WARNING]::[GRAPH]::Single vertex in graph."<<RESET<<std::endl;
+                    continue;
+                }
+                // std::cout<<radius[i]<<" "<<dists.back()<<std::endl;
+                geometry::Vec3List directions;
+                for (size_t j = 1; j < indices.size(); ++j)
+                {
+
+                    geometry::Vector3 tmp_d = (vertices[indices[j]] -  vertices[i]).normalized();
+                    bool new_direction = true;
+                    for(auto &d: directions)
                     {
-                        AddEdge(i, j);
-                        AddEdge(j, i);
+                       if(tmp_d.dot(d) > 0)
+                        {
+                            new_direction = false;
+                            break;
+                        }
                     }
+                    // std::cout<<dists[j]<<std::endl;
+                    if(new_direction)
+                    {
+                        AddEdge(i, indices[j]);
+                        AddEdge(indices[j], i);
+                        directions.push_back(tmp_d);
+                    }
+                    // else break;
+                }
+                // std::cout<<"-----------------------------"<<std::endl;
+            }
         }
         void ConstructEdgeKNN(int k)
         {
@@ -79,27 +111,30 @@ class Graph
                 directions.push_back((vertices[indices[1]] -  vertices[i]).normalized());
                 for (size_t j = 2; j < indices.size(); ++j)
                 {
+                    if(dists[j] / dists[1] > factor * factor)
+                    break;
                     geometry::Vector3 tmp_d = (vertices[indices[j]] -  vertices[i]).normalized();
                     bool new_direction = true;
                     for(auto &d: directions)
                     {
-                       if(tmp_d.dot(d) > 0.75)
+                       if(tmp_d.dot(d) > 0.25)
                         {
                             new_direction = false;
                             break;
                         }
                     }
-                    if(dists[j] / dists[1] <= factor * factor|| new_direction)
+                    // std::cout<<dists[j]<<std::endl;
+                    if(new_direction)
                     {
                         AddEdge(i, indices[j]);
                         AddEdge(indices[j], i);
                         directions.push_back(tmp_d);
                     }
-                    else break;
+                    // else break;
                 }
+                // std::cout<<"-----------------------------"<<std::endl;
             }
         }
-        
         void AddEdge(size_t u, size_t v) 
         {
             if(std::find(neighbors[u].begin(), neighbors[u].end(), v) == neighbors[u].end())

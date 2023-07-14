@@ -575,12 +575,17 @@ namespace geometry
 
             std::vector<size_t> indices;
             std::vector<float> dists;
-            kdtree.RadiusSearch(pcd[i], indices, dists, radius[i] * search_factor );
-            clusters.push_back(indices);
+            kdtree.RadiusSearch(pcd[i], indices, dists, radius[i] * search_factor * radius[i] * search_factor);
+            
+            // std::cout<<dists.size()<<" "<<radius[i] * search_factor <<" "<<dists.back()<<" "<<Distance(pcd[i], pcd[indices.back()])<<std::endl;
+            std::vector<size_t> final_indices;
             for(size_t j = 0; j != indices.size(); ++j)
             {
+                // if(flags[indices[j]]) continue;
                 flags[indices[j]] = true;
+                final_indices.push_back(indices[j]);
             }
+            clusters.push_back(final_indices);
         }
         return clusters;
     }

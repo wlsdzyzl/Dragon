@@ -401,6 +401,14 @@ namespace mesh
         he.ToTriangleMesh(mesh);
         return std::make_shared<TriangleMesh>(mesh);
     }
+    std::shared_ptr<TriangleMesh> ToManifoldMesh(const TriangleMesh &mesh)
+    {
+        HalfEdge he;
+        TriangleMesh res_mesh;
+        he.FromTriangleMesh(mesh);
+        he.ToTriangleMesh(res_mesh);
+        return std::make_shared<TriangleMesh>(res_mesh);
+    }
     std::shared_ptr<TriangleMesh> QuadricDecimation(const TriangleMesh &mesh, size_t target_num)
     {
         Decimator decimator;
