@@ -2,7 +2,7 @@
 
 cpp_program="../../build/app/CenterLine2SDF"
 inputfolder="/media/wlsdzyzl/DATA1/datasets/CAT08/xyzr"
-outputfolder="/media/wlsdzyzl/DATA1/datasets/CAT08/processed_skeleton"
+outputfolder="/media/wlsdzyzl/DATA1/datasets/CAT08/mesh_from_xyzr_ours_ball"
 files=$(find "$inputfolder" -type f)
 total_time=0
 file_count=0
