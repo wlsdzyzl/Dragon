@@ -57,8 +57,8 @@ namespace geometry
         }
         size_t GetPointSize() const{return points.size();}
         size_t GetTriangleSize() const{return triangles.size();}
-        bool WriteToPLY(const std::string &fileName) const;
-        bool WriteToOBJ(const std::string &fileName) const;
+        bool WriteToPLY(const std::string &filename) const;
+        bool WriteToOBJ(const std::string &filename) const;
         BoundingBox GetBoundingBox() const;
         Point3uiList triangles;
         Point3List points;

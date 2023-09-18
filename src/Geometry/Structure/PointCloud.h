@@ -34,7 +34,7 @@ namespace geometry
             void EstimateNormals(float radius = 0.1, int knn = 30);
             void Transform(const geometry::Matrix4 &T);
             std::shared_ptr<PointCloud> DownSample(float grid_len) const;
-            bool WriteToPLY(const std::string &fileName) const;
+            bool WriteToPLY(const std::string &filename) const;
             void MergePCD(const PointCloud & another_pcd);
             void VoxelClustering(double grid_len);
             BoundingBox GetBoundingBox() const

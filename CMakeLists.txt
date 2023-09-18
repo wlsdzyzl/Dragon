@@ -105,6 +105,7 @@ add_executable(Mesh2Indicator "app/Mesh2Indicator.cpp")
 add_executable(CenterLine2SDF "app/CenterLine2SDF.cpp")
 add_executable(CenterLine2SurfacePoints "app/CenterLine2SurfacePoints.cpp")
 add_executable(CenterLineAgreeMesh "app/CenterLineAgreeMesh.cpp")
+add_executable(CenterLine2Graph "app/CenterLine2Graph.cpp")
 
 target_link_libraries(ReadMesh
     dragon
@@ -151,6 +152,10 @@ target_link_libraries(CenterLine2SurfacePoints
     ${THIRD_LIB}
 )
 target_link_libraries(CenterLineAgreeMesh
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(CenterLine2Graph
     dragon
     ${THIRD_LIB}
 )

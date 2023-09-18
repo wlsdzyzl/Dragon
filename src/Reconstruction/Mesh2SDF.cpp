@@ -591,7 +591,7 @@ namespace reconstruction
         geometry::PointCloud base_pcd;
         geometry::PointCloud res_pcd;
         std::vector<std::unordered_map<size_t, size_t>> neighbor_pos(centers.size());
-        std::vector<std::vector<size_t>> all_neighbors = graph.GetNeighbors();
+        std::vector<std::vector<size_t>> all_neighbors = graph.neighbors;
         geometry::Vector3 z_axis(0, 0, 1);
         // generate base points using trigonometric function
         double step = 2 * M_PI / n_points;
@@ -645,7 +645,7 @@ namespace reconstruction
         // graph.ConstructEdgeThreshold(radius);
         std::vector<geometry::Point3List> all_normals(centers.size());
         std::vector<std::unordered_map<size_t, size_t>> neighbor_pos(centers.size());
-        std::vector<std::vector<size_t>> all_neighbors = graph.GetNeighbors();
+        std::vector<std::vector<size_t>> all_neighbors = graph.neighbors;
 #pragma omp parallel for
         for(size_t i = 0; i != centers.size(); ++i)
         {
@@ -923,7 +923,7 @@ namespace reconstruction
         // graph.ConstructEdgeThreshold(radius);
 
 
-        std::vector<std::vector<size_t>> all_neighbors = graph.GetNeighbors();
+        std::vector<std::vector<size_t>> all_neighbors = graph.neighbors;
         geometry::Vector3 z_axis(0, 0, 1);
         geometry::KDTree<3> kdtree;
         kdtree.BuildTree(centers);
