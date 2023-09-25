@@ -55,6 +55,11 @@ We can estimate the quality of mesh2sdf algorithm by applying marching-cube algo
 ![](./image/dragon.jpg)
 
 ![](./image/kitten.jpg)
+
+#### Tubular Shape Reconstruction from Skeleton Representation
+
+![](./image/tubu_shape_recon.png)
+
 ### Other  
 - SpiderMan (The curve is cubic spline):
 

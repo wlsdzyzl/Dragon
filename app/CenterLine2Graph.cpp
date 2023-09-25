@@ -127,6 +127,10 @@ int main(int argc, char* argv[])
     }
     // tree_graph.colors[max_id1] = geometry::Point3(1.0, 0.0, 0.0);
     // tree_graph.colors[max_id2] = geometry::Point3(1.0, 0.0, 0.0);
+    for(size_t i = 0; i != tree_graph.vertices.size(); ++i)
+    {
+        tree_graph.vertices[i] /= scale;
+    }
     tree_graph.WriteToPLY(output_filename);
     return 0;
 }
