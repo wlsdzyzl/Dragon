@@ -10,7 +10,7 @@ void ReadCenterLines(const std::string &path, geometry::Point3List &centers, std
     {
         geometry::Point3 center;
         // double useless;
-        double r;
+        double r = 0.0;
         ifs >> center[0] >> center[1] >> center[2] >> r;
         // std::cout<<center.transpose()<<std::endl;
         centers.push_back(center);

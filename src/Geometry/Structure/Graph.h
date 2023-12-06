@@ -41,6 +41,8 @@ class Graph
         // transfer neighbors to edges
         void ComputeEdges();
         void ComputeNeighbors();
+        void DeleteVertices(const std::set<size_t> & vids);
+        Graph GenerateKeyGraph(const std::vector<size_t> & key_node) const;
         std::vector<std::vector<Edge>> GenerateMinSpanningTrees();
         geometry::Point3List vertices;
         geometry::Point3List colors;
