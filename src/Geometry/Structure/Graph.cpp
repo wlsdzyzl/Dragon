@@ -76,27 +76,22 @@ namespace geometry
                 for(size_t i = 0; i < tmp_neighbors.size() - 1; ++i)
                 for(size_t j = i+1; j < tmp_neighbors.size(); ++j)
                 {
-                    std::set<size_t> ni = std::set<size_t>(neighbors[tmp_neighbors[i]].begin(), tmp_neighbors[i].end());
-                    std::set<size_t> nj = std::set<size_t>(neighbors[tmp_neighbors[j]].begin(), tmp_neighbors[i].end());
-                    ni.erase(v);
-                    nj.erase(v);
-                    ni.insert(tmp_neighbors[j]);
-                    nj.insert(tmp_neighbors[i]);
-                    neighbors[tmp_neighbors[i]] = std::vector<size_t>(ni.begin(), ni.end());
-                    neighbors[tmp_neighbors[j]] = std::vector<size_t>(nj.begin(), nj.end());
+
+                    neighbors[tmp_neighbors[i]].push_back(tmp_neighbors[j]);
+                    neighbors[tmp_neighbors[j]].push_back(tmp_neighbors[i]);
                 }
 
                 deleted_flag[v] = true;
             }
         }
         // re-assign vid
-        std::vector<size_t> new_vid(vertices.size(), vertices.size());
+        std::vector<size_t> new_vids(vertices.size(), vertices.size());
         size_t ptr = 0;
         for(size_t i = 0; i != vertices.size(); ++i)
         {
             if(!deleted_flag[i])
             {
-                new_vid[i] = ptr;
+                new_vids[i] = ptr;
                 ptr ++;
             }
         }
@@ -108,17 +103,14 @@ namespace geometry
         {
             if(!deleted_flag[i])
             {
-                new_neighbors.push_back(td::vector<size_t>());
+                std::set<size_t> tmp_new_neighbors;
+
                 for(auto & nid: neighbors[i])
                 {
-                    if(deleted_flag[nid]) 
-                    {
-                        std::cout<<YELLOW<<"[WARNING]::[GRAPH]::Something wrong, neighbors contain deleted vertices."<<RESET<<std::endl;
-                        continue;
-                    }
-                    new_neighbors.back().push_back( new_vid[nid]);
+                    if(!deleted_flag[nid]) tmp_new_neighbors.insert(new_vids[nid]);
                 }
-                new_vertices.push_back(vertices[i]);
+                new_neighbors.push_back(std::vector<size_t>(tmp_new_neighbors.begin(), tmp_new_neighbors.end()));
+                new_vertices.push_back( vertices[i]);
                 if(HasColors())
                 new_colors.push_back(colors[i]);
             }
@@ -126,7 +118,6 @@ namespace geometry
         neighbors = new_neighbors;
         colors = new_colors;
         vertices = new_vertices;
-        
         // clear edge
         edges.clear();
     }
@@ -282,13 +273,13 @@ namespace geometry
     Graph Graph::GenerateKeyGraph(const std::vector<size_t> & key_node) const
     {
         Graph key_graph = *this;
-        std::vector<bool> is_deleted(vertices, true);
+        std::vector<bool> deleted_flag(vertices, true);
         for(auto &k: key_graph)
-        is_deleted[key_graph] = false;
+        deleted_flag[key_graph] = false;
         std::vector<size_t> deleted_vids;
         for(size_t i = 0; i != vertices.size(); ++i)
         {
-            if(is_deleted[i])
+            if(deleted_flag[i])
             deleted_vids.push_back(i);
         }
         key_graph.DeleteVertices(deleted_vids);
