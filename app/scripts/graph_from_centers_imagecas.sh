@@ -14,6 +14,7 @@ for file in $files; do
   # 指定输出文件路径
   output_file="${outputfolder}/${filename}.ply"
   start_time=$(date +%s.%N)
+  echo $cpp_program "$file" "$output_file" "1"
   # 使用编译好的C++程序处理文件，并指定输出文件路径
   $cpp_program "$file" "$output_file" "1"
   end_time=$(date +%s.%N)
