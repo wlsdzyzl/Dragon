@@ -60,6 +60,13 @@ We can estimate the quality of mesh2sdf algorithm by applying marching-cube algo
 
 ![](./image/tubu_shape_recon.png)
 
+#### Extract Tree Graph and Key-node Graph from Skeleton Representation
+**Skeleton Representation**
+![](./image/skeleton_points.png)
+**Tree Graph from Skeleton**
+![](./image/tree_graph.png)
+**Key-node Graph from Skeleton (End points and bifurcation points are considered as key-nodes)**
+![](./image/key_graph.png)
 ### Other  
 - SpiderMan (The curve is cubic spline):
 
@@ -89,5 +96,6 @@ Remeshing
 ![](./image/dragon_phong_model.gif)
 - 2021/7/2: Generate sdf from triangle mesh (`Mesh2SDF` in `Mesh2SDF.h`). 
 - 2023/9/25: Generate sdf from skeleton representation (`CenterLine2SDF` in `Mesh2SDF.h`)
+- 2023/12/7: Generate tree graph from skeleton representation (Refer to `app/Centerline2SDF.cpp`)
 ## License 
 Under the MIT License, see http://opensource.org/licenses/MIT.

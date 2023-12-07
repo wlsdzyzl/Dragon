@@ -74,11 +74,14 @@ namespace geometry
             {
                 auto & tmp_neighbors = neighbors[v];
                 for(size_t i = 0; i < tmp_neighbors.size() - 1; ++i)
-                for(size_t j = i+1; j < tmp_neighbors.size(); ++j)
                 {
-
-                    neighbors[tmp_neighbors[i]].push_back(tmp_neighbors[j]);
-                    neighbors[tmp_neighbors[j]].push_back(tmp_neighbors[i]);
+                    if(deleted_flag[tmp_neighbors[i]]) continue;
+                    for(size_t j = i+1; j < tmp_neighbors.size(); ++j)
+                    {
+                        if(deleted_flag[tmp_neighbors[j]]) continue;
+                        neighbors[tmp_neighbors[i]].push_back(tmp_neighbors[j]);
+                        neighbors[tmp_neighbors[j]].push_back(tmp_neighbors[i]);
+                    }
                 }
 
                 deleted_flag[v] = true;
@@ -270,12 +273,12 @@ namespace geometry
         return msts;    
     }
     // generate minimum spanning trees through key node
-    Graph Graph::GenerateKeyGraph(const std::vector<size_t> & key_node) const
+    Graph Graph::GenerateKeyGraph(const std::vector<size_t> & key_nodes) const
     {
         Graph key_graph = *this;
-        std::vector<bool> deleted_flag(vertices, true);
-        for(auto &k: key_graph)
-        deleted_flag[key_graph] = false;
+        std::vector<bool> deleted_flag(vertices.size(), true);
+        for(auto &k: key_nodes)
+        deleted_flag[k] = false;
         std::vector<size_t> deleted_vids;
         for(size_t i = 0; i != vertices.size(); ++i)
         {

@@ -99,6 +99,7 @@ int main(int argc, char* argv[])
     tree_graph.colors = geometry::Point3List(tree_graph.vertices.size(), geometry::Point3(1.0, 1.0, 1.0));
     size_t max_id1 = -1, max_id2 = -1;
     double max_z1 = -1e7, max_z2 = -1e7;
+    std::vector<size_t> key_nodes;
     for (size_t i = 0; i != tree_graph.vertices.size(); ++i)
     {
         // count edge
@@ -121,16 +122,23 @@ int main(int argc, char* argv[])
                     max_z2 = tree_graph.vertices[i](0);
                 }
             }
+            key_nodes.push_back(i);
         }
         if(neight_count >= 3)
-        tree_graph.colors[i][1] = 0;
+        {
+            tree_graph.colors[i][1] = 0;
+            key_nodes.push_back(i);
+        }   
     }
-    // tree_graph.colors[max_id1] = geometry::Point3(1.0, 0.0, 0.0);
-    // tree_graph.colors[max_id2] = geometry::Point3(1.0, 0.0, 0.0);
+    tree_graph.colors[max_id1] = geometry::Point3(1.0, 0.0, 0.0);
+    tree_graph.colors[max_id2] = geometry::Point3(1.0, 0.0, 0.0);
     for(size_t i = 0; i != tree_graph.vertices.size(); ++i)
     {
         tree_graph.vertices[i] /= scale;
     }
+
     tree_graph.WriteToPLY(output_filename);
+    geometry::Graph key_graph = tree_graph.GenerateKeyGraph(key_nodes);
+    key_graph.WriteToPLY(output_filename+std::string(".key.ply"));
     return 0;
 }
