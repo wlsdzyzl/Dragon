@@ -6,6 +6,8 @@ void ReadCenterLines(const std::string &path, geometry::Point3List &centers, std
     std::ifstream ifs(path);
     centers.clear();
     radius.clear();
+    std::string _a;
+    ifs >> _a >> _a >> _a >> _a;
     while(ifs)
     {
         geometry::Point3 center;

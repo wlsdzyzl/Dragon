@@ -1,9 +1,9 @@
 #!/bin/bash
 
 cpp_program_surface="../../build/app/CenterLineAgreeMesh"
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/xyzr"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/xyzr"
 
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ours_ball"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ours_origin"
 files=$(find "$inputfolder_xyzr" -type f)
 total_acc=0
 file_count=0
@@ -27,7 +27,7 @@ mean_acc=$(echo "scale=2; $total_acc / $file_count" | bc)
 echo "总共处理了 $file_count 个文件"
 echo "mean accuracy: $mean_acc"
 
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ballpivoting"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ballpivoting"
 files=$(find "$inputfolder_xyzr" -type f)
 total_acc=0
 file_count=0
@@ -51,7 +51,7 @@ mean_acc=$(echo "scale=2; $total_acc / $file_count" | bc)
 echo "总共处理了 $file_count 个文件"
 echo "mean accuracy: $mean_acc"
 
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_poisson"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_poisson"
 files=$(find "$inputfolder_xyzr" -type f)
 total_acc=0
 file_count=0

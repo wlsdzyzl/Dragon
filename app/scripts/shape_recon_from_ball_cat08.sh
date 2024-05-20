@@ -2,8 +2,8 @@
 
 cpp_program_surface="../../build/app/CenterLine2SurfacePoints"
 python_program_ballpivoting="./ballpivoting_recon.py"
-inputfolder="/media/wlsdzyzl/DATA1/datasets/CAT08/xyzr"
-outputfolder="/media/wlsdzyzl/DATA1/datasets/CAT08/mesh_from_xyzr_ballpivoting"
+inputfolder="/media/wlsdzyzl/DATA/datasets/CAT08/xyzr"
+outputfolder="/media/wlsdzyzl/DATA/datasets/CAT08/mesh_from_xyzr_ballpivoting"
 files=$(find "$inputfolder" -type f)
 total_time=0
 file_count=0

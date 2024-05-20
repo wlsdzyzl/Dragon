@@ -2,8 +2,8 @@
 
 cpp_program_surface="../../build/app/CenterLine2SurfacePoints"
 python_program_possion="./poisson_recon.py"
-inputfolder="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/xyzr/"
-outputfolder="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_poisson/"
+inputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/xyzr/"
+outputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_poisson/"
 files=$(find "$inputfolder" -type f)
 total_time=0
 file_count=0

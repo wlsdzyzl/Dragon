@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 {
     if(argc < 2)
     {
-        std::cout << "Usage: CenterLine2SDFTest [input_filename] [output_filename] [voxel resolution = 0.01] [ordered = 1] [radius_factor = -1.0] [scaling = -1]"<<std::endl;
+        std::cout << "Usage: CenterLine2SDFTest [input_filename] [output_filename] [voxel resolution = 0.01] [ordered = 1] [radius_factor = -1.0] [scaling = -1] [fast_computation = 1]"<<std::endl;
         return 0;        
     }
 
@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
     double radius_factor = -1.0;
     float voxel_resolution = 0.01;
     int ordered = 1;
+    int fast_computation = 1;
     if(argc > 3)
     voxel_resolution = std::atof(argv[3]);
     if(argc > 4)
@@ -46,6 +47,8 @@ int main(int argc, char* argv[])
     radius_factor = std::atof(argv[5]);
     if(argc > 6)
     scale = std::atof(argv[6]);
+    if(argc > 7)
+    fast_computation = std::atoi(argv[7]);
     // scaling
     // why is scaling so important?
     if(scale <= 0)
@@ -110,7 +113,7 @@ int main(int argc, char* argv[])
 
 
     cube_handler.SetVoxelResolution(voxel_resolution);
-    reconstruction::CenterLine2SDF(centers, radius, cube_handler, voxel_resolution, ordered, 2);
+    reconstruction::CenterLine2SDF(centers, radius, cube_handler, voxel_resolution, ordered, 2, fast_computation);
 
 
     //for(size_t i = 0; i != centers.size(); ++i)

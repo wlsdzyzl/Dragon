@@ -8,7 +8,9 @@ def load_and_recon(input_path, output_path, depth = 9):
     # load a new mesh in the MeshSet, and sets it as current mesh
     # the path of the mesh can be absolute or relative
     ms.load_new_mesh(input_path)
-
+    
+    # estimate normals
+    ms.compute_normal_for_point_clouds()
 
     # apply the filter script contained in the MeshSet
     # note - the filter script used in this example does not require an input mesh,

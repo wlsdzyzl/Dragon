@@ -1,9 +1,9 @@
 #!/bin/bash
 
 cpp_program="../../build/app/CenterLine2Graph"
-inputfolder="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/xyzr/"
-# inputfolder="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/ot_skeleton/"
-outputfolder="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/graph/"
+inputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/skeleton_right_xyzr"
+# inputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/ot_skeleton/"
+outputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/skeleton_right_graph"
 
 files=$(find "$inputfolder" -type f)
 total_time=0

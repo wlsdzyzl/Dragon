@@ -1,9 +1,8 @@
 # ours
-./shape_recon_from_centers_atm.sh > ./atm_ours_wr.out
-./shape_recon_from_centers_cat08.sh > ./cat08_ours_wr.out
-./shape_recon_from_centers_deepvessel.sh > ./deepvessel_ours_wr.out
-./shape_recon_from_centers_imagecas.sh > ./imagecas_ours_wr.out
-./shape_recon_from_centers_parse.sh > ./parse_ours_wr.out
+./shape_recon_from_centers_atm.sh > ./atm_ours_fast.out
+./shape_recon_from_centers_deepvessel.sh > ./deepvessel_ours_fast.out
+./shape_recon_from_centers_imagecas.sh > ./imagecas_ours_fast.out
+./shape_recon_from_centers_parse.sh > ./parse_ours_fast.out
 
 # # poisson
 # ./shape_recon_from_poisson_atm.sh > ./atm_poisson_wr.out

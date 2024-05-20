@@ -89,10 +89,10 @@ int main(int argc, char* argv[])
         std::cout<<"After clustering: "<<centers.size()<<std::endl;
     }      
     
-    geometry::PointCloud surface_pcd = reconstruction::Centerline2SurfacePoints(centers, radius);
+    geometry::PointCloud surface_pcd = reconstruction::Centerline2SurfacePoints(centers, radius, 5);
     std::cout<<surface_pcd.points.size()<<std::endl;
     surface_pcd.VoxelClustering(voxel_resolution);
-    surface_pcd.WriteToPLY(output_filename);
+    surface_pcd.WriteToFile(output_filename);
     
     std::cout<<surface_pcd.points.size()<<std::endl;
     return 0;

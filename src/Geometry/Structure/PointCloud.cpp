@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <omp.h>
 #include <queue>
+#include <fstream>
+
 namespace dragon
 {
 namespace geometry 
@@ -226,24 +228,74 @@ namespace geometry
             {
                 return LoadFromPLY(filename);
             }
+            else if(result[1] == "xyz")
+            {
+                return LoadFromXYZ(filename);
+            }
         }
-        std::cout<<YELLOW<<"[WARNING]::[LoadFromFile]::Dragon only supports obj and ply file."<<RESET<<std::endl;
+        std::cout<<YELLOW<<"[WARNING]::[LoadFromFile]::Dragon only supports obj, xyz and ply file."<<RESET<<std::endl;
         return false;
     }
-    bool PointCloud::WriteToOBJ(const std::string &filename)
+    bool PointCloud::WriteToOBJ(const std::string &filename) const
     {
         return io::WriteOBJ(filename,points,normals,colors);
     }
+    
     void PointCloud::Transform(const TransformationMatrix &T)
     {
         points = geometry::TransformPoints(T,points);
         if(HasNormals())
         normals = geometry::TransformNormals(T,normals);
     }
-
     bool PointCloud::WriteToPLY(const std::string &filename) const
     {
         return io::WritePLY(filename,points,normals,colors);
     }
+    bool PointCloud::LoadFromXYZ(const std::string &filename)
+    {
+        std::ifstream ifs(filename);
+        points.clear();
+        while(ifs)
+        {
+            geometry::Point3 p;
+            ifs >> p[0] >> p[1] >> p[2];
+            points.push_back(p);
+        }
+        ifs.close();
+        std::cout<<BLUE<<"[INFO]::[LoadFromXYZ]::Number of points: "<<points.size()<<RESET<<std::endl;
+        return true;
+    }
+    bool PointCloud::WriteToXYZ(const std::string &filename) const
+    {
+        std::ofstream ofs(filename);
+        for(size_t i = 0; i != points.size(); ++i)
+        {
+            ofs<<points[i](0)<<" "<<points[i](1)<<" "<<points[i](2)<<"\n";
+        }
+        ofs.close();
+        return true;
+    }
+    bool PointCloud::WriteToFile(const std::string &filename) const
+    {
+        std::vector<std::string> result = tool::RSplit(filename, ".", 1);
+        if(result.size() == 2)
+        {
+            if(result[1] == "obj")//obj
+            {
+                return WriteToOBJ(filename);
+            }
+            else if(result[1] == "ply")
+            {
+                return WriteToPLY(filename);
+            }
+            else if(result[1] == "xyz")
+            {
+                return WriteToXYZ(filename);
+            }
+        }
+        std::cout<<YELLOW<<"[WARNING]::[WriteToFile]::Dragon only supports obj, xyz and ply file."<<RESET<<std::endl;
+        return false;        
+    }
+
 }
 }

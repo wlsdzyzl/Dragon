@@ -29,12 +29,17 @@ namespace geometry
             }
             bool LoadFromPLY(const std::string &filename);
             bool LoadFromOBJ(const std::string &filename);
+            bool LoadFromXYZ(const std::string &filename);
             bool LoadFromFile(const std::string & filename);
-            bool WriteToOBJ(const std::string &filename);
+            
             void EstimateNormals(float radius = 0.1, int knn = 30);
             void Transform(const geometry::Matrix4 &T);
             std::shared_ptr<PointCloud> DownSample(float grid_len) const;
+            bool WriteToOBJ(const std::string &filename) const;
             bool WriteToPLY(const std::string &filename) const;
+            // only write coordinates
+            bool WriteToXYZ(const std::string &filename) const;
+            bool WriteToFile(const std::string &filename) const;
             void MergePCD(const PointCloud & another_pcd);
             void VoxelClustering(double grid_len);
             BoundingBox GetBoundingBox() const

@@ -22,7 +22,7 @@ process_files() {
     # 使用编译好的C++程序处理文件，并指定输出文件路径
     local output=$($cpp_program_surface "$file" "$inputfile_mesh")
     local values=($(echo "$output" | tail -n 2))
-
+    # echo $output
     # 检查是否提取到两个值
     if [ ${#values[@]} -eq 2 ]; then
       # 在循环中累加值
@@ -40,93 +40,93 @@ process_files() {
 }
 
 echo "OURS (fast):"
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/processed_skeleton"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ours_fast"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/CAT08/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/CAT08/processed_skeleton"
-process_files "$inputfolder_xyzr" "$inputfolder_mesh"
+# inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/CAT08/xyzr"
+# inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/CAT08/mesh_from_xyzr_ours_fast"
+# process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/processed_skeleton"
-process_files "$inputfolder_xyzr" "$inputfolder_mesh"
-
-
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/processed_skeleton"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mesh_from_xyzr_ours_fast"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/PARSE2022/train/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/PARSE2022/train/output/processed_skeleton"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_ours_fast"
+process_files "$inputfolder_xyzr" "$inputfolder_mesh"
+
+
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/mesh_from_xyzr_ours_fast"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
 # -------------------------------------------------------------------------------
 echo "OURS:"
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ours_origin"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/CAT08/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/CAT08/mesh_from_xyzr"
+# inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/CAT08/xyzr"
+# inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/CAT08/mesh_from_xyzr_ours_origin"
+# process_files "$inputfolder_xyzr" "$inputfolder_mesh"
+
+
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mesh_from_xyzr_ours_origin"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/mesh_from_xyzr"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_ours_origin"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr"
-process_files "$inputfolder_xyzr" "$inputfolder_mesh"
-
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/PARSE2022/train/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/PARSE2022/train/output/mesh_from_xyzr"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/mesh_from_xyzr_ours_origin"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
 # -------------------------------------------------------------------------------
 echo "POISSON:"
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_poisson"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_poisson"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/CAT08/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/CAT08/mesh_from_xyzr_poisson"
+# inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/CAT08/xyzr"
+# inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/CAT08/mesh_from_xyzr_poisson"
+# process_files "$inputfolder_xyzr" "$inputfolder_mesh"
+
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mesh_from_xyzr_poisson"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/mesh_from_xyzr_poisson"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_poisson"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_poisson"
-process_files "$inputfolder_xyzr" "$inputfolder_mesh"
-
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/PARSE2022/train/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/PARSE2022/train/output/mesh_from_xyzr_poisson"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/mesh_from_xyzr_poisson"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
 # ---------------------------------------------------------------------------------
 
 echo "BALL PIVOTING:"
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ballpivoting"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ballpivoting"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/CAT08/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/CAT08/mesh_from_xyzr_ballpivoting"
+# inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/CAT08/xyzr"
+# inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/CAT08/mesh_from_xyzr_ballpivoting"
+# process_files "$inputfolder_xyzr" "$inputfolder_mesh"
+
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mesh_from_xyzr_ballpivoting"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/DeepVesselNet/output/mesh_from_xyzr_ballpivoting"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_ballpivoting"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
 
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_ballpivoting"
-process_files "$inputfolder_xyzr" "$inputfolder_mesh"
-
-inputfolder_xyzr="/media/wlsdzyzl/DATA1/datasets/PARSE2022/train/output/xyzr"
-inputfolder_mesh="/media/wlsdzyzl/DATA1/datasets/PARSE2022/train/output/mesh_from_xyzr_ballpivoting"
+inputfolder_xyzr="/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/xyzr"
+inputfolder_mesh="/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/mesh_from_xyzr_ballpivoting"
 process_files "$inputfolder_xyzr" "$inputfolder_mesh"
