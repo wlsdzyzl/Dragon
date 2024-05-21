@@ -57,7 +57,7 @@ We can estimate the quality of mesh2sdf algorithm by applying marching-cube algo
 ![](./image/kitten.jpg)
 
 #### Tubular Shape Reconstruction from Skeleton Representation
-To better understand this work, please refer to [A Geometric Algorithm for Tubular Shape Reconstruction from Skeletal Representation](https://arxiv.org/pdf/2402.12797v2).
+To better understand this work, please refer to [A Geometric Algorithm for Tubular Shape Reconstruction from Skeletal Representation](https://arxiv.org/pdf/2402.12797v2) (Accepted by ISBRA 2024).
 
 ![](./image/tubu_shape_recon.png)
 
