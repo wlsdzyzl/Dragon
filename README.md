@@ -68,6 +68,10 @@ To better understand this work, please refer to [A Geometric Algorithm for Tubul
 ![](./image/tree_graph.png)
 **Key-node Graph from Skeleton (End points and bifurcation points are considered as key-nodes)**
 ![](./image/key_graph.png)
+**Vessel Segmentation from Skeleton**
+- input: [input_pcd], [input_skeleton]
+- output: [output_graph], [output_keynode_graph], [output_colorized_pcd], [output_label]
+![](./image/vessel_seg.png)
 ### Other  
 - SpiderMan (The curve is cubic spline):
 

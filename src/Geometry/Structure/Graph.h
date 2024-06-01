@@ -42,6 +42,9 @@ class Graph
         void ComputeEdges();
         void ComputeNeighbors();
         void DeleteVertices(const std::vector<size_t> & vids);
+        void _BFT(size_t start_id, std::vector<bool> &visited, std::vector<size_t> &traveled_id, std::vector<size_t> &father_id) const;
+        void _DFT(size_t start_id, std::vector<bool> &visited, std::vector<size_t> &traveled_id, std::vector<size_t> &father_id) const;
+        std::vector<size_t> Travel(size_t start_id, std::vector<size_t> & father_id, bool dft = true) const;
         Graph GenerateKeyGraph(const std::vector<size_t> & key_node) const;
         std::vector<std::vector<Edge>> GenerateMinSpanningTrees();
         geometry::Point3List vertices;

@@ -140,6 +140,58 @@ namespace geometry
             }
         }
     }
+    void Graph::_DFT(size_t start_id, std::vector<bool> &visited, std::vector<size_t> &traveled_id, 
+        std::vector<size_t> &father_id) const
+    {
+
+        for(size_t i = 0; i != neighbors[start_id].size(); ++i)
+        {
+            size_t current_id = neighbors[start_id][i];
+            if(!visited[current_id])
+            {
+                visited[current_id] = true;
+                traveled_id.push_back(current_id);
+                father_id[current_id] = start_id;
+                _DFT(current_id, visited, traveled_id, father_id);
+            }
+        }
+    }
+
+    // can also be implemented through a queue
+    void Graph::_BFT(size_t start_id, std::vector<bool> &visited, std::vector<size_t> &traveled_id, 
+        std::vector<size_t> &father_id) const
+    {
+        std::vector<size_t> waiting_pool;
+        for(size_t i = 0; i != neighbors[start_id].size(); ++i)
+        {
+            size_t current_id = neighbors[start_id][i];
+            if(!visited[current_id])
+            {
+                visited[current_id] = true;
+                traveled_id.push_back(current_id);
+                father_id[current_id] = start_id;
+                waiting_pool.push_back(current_id);
+            }
+        }
+        for(size_t i = 0; i != waiting_pool.size(); ++i)
+        {
+            size_t current_id = waiting_pool[i];    
+            _BFT(current_id, visited, traveled_id, father_id);  
+        }
+    }
+    std::vector<size_t> Graph::Travel(size_t start_id, std::vector<size_t> & father_id, bool dft) const
+    {
+        std::vector<bool> visited(vertices.size(), false);
+        std::vector<size_t> traveled_id;
+        visited[start_id] = true;
+        // father is itself
+        father_id[start_id] = start_id;
+        traveled_id.push_back(start_id);
+        if(dft) _DFT(start_id, visited, traveled_id, father_id);
+        else _BFT(start_id, visited, traveled_id, father_id);
+
+        return traveled_id;
+    }
     void Graph::ConstructEdgeAdaptive(double factor, int max_k, double min_degree)
     {
         geometry::KDTree<3> kdtree;
