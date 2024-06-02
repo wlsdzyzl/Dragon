@@ -3,6 +3,8 @@
 #include "Tool/ColorTable.h"
 #include <unordered_set>
 #include <unordered_map>
+#include <set>
+#include <map>
 using namespace dragon;
 void ReadCenterLines(const std::string &path, geometry::Point3List &centers, std::vector<double> &radius)
 {
@@ -33,6 +35,63 @@ void SaveLabels(const std::string &path, const std::vector<int> & labels)
     for(size_t i = 0; i != labels.size(); ++i)
     ofs << labels[i] << std::endl;
     ofs.close();
+}
+void SaveLabelTree(const std::string &path, const std::map<size_t, std::set<size_t>> &child_labels, 
+    const std::vector<size_t> &father_labels)
+{
+    std::ofstream ofs(path);
+    // ignore the first labels
+    ofs<<"number_of_nodes: "<<father_labels.size() - 1<<std::endl;
+    ofs<<"head_nodes: [";
+    bool first_node = true;
+    for(size_t l = 1; l < father_labels.size(); ++l)
+    {
+        if(father_labels[l] == 0)
+        {
+            if(first_node) first_node = false;
+            else ofs<<", ";
+            ofs<<l;
+        }
+    }
+    ofs<<"]"<< std::endl,
+
+    ofs<<"father_nodes: "<<std::endl;
+    for(auto & cl: child_labels)
+    {
+        if(cl.second.size() > 0)
+        {
+            ofs<< "\t- ";
+            ofs<<cl.first<<": [";
+            first_node = true;
+            for(auto &l: cl.second)
+            {
+                if(first_node) first_node = false;
+                else ofs<<", ";
+                ofs<<l;
+            }
+            ofs<<"]"<<std::endl;
+        }
+    }
+    ofs.close();
+}
+void GetLabelTree(std::map<size_t, std::set<size_t>> &child_labels, std::vector<size_t> &father_labels, const std::vector<size_t> &seg_to_label, const std::vector<std::vector<size_t>> & segments,
+    const std::vector<size_t> &father_seg_ids, const size_t &label_size)
+{
+    // save tree of segments.
+    child_labels.clear();
+    // we ignore the first label  0
+    father_labels = std::vector<size_t>(label_size+1, 0);
+    for(size_t sid = 0; sid != segments.size(); ++sid)
+    {
+        size_t father_seg_label = seg_to_label[father_seg_ids[sid]];
+        size_t seg_label = seg_to_label[sid];
+        if(segments[sid].size() > 0 &&   father_seg_label != seg_label )
+        {
+            child_labels[father_seg_label].insert(seg_label);
+            father_labels[seg_label] = father_seg_label;
+        }
+    }
+    
 }
 void DeleteSegment(std::vector<std::vector<size_t>> & segments, std::unordered_map<size_t, std::unordered_set<size_t>> &child_seg_ids, 
     std::vector<size_t> &father_seg_ids, std::vector<double> &seg_lengths, size_t did)
@@ -270,10 +329,12 @@ int main(int argc, char* argv[])
     int label_ptr = 1;
     std::vector<size_t> unlabeled_seg_ids;
     std::cout<<"label qualified segments ..."<<std::endl;
+    std::vector<size_t> seg_to_label(segments.size());
     for(size_t i = 0; i != segments.size(); ++i)
     {
         if(segments[i].size() >= min_seg_count && seg_lengths[i] >= min_seg_length)
         {
+            seg_to_label[i] = label_ptr;
             for(auto &s: segments[i])
             {
                 final_labels[s] = label_ptr;
@@ -301,12 +362,17 @@ int main(int argc, char* argv[])
         {
             for(auto &uid: useg)
             final_labels[uid] = final_labels[father_ids[useg[0]]];
+            
+            seg_to_label[unlabeled_seg_ids[i]] = final_labels[father_ids[useg[0]]];
+            
         }
         else
         {
             kdtree.KnnSearch(tree_graph.vertices[useg.back()], indices, dists, 1);
             for(auto &uid: useg)
             final_labels[uid] = final_labels[labeled_point_ids[indices[0]]];
+
+            seg_to_label[unlabeled_seg_ids[i]] = final_labels[labeled_point_ids[indices[0]]];
         }
     }
     
@@ -333,11 +399,17 @@ int main(int argc, char* argv[])
     {
         kdtree.KnnSearch(pcd.points[i], indices, dists, 1);
         pcd_labels[i] = final_labels[indices[0]];
-        pcd.colors[i] = tool::COLOR_TABLE[pcd_labels[i]];
+        pcd.colors[i] = tool::COLOR_TABLE[pcd_labels[i]-1];
     }
     // save colorized point cloud
     pcd.WriteToPLY(output_filename+std::string(".seg.ply"));
     // save labels
     SaveLabels(output_filename+std::string(".seg"), pcd_labels);
+
+    // compute label tree
+    std::map<size_t, std::set<size_t>> child_labels;
+    std::vector<size_t> father_labels;
+    GetLabelTree(child_labels, father_labels, seg_to_label, segments, father_seg_ids, label_ptr - 1);
+    SaveLabelTree(output_filename+std::string(".tree.yaml"), child_labels, father_labels);
     return 0;
 }
