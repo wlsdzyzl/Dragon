@@ -36,31 +36,48 @@ void SaveLabels(const std::string &path, const std::vector<int> & labels)
     ofs << labels[i] << std::endl;
     ofs.close();
 }
-void SaveLabelTree(const std::string &path, const std::map<size_t, std::set<size_t>> &child_labels, 
-    const std::vector<size_t> &father_labels)
+void SaveRadius(const std::string &path, const std::vector<double> &radius)
+{
+    std::ofstream ofs(path);
+    for(size_t i = 0; i != radius.size(); ++i)
+    ofs << radius[i] << std::endl;
+    ofs.close();
+}
+void SaveFatherLabels(const std::string &path, const std::vector<int> & father_labels)
+{
+    std::ofstream ofs(path);
+    for(size_t i = 0; i < father_labels.size(); ++i)
+    ofs << father_labels[i] << std::endl;
+    ofs.close();
+}
+void SaveLabelTree(const std::string &path, 
+    const std::map<int, std::set<int>> &child_labels, 
+    const std::vector<int> &father_labels,
+    const std::vector<geometry::Point3List> &label_se_points,
+    const std::vector<std::vector<double>> & label_se_radius)
 {
     std::ofstream ofs(path);
     // ignore the first labels
-    ofs<<"number_of_nodes: "<<father_labels.size() - 1<<std::endl;
+    ofs<<"number_of_nodes: "<<father_labels.size()<<std::endl;
     ofs<<"head_nodes: [";
     bool first_node = true;
-    for(size_t l = 1; l < father_labels.size(); ++l)
+    for(size_t l = 0; l < father_labels.size(); ++l)
     {
         if(father_labels[l] == 0)
         {
             if(first_node) first_node = false;
             else ofs<<", ";
-            ofs<<l;
+            ofs<<l+1;
         }
     }
     ofs<<"]"<< std::endl,
 
-    ofs<<"father_nodes: "<<std::endl;
+    ofs<<"father_to_childs: "<<std::endl;
     for(auto & cl: child_labels)
     {
         if(cl.second.size() > 0)
         {
-            ofs<< "\t- ";
+            ofs<< "  - ";
             ofs<<cl.first<<": [";
             first_node = true;
             for(auto &l: cl.second)
@@ -72,37 +89,109 @@ void SaveLabelTree(const std::string &path, const std::map<size_t, std::set<size
             ofs<<"]"<<std::endl;
         }
     }
+    ofs <<"node_to_father: [";
+    first_node = true;
+    for(size_t l = 0; l < father_labels.size(); ++l)
+    {
+            if(first_node) first_node = false;
+            else ofs<<", ";
+            ofs<<father_labels[l];
+    }
+    ofs<<"]"<<std::endl;
+
+    ofs << "node_start:\n";
+    first_node = true;
+    for(size_t l = 0; l < label_se_points.size(); ++l)
+    {
+            if(first_node) first_node = false;
+            else ofs<<"\n";
+            ofs<<"\t- ["<<label_se_points[l][0][0]<<","<<label_se_points[l][0][1]<<","<<label_se_points[l][0][2]<<","<< label_se_radius[l][0]<<"]";
+    }
+    ofs<<std::endl;
+
+    ofs << "node_end:\n";
+    first_node = true;
+    for(size_t l = 0; l < label_se_points.size(); ++l)
+    {
+            if(first_node) first_node = false;
+            else ofs<<"\n";
+            ofs<<"\t- ["<<label_se_points[l][1][0]<<","<<label_se_points[l][1][1]<<","<<label_se_points[l][1][2]<<","<< label_se_radius[l][1]<<"]";
+    }
+    ofs<<std::endl;
     ofs.close();
 }
-void GetLabelTree(std::map<size_t, std::set<size_t>> &child_labels, std::vector<size_t> &father_labels, const std::vector<size_t> &seg_to_label, const std::vector<std::vector<size_t>> & segments,
-    const std::vector<size_t> &father_seg_ids, const size_t &label_size)
+void GetLabelTree(std::map<int, std::set<int>> &child_labels, std::vector<int> &father_labels, 
+    std::vector<geometry::Point3List> &label_se_points,
+    std::vector<std::vector<double>> &label_se_radius,
+    const std::vector<int> &seg_to_label, 
+    const std::vector<std::vector<size_t>> & segments,
+    const std::vector<size_t> &father_seg_ids, 
+    const std::vector<geometry::Point3List> &seg_se_points,
+    const std::vector<std::vector<double>> &seg_se_radius,
+    const size_t &label_size)
 {
     // save tree of segments.
     child_labels.clear();
     // we ignore the first label  0
-    father_labels = std::vector<size_t>(label_size+1, 0);
+    father_labels = std::vector<int>(label_size, 0);
+    label_se_points = std::vector<geometry::Point3List>(label_size, geometry::Point3List());
+    label_se_radius = std::vector<std::vector<double>>(label_size, std::vector<double>());
     for(size_t sid = 0; sid != segments.size(); ++sid)
     {
         size_t father_seg_label = seg_to_label[father_seg_ids[sid]];
         size_t seg_label = seg_to_label[sid];
-        if(segments[sid].size() > 0 &&   father_seg_label != seg_label )
+        // valid label
+        if(segments[sid].size() > 0)
         {
-            child_labels[father_seg_label].insert(seg_label);
-            father_labels[seg_label] = father_seg_label;
+            if(father_seg_label != seg_label )
+            {
+                child_labels[father_seg_label].insert(seg_label);
+                father_labels[seg_label - 1] = father_seg_label;
+            }
+            if (label_se_points[seg_label - 1].size() == 0)
+            {
+                label_se_points[seg_label - 1] = seg_se_points[sid];
+                label_se_radius[seg_label - 1] = seg_se_radius[sid];
+            }
+            else
+            {
+                double dist_old = geometry::Distance(label_se_points[seg_label - 1][1], label_se_points[seg_label - 1][0]);
+                double dist_new = geometry::Distance(label_se_points[seg_label - 1][1], seg_se_points[sid][0]);
+                if(dist_old < dist_new)
+                {   
+                    label_se_points[seg_label - 1][1] = seg_se_points[sid][0];
+                    label_se_radius[seg_label - 1][1] = seg_se_radius[sid][0];
+                }
+            }
         }
     }
     
 }
-void DeleteSegment(std::vector<std::vector<size_t>> & segments, std::unordered_map<size_t, std::unordered_set<size_t>> &child_seg_ids, 
-    std::vector<size_t> &father_seg_ids, std::vector<double> &seg_lengths, size_t did)
+void DeleteSegment(std::vector<std::vector<size_t>> & segments, 
+std::unordered_map<size_t, std::unordered_set<size_t>> &child_seg_ids, 
+    std::vector<size_t> &father_seg_ids, std::vector<double> &seg_lengths, 
+    std::vector<geometry::Point3List> &seg_se_points, 
+    std::vector<std::vector<double>> &seg_se_radius,
+    size_t did)
 {
     // merge current segment to its father
     size_t seg_father = father_seg_ids[did];
     segments[seg_father].insert(segments[seg_father].end(), segments[did].begin(), segments[did].end());
     seg_lengths[seg_father] += seg_lengths[did];
     seg_lengths[did] = 0;
+    double dist_old = geometry::Distance(seg_se_points[seg_father][1], seg_se_points[seg_father][0]);
+    double dist_new = geometry::Distance(seg_se_points[did][1], seg_se_points[seg_father][0]);
+    if(dist_old < dist_new)
+    {   
+        seg_se_points[seg_father][1] = seg_se_points[did][1];
+        seg_se_radius[seg_father][1] = seg_se_radius[did][1];
+    }
+    seg_se_points[did].clear();
+    seg_se_radius[did].clear();
     segments[did].clear();
-    // std::cout<<"before childs: "<< child_seg_ids[seg_father].size()<<std::endl;
+    // std::cout<<dist_new <<" "<< dist_old <<std::endl; 
+    // std::cout<<seg_lengths[seg_father]<<std::endl;
+    // std::cout<<"---------------------------"<<std::endl;
     // merge current segment's childs to its father
     if(child_seg_ids.find(did) != child_seg_ids.end())
     {
@@ -250,7 +339,13 @@ int main(int argc, char* argv[])
         }
         start_node.push_back(max_id);
     }
-
+    // finish graph construction
+    for(size_t i = 0; i != tree_graph.vertices.size(); ++i)
+    {
+        tree_graph.vertices[i] /= scale;
+        radius[i] /= scale;
+    }
+    if(min_seg_length < 1) min_seg_length /= scale;
     // travel tree graph
     // std::vector<size_t> travel_id = tree_graph.Travel(max_id1);
 
@@ -266,6 +361,9 @@ int main(int argc, char* argv[])
     std::vector<size_t> father_seg_ids;
     std::vector<std::vector<size_t>> segments;
     std::vector<double> seg_lengths;
+    // start and end points of segments
+    std::vector<geometry::Point3List> seg_se_points;
+    std::vector<std::vector<double>> seg_se_radius;
     std::unordered_map<size_t, std::unordered_set<size_t>> child_seg_ids;
     size_t current_seg_id = 0;
     std::cout<<"Generating segments ..."<<std::endl;
@@ -275,28 +373,44 @@ int main(int argc, char* argv[])
         std::vector<size_t> travel_ids = tree_graph.Travel(start_node[i], father_ids);
         
         std::vector<size_t> current_seg = {travel_ids[0]};
-
+        geometry::Point3List current_se_points = {tree_graph.vertices[travel_ids[0]]};
+        std::vector<double> current_se_radius = {radius[travel_ids[0]]};
         seg_ids[travel_ids[0]] = current_seg_id;
         
         for(size_t j = 1; j < travel_ids.size(); ++j)
         {
+            // if there is no start point, add start point
+            if(current_se_points.empty())
+            {
+                current_se_points.push_back(tree_graph.vertices[travel_ids[j]]);
+                current_se_radius.push_back(radius[travel_ids[j]]);
+            }
             current_seg.push_back(travel_ids[j]);
             seg_ids[travel_ids[j]] = current_seg_id;
             if(key_nodes.find(travel_ids[j]) != key_nodes.end()) 
-            {
+            {   
+                // add end point
+                current_se_points.push_back(tree_graph.vertices[travel_ids[j]]);
+                current_se_radius.push_back(radius[travel_ids[j]]);
                 // if(current_seg.size() < 2) continue;
                 double seg_length = 0;
                 for(size_t l = 1; l != current_seg.size(); ++l)
                 seg_length += geometry::Distance(tree_graph.vertices[current_seg[l]], tree_graph.vertices[current_seg[l-1]]);
                 
-                //
+                // 
                 segments.push_back(current_seg);
                 size_t seg_father_id = seg_ids[ father_ids[current_seg[0]]];
                 father_seg_ids.push_back(seg_father_id);
                 seg_lengths.push_back(seg_length);
+                // std::cout<<current_se_points.size()<<std::endl;
+                seg_se_points.push_back(current_se_points);
+                seg_se_radius.push_back(current_se_radius);
                 child_seg_ids[seg_father_id].insert(current_seg_id);
                 current_seg_id += 1;
                 current_seg.clear();
+                current_se_points.clear();
+                current_se_radius.clear();
+
 
             }
         }
@@ -309,7 +423,7 @@ int main(int argc, char* argv[])
         if(father_seg_ids[i] != i && segments[i].size() <= dead_seg_count)
         {
             // std::cout<<"clean dead segment "<<i<<std::endl;
-            DeleteSegment(segments, child_seg_ids, father_seg_ids, seg_lengths, i);
+            DeleteSegment(segments, child_seg_ids, father_seg_ids, seg_lengths, seg_se_points, seg_se_radius, i);
         }
     }
     // clean segment whose father has only one child
@@ -321,7 +435,7 @@ int main(int argc, char* argv[])
         // std::cout<<child_seg_ids[seg_father].size()<<std::endl;
         if(seg_father != i &&  child_seg_ids.find(seg_father) != child_seg_ids.end() && child_seg_ids[seg_father].size() == 1)
         {
-            DeleteSegment(segments, child_seg_ids, father_seg_ids, seg_lengths, i);
+            DeleteSegment(segments, child_seg_ids, father_seg_ids, seg_lengths, seg_se_points, seg_se_radius, i);
         }
     }
 
@@ -329,9 +443,10 @@ int main(int argc, char* argv[])
     int label_ptr = 1;
     std::vector<size_t> unlabeled_seg_ids;
     std::cout<<"label qualified segments ..."<<std::endl;
-    std::vector<size_t> seg_to_label(segments.size());
+    std::vector<int> seg_to_label(segments.size());
     for(size_t i = 0; i != segments.size(); ++i)
     {
+
         if(segments[i].size() >= min_seg_count && seg_lengths[i] >= min_seg_length)
         {
             seg_to_label[i] = label_ptr;
@@ -380,15 +495,18 @@ int main(int argc, char* argv[])
 
     tree_graph.colors = geometry::Point3List(tree_graph.vertices.size(), geometry::Point3(1.0, 1.0, 1.0));
     for(size_t i = 0; i != tree_graph.vertices.size(); ++i)
-    {
-        tree_graph.colors[i] = tool::COLOR_TABLE[final_labels[i]];
-        tree_graph.vertices[i] /= scale;
-    }
+        tree_graph.colors[i] = tool::COLOR_TABLE[final_labels[i]-1];
 
+    tree_graph.WriteToPLY(output_filename+std::string(".skeleton.ply"));
     std::cout<<"Colorizing graph ... "<<std::endl;
-    tree_graph.WriteToPLY(output_filename);
     geometry::Graph key_graph = tree_graph.GenerateKeyGraph(std::vector<size_t>(key_nodes.begin(), key_nodes.end()));
     key_graph.WriteToPLY(output_filename+std::string(".key.ply"));
+
+    // save skeleton and radius
+    SaveRadius(output_filename+std::string(".radius"), radius);
+    // save skeleton label
+    SaveLabels(output_filename+std::string(".skeleton.seg"), final_labels);
+
 
     // find label of point cloud based KNN search
     kdtree.BuildTree(tree_graph.vertices);
@@ -407,9 +525,13 @@ int main(int argc, char* argv[])
     SaveLabels(output_filename+std::string(".seg"), pcd_labels);
 
     // compute label tree
-    std::map<size_t, std::set<size_t>> child_labels;
-    std::vector<size_t> father_labels;
-    GetLabelTree(child_labels, father_labels, seg_to_label, segments, father_seg_ids, label_ptr - 1);
-    SaveLabelTree(output_filename+std::string(".tree.yaml"), child_labels, father_labels);
+    std::map<int, std::set<int>> child_labels;
+    std::vector<int> father_labels;
+    std::vector<geometry::Point3List> label_se_points;
+    std::vector<std::vector<double>> label_se_radius;
+    GetLabelTree(child_labels, father_labels, label_se_points, label_se_radius, seg_to_label, segments, 
+        father_seg_ids, seg_se_points, seg_se_radius, label_ptr - 1);
+    SaveLabelTree(output_filename+std::string(".tree.yaml"), child_labels, father_labels, label_se_points, label_se_radius);
+    SaveFatherLabels(output_filename+std::string(".father.seg"), father_labels);
     return 0;
 }
