@@ -106,7 +106,6 @@ add_executable(CenterLine2SDF "app/CenterLine2SDF.cpp")
 add_executable(CenterLine2SurfacePoints "app/CenterLine2SurfacePoints.cpp")
 add_executable(CenterLineAgreeMesh "app/CenterLineAgreeMesh.cpp")
 add_executable(VesselSegment "app/VesselSegment.cpp")
-
 target_link_libraries(ReadMesh
     dragon
     ${THIRD_LIB}

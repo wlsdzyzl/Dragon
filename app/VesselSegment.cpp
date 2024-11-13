@@ -105,7 +105,7 @@ void SaveLabelTree(const std::string &path,
     {
             if(first_node) first_node = false;
             else ofs<<"\n";
-            ofs<<"\t- ["<<label_se_points[l][0][0]<<","<<label_se_points[l][0][1]<<","<<label_se_points[l][0][2]<<","<< label_se_radius[l][0]<<"]";
+            ofs<<"  - ["<<label_se_points[l][0][0]<<","<<label_se_points[l][0][1]<<","<<label_se_points[l][0][2]<<","<< label_se_radius[l][0]<<"]";
     }
     ofs<<std::endl;
 
@@ -115,7 +115,7 @@ void SaveLabelTree(const std::string &path,
     {
             if(first_node) first_node = false;
             else ofs<<"\n";
-            ofs<<"\t- ["<<label_se_points[l][1][0]<<","<<label_se_points[l][1][1]<<","<<label_se_points[l][1][2]<<","<< label_se_radius[l][1]<<"]";
+            ofs<<"  - ["<<label_se_points[l][1][0]<<","<<label_se_points[l][1][1]<<","<<label_se_points[l][1][2]<<","<< label_se_radius[l][1]<<"]";
     }
     ofs<<std::endl;
     ofs.close();
@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
 {
     if(argc < 2)
     {
-        std::cout << "Usage: CenterLine2SDFTest [input_pcloud] [input_skeleton] [output_filename] [radius_factor = 1.0] [min_seg_length = 0.15] [min_seg_count = 2] [scaling = -1]"<<std::endl;
+        std::cout << "Usage: CenterLine2SDFTest [input_pcloud] [input_skeleton] [output_filename] [radius_factor = 1.0] [min_seg_length = 0.15] [min_seg_count = 2] [save_normalized=0]"<<std::endl;
         return 0;        
     }
 
@@ -223,11 +223,11 @@ int main(int argc, char* argv[])
     ReadCenterLines(argv[2], centers, radius);
 
     std::string output_filename = argv[3];
-    double scale = -1;
     double radius_factor = 1.0;
     double min_seg_length = 0.15;
     double dead_seg_count = 1;
     size_t min_seg_count = 2;
+    bool save_normalized = 0;
     if(argc > 4)
     radius_factor = std::atof(argv[4]);
     if(argc > 5)
@@ -235,22 +235,23 @@ int main(int argc, char* argv[])
     if(argc > 6)
     min_seg_count = std::atoi(argv[6]);
     if(argc > 7)
-    scale = std::atof(argv[7]);
+    save_normalized = std::atoi(argv[7]);
 
     // scaling
     // maybe we don't need scaling in graph construction
-    if(scale <= 0)
-    {
-        geometry::BoundingBox bb;
-        for(size_t i = 0; i != centers.size(); ++i)
-        bb.AddPoint(centers[i]);
-        scale = 1 / (std::max(bb.y_max - bb.y_min, std::max(bb.x_max - bb.x_min, bb.z_max - bb.z_min)));
-        // std::cout<<scale<<" "<<bb.y_max <<" "<< bb.y_min<<" " <<bb.x_max <<" "<< bb.x_min <<" "<<bb.z_max <<" "<< bb.z_min <<std::endl;
-        
-    }
+    double scale = -1;
+    geometry::Point3 mean_pos;
+    geometry::BoundingBox bb;
+    for(size_t i = 0; i != centers.size(); ++i)
+    bb.AddPoint(centers[i]);
+    scale = 1 / (std::max(bb.y_max - bb.y_min, std::max(bb.x_max - bb.x_min, bb.z_max - bb.z_min)));
+    // std::cout<<scale<<" "<<bb.y_max <<" "<< bb.y_min<<" " <<bb.x_max <<" "<< bb.x_min <<" "<<bb.z_max <<" "<< bb.z_min <<std::endl;
+    mean_pos = geometry::Point3((bb.x_max - bb.x_min) / 2, (bb.y_max - bb.y_min) / 2, (bb.z_max - bb.z_min) / 2);
+    
+
     for(size_t i = 0; i != centers.size(); ++i)
     {
-        centers[i] *= scale;
+        centers[i] = (centers[i] - mean_pos) * scale;
         radius[i] *= scale;
     }
 
@@ -283,13 +284,13 @@ int main(int argc, char* argv[])
     // construct tree
     // compute min spanning trees
     auto msts = graph.GenerateMinSpanningTrees();
-    
-    if(msts.size() != 2)
-    {
-        // if the number of msts is 1, we need cut edge.
-        // if the number of msts is larger than 2, we need make edges.
-        std::cout<<"number of MST is not 2: "<<msts.size()<<std::endl;
-    }
+    std::cout<<"number of MST: "<<msts.size()<<std::endl;
+    // if(msts.size() != 2)
+    // {
+    //     // if the number of msts is 1, we need cut edge.
+    //     // if the number of msts is larger than 2, we need make edges.
+    //     std::cout<<"number of MST is not 2: "<<msts.size()<<std::endl;
+    // }
 
     // construct tree graph
     geometry::Graph tree_graph(centers);
@@ -310,6 +311,7 @@ int main(int argc, char* argv[])
 
 
     std::unordered_set<size_t> key_nodes;
+    std::unordered_map<size_t, std::pair<double, double>> key_node_distance;
     std::vector<size_t> start_node;
     for(size_t m = 0; m != tree_vids.size(); ++m) 
     {
@@ -340,12 +342,15 @@ int main(int argc, char* argv[])
         start_node.push_back(max_id);
     }
     // finish graph construction
-    for(size_t i = 0; i != tree_graph.vertices.size(); ++i)
+    if(!save_normalized)
     {
-        tree_graph.vertices[i] /= scale;
-        radius[i] /= scale;
+        for(size_t i = 0; i != tree_graph.vertices.size(); ++i)
+        {
+            tree_graph.vertices[i]  =  tree_graph.vertices[i] / scale + mean_pos;
+            radius[i] /= scale;
+        }
+        if(min_seg_length < 1) min_seg_length /= scale;
     }
-    if(min_seg_length < 1) min_seg_length /= scale;
     // travel tree graph
     // std::vector<size_t> travel_id = tree_graph.Travel(max_id1);
 
@@ -396,7 +401,7 @@ int main(int argc, char* argv[])
                 double seg_length = 0;
                 for(size_t l = 1; l != current_seg.size(); ++l)
                 seg_length += geometry::Distance(tree_graph.vertices[current_seg[l]], tree_graph.vertices[current_seg[l-1]]);
-                
+                key_node_distance[travel_ids[j]] = std::make_pair(seg_length, geometry::Distance(current_se_points[1], current_se_points[0]));
                 // 
                 segments.push_back(current_seg);
                 size_t seg_father_id = seg_ids[ father_ids[current_seg[0]]];
@@ -492,32 +497,44 @@ int main(int argc, char* argv[])
     }
     
     std::cout<<"Number of labels: "<<label_ptr - 1<<std::endl;
-
+    std::cout<<"Colorizing graph ... "<<std::endl;
     tree_graph.colors = geometry::Point3List(tree_graph.vertices.size(), geometry::Point3(1.0, 1.0, 1.0));
     for(size_t i = 0; i != tree_graph.vertices.size(); ++i)
-        tree_graph.colors[i] = tool::COLOR_TABLE[final_labels[i]-1];
+        tree_graph.colors[i] = tool::COLOR_TABLE[(final_labels[i]-1) % tool::COLOR_TABLE.size()];
 
     tree_graph.WriteToPLY(output_filename+std::string(".skeleton.ply"));
-    std::cout<<"Colorizing graph ... "<<std::endl;
+    std::cout<<"Saving key graph with attributes (which are written in normals) ... "<<std::endl;
+    tree_graph.normals = geometry::Point3List(tree_graph.vertices.size(), geometry::Point3(0,0,0));
+    for(size_t i = 0; i != tree_graph.vertices.size(); ++i)
+    {
+        if(key_node_distance.find(i) != key_node_distance.end())
+        {
+            tree_graph.normals[i][0] = key_node_distance[i].first;
+            tree_graph.normals[i][1] = key_node_distance[i].second;
+        }
+    }
     geometry::Graph key_graph = tree_graph.GenerateKeyGraph(std::vector<size_t>(key_nodes.begin(), key_nodes.end()));
     key_graph.WriteToPLY(output_filename+std::string(".key.ply"));
-
+    tree_graph.normals.clear();
     // save skeleton and radius
     SaveRadius(output_filename+std::string(".radius"), radius);
     // save skeleton label
     SaveLabels(output_filename+std::string(".skeleton.seg"), final_labels);
-
-
     // find label of point cloud based KNN search
     kdtree.BuildTree(tree_graph.vertices);
 
     std::vector<int> pcd_labels(pcd.GetSize());
     pcd.colors = geometry::Point3List(pcd.points.size(), geometry::Point3(1.0, 1.0, 1.0));
+    if(save_normalized)
+    {
+        for(size_t i = 0; i != pcd.points.size(); ++i)
+            pcd.points[i] = (pcd.points[i] - mean_pos) * scale;
+    }
     for(size_t i = 0; i != pcd.points.size(); ++i)
     {
         kdtree.KnnSearch(pcd.points[i], indices, dists, 1);
         pcd_labels[i] = final_labels[indices[0]];
-        pcd.colors[i] = tool::COLOR_TABLE[pcd_labels[i]-1];
+        pcd.colors[i] = tool::COLOR_TABLE[(pcd_labels[i]-1) % tool::COLOR_TABLE.size()];
     }
     // save colorized point cloud
     pcd.WriteToPLY(output_filename+std::string(".seg.ply"));

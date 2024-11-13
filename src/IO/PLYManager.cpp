@@ -275,6 +275,7 @@ namespace io
     // used to draw graph
     bool WritePLY(const std::string &filename, const geometry::Point3List&points, 
         const geometry::Point3List &colors,
+        const geometry::Point3List &normals,
         const std::vector<std::vector<size_t>> &neighbors, 
         const std::vector<std::string> & comments,
         const std::vector<AdditionalElement> & additional_labels,
@@ -282,6 +283,7 @@ namespace io
     {
         //size_t numPoints = points.size();
         bool has_colors = colors.size() > 0 && colors.size() == points.size();
+        bool has_normals = normals.size()>0 && normals.size() == points.size();
         std::vector<std::pair<size_t, size_t>> edges;
         for(size_t i = 0; i != neighbors.size(); ++i)
         {
@@ -320,6 +322,13 @@ namespace io
             colors_buffer.push_back((unsigned char)(colors[i](1) * 255));
             colors_buffer.push_back((unsigned char)(colors[i](2) * 255));
         }
+        if(has_normals)
+        for(size_t i = 0; i != normals.size(); ++i)
+        {
+            normals_buffer.push_back(normals[i](0));
+            normals_buffer.push_back(normals[i](1));
+            normals_buffer.push_back(normals[i](2));
+        }
         if(has_edges)
         for(size_t i = 0; i != edges.size(); ++i)
         {
@@ -333,6 +342,9 @@ namespace io
         if(has_colors)
         geometry_file.add_properties_to_element("vertex", { "red", "green", "blue" },
             Type::UINT8, colors_buffer.size() / 3, reinterpret_cast<uint8_t*>(colors_buffer.data()), Type::INVALID, 0);
+        if(has_normals)
+        geometry_file.add_properties_to_element("vertex", { "nx", "ny", "nz" },
+            float_type, normals_buffer.size() / 3, reinterpret_cast<uint8_t*>(normals_buffer.data()), Type::INVALID, 0);
         if(has_edges)
         geometry_file.add_properties_to_element("edge", { "vertex1", "vertex2" },
             Type::UINT32, edges_buffer.size() / 2, reinterpret_cast<uint8_t*>(edges_buffer.data()), Type::INVALID, 2);

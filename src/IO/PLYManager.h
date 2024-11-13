@@ -32,7 +32,8 @@ namespace io
         bool use_ascii = true);
     bool WritePLY(const std::string &filename, const geometry::Point3List&points, 
         const geometry::Point3List &colors,
-        const std::vector<std::vector<size_t>> &neighbors = std::vector<std::vector<size_t>>(), 
+        const geometry::Point3List &normals,
+        const std::vector<std::vector<size_t>> &neighbors, 
         const std::vector<std::string> & comments = std::vector<std::string>(),
         const std::vector<AdditionalElement> & additional_labels = std::vector<AdditionalElement>(),
         bool use_ascii = true);

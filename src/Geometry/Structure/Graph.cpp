@@ -102,6 +102,7 @@ namespace geometry
         std::vector<std::vector<size_t>> new_neighbors;
         Point3List new_vertices;
         Point3List new_colors;
+        Point3List new_normals;
         for(size_t i = 0; i!= vertices.size(); ++i)
         {
             if(!deleted_flag[i])
@@ -116,10 +117,13 @@ namespace geometry
                 new_vertices.push_back( vertices[i]);
                 if(HasColors())
                 new_colors.push_back(colors[i]);
+                if(HasNormals())
+                new_normals.push_back(normals[i]);
             }
         }
         neighbors = new_neighbors;
         colors = new_colors;
+        normals = new_normals;
         vertices = new_vertices;
         // clear edge
         edges.clear();
@@ -266,7 +270,7 @@ namespace geometry
     bool Graph::WriteToPLY(const std::string &filename) const
     {
         // through neighbors
-        return io::WritePLY(filename,vertices, colors, neighbors);
+        return io::WritePLY(filename, vertices, colors, normals, neighbors);
     }
     // generate min spanning tree
     // if the graph is a connected graph, then there will be only one spanning tree

@@ -31,7 +31,8 @@ class Graph
             neighbors = std::vector<std::vector<size_t>>(vertices.size(), std::vector<size_t>());
         }
         bool inline HasEdges() const {return edges.size() > 0;}
-        bool inline HasColors() const {return colors.size() > 0;}
+        bool inline HasColors() const {return colors.size() > 0 && colors.size() == vertices.size();}
+        bool inline HasNormals() const {return normals.size() > 0 && normals.size() == normals.size();}
         void ConstructEdgeThreshold(double threshold);
         void ConstructEdgeRadius(const std::vector<double> & radius);
         void ConstructEdgeKNN(int k);
@@ -49,6 +50,7 @@ class Graph
         std::vector<std::vector<Edge>> GenerateMinSpanningTrees();
         geometry::Point3List vertices;
         geometry::Point3List colors;
+        geometry::Point3List normals;
         std::vector<std::vector<size_t>> neighbors;
         std::vector<Edge> edges;
 };
