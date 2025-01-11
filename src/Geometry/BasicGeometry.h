@@ -44,6 +44,7 @@ namespace geometry
     typedef Eigen::Matrix<unsigned int, 3, 1> Point3ui;
     typedef std::vector<Point2i, Eigen::aligned_allocator<Point2i> > Point2iList;
     typedef std::vector<Point3i, Eigen::aligned_allocator<Point3i> > Point3iList;
+    typedef std::vector<Point2ui, Eigen::aligned_allocator<Point2ui> > Point2uiList;
     typedef std::vector<Point3ui, Eigen::aligned_allocator<Point3ui> > Point3uiList;
     
     typedef std::vector<Point2, Eigen::aligned_allocator<Point2> > Point2List;

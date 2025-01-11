@@ -1,7 +1,7 @@
 #include "Reconstruction/Mesh2SDF.h"
 #include "Geometry/TriangleMesh/Processing/Decimation.h"
 using namespace dragon;
-void ReadCenterLines(const std::string &path, geometry::Point3List &centers, std::vector<double> &radius)
+void ReadCenterLines(const std::string &path, geometry::Point3List &centers, geometry::ScalarList &radius)
 {
     std::ifstream ifs(path);
     centers.clear();
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
     geometry::TriangleMesh generated_mesh;
     geometry::Point3List centers;
-    std::vector<double> radius;
+    geometry::ScalarList radius;
     ReadCenterLines(argv[1], centers, radius);
     std::string output_filename = argv[2];
     double scale = -1;
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     // {
     //     auto clusters = geometry::VoxelClustering(centers, voxel_resolution * 2);
     //     geometry::Point3List ccenters;
-    //     std::vector<double> cradius;
+    //     geometry::ScalarList cradius;
     //     for(auto &c: clusters)
     //     {
     //         geometry::Point3 tmp_center = geometry::Point3::Zero();
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     if(radius_factor > 0)
     {
         geometry::Point3List ccenters;
-        std::vector<double> cradius;
+        geometry::ScalarList cradius;
         auto clusters = geometry::RadiusClustering(centers, radius, radius_factor);
         for(auto &c: clusters)
         {

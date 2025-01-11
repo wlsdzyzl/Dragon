@@ -103,6 +103,7 @@ add_executable(PoissonTest "app/PoissonTest.cpp")
 add_executable(Mesh2SDFTest "app/Mesh2SDFTest.cpp")
 add_executable(Mesh2Indicator "app/Mesh2Indicator.cpp")
 add_executable(CenterLine2SDF "app/CenterLine2SDF.cpp")
+add_executable(SkeletonGraph2SDF "app/SkeletonGraph2SDF.cpp")
 add_executable(CenterLine2SurfacePoints "app/CenterLine2SurfacePoints.cpp")
 add_executable(CenterLineAgreeMesh "app/CenterLineAgreeMesh.cpp")
 add_executable(VesselSegment "app/VesselSegment.cpp")
@@ -143,6 +144,10 @@ target_link_libraries(Mesh2Indicator
     ${THIRD_LIB}
 )
 target_link_libraries(CenterLine2SDF
+    dragon
+    ${THIRD_LIB}
+)
+target_link_libraries(SkeletonGraph2SDF
     dragon
     ${THIRD_LIB}
 )

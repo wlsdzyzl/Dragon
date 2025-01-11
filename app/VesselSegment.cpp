@@ -6,7 +6,7 @@
 #include <set>
 #include <map>
 using namespace dragon;
-void ReadCenterLines(const std::string &path, geometry::Point3List &centers, std::vector<double> &radius)
+void ReadCenterLines(const std::string &path, geometry::Point3List &centers, geometry::ScalarList &radius)
 {
     std::ifstream ifs(path);
     centers.clear();
@@ -36,7 +36,7 @@ void SaveLabels(const std::string &path, const std::vector<int> & labels)
     ofs << labels[i] << std::endl;
     ofs.close();
 }
-void SaveRadius(const std::string &path, const std::vector<double> &radius)
+void SaveRadius(const std::string &path, const geometry::ScalarList &radius)
 {
     std::ofstream ofs(path);
     for(size_t i = 0; i != radius.size(); ++i)
@@ -54,7 +54,7 @@ void SaveLabelTree(const std::string &path,
     const std::map<int, std::set<int>> &child_labels, 
     const std::vector<int> &father_labels,
     const std::vector<geometry::Point3List> &label_se_points,
-    const std::vector<std::vector<double>> & label_se_radius)
+    const std::vector<geometry::ScalarList> & label_se_radius)
 {
     std::ofstream ofs(path);
     // ignore the first labels
@@ -122,12 +122,12 @@ void SaveLabelTree(const std::string &path,
 }
 void GetLabelTree(std::map<int, std::set<int>> &child_labels, std::vector<int> &father_labels, 
     std::vector<geometry::Point3List> &label_se_points,
-    std::vector<std::vector<double>> &label_se_radius,
+    std::vector<geometry::ScalarList> &label_se_radius,
     const std::vector<int> &seg_to_label, 
     const std::vector<std::vector<size_t>> & segments,
     const std::vector<size_t> &father_seg_ids, 
     const std::vector<geometry::Point3List> &seg_se_points,
-    const std::vector<std::vector<double>> &seg_se_radius,
+    const std::vector<geometry::ScalarList> &seg_se_radius,
     const size_t &label_size)
 {
     // save tree of segments.
@@ -135,7 +135,7 @@ void GetLabelTree(std::map<int, std::set<int>> &child_labels, std::vector<int> &
     // we ignore the first label  0
     father_labels = std::vector<int>(label_size, 0);
     label_se_points = std::vector<geometry::Point3List>(label_size, geometry::Point3List());
-    label_se_radius = std::vector<std::vector<double>>(label_size, std::vector<double>());
+    label_se_radius = std::vector<geometry::ScalarList>(label_size, geometry::ScalarList());
     for(size_t sid = 0; sid != segments.size(); ++sid)
     {
         size_t father_seg_label = seg_to_label[father_seg_ids[sid]];
@@ -169,9 +169,9 @@ void GetLabelTree(std::map<int, std::set<int>> &child_labels, std::vector<int> &
 }
 void DeleteSegment(std::vector<std::vector<size_t>> & segments, 
 std::unordered_map<size_t, std::unordered_set<size_t>> &child_seg_ids, 
-    std::vector<size_t> &father_seg_ids, std::vector<double> &seg_lengths, 
+    std::vector<size_t> &father_seg_ids, geometry::ScalarList &seg_lengths, 
     std::vector<geometry::Point3List> &seg_se_points, 
-    std::vector<std::vector<double>> &seg_se_radius,
+    std::vector<geometry::ScalarList> &seg_se_radius,
     size_t did)
 {
     // merge current segment to its father
@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 
     geometry::TriangleMesh generated_mesh;
     geometry::Point3List centers;
-    std::vector<double> radius;
+    geometry::ScalarList radius;
     geometry::PointCloud pcd;
     pcd.LoadFromFile(argv[1]);
 
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
     if(radius_factor > 0)
     {
         geometry::Point3List ccenters;
-        std::vector<double> cradius;
+        geometry::ScalarList cradius;
         auto clusters = geometry::RadiusClustering(centers, radius, radius_factor);
         for(auto &c: clusters)
         {
@@ -365,10 +365,10 @@ int main(int argc, char* argv[])
     // the corresponding father segment id of each segment
     std::vector<size_t> father_seg_ids;
     std::vector<std::vector<size_t>> segments;
-    std::vector<double> seg_lengths;
+    geometry::ScalarList seg_lengths;
     // start and end points of segments
     std::vector<geometry::Point3List> seg_se_points;
-    std::vector<std::vector<double>> seg_se_radius;
+    std::vector<geometry::ScalarList> seg_se_radius;
     std::unordered_map<size_t, std::unordered_set<size_t>> child_seg_ids;
     size_t current_seg_id = 0;
     std::cout<<"Generating segments ..."<<std::endl;
@@ -379,7 +379,7 @@ int main(int argc, char* argv[])
         
         std::vector<size_t> current_seg = {travel_ids[0]};
         geometry::Point3List current_se_points = {tree_graph.vertices[travel_ids[0]]};
-        std::vector<double> current_se_radius = {radius[travel_ids[0]]};
+        geometry::ScalarList current_se_radius = {radius[travel_ids[0]]};
         seg_ids[travel_ids[0]] = current_seg_id;
         
         for(size_t j = 1; j < travel_ids.size(); ++j)
@@ -545,7 +545,7 @@ int main(int argc, char* argv[])
     std::map<int, std::set<int>> child_labels;
     std::vector<int> father_labels;
     std::vector<geometry::Point3List> label_se_points;
-    std::vector<std::vector<double>> label_se_radius;
+    std::vector<geometry::ScalarList> label_se_radius;
     GetLabelTree(child_labels, father_labels, label_se_points, label_se_radius, seg_to_label, segments, 
         father_seg_ids, seg_se_points, seg_se_radius, label_ptr - 1);
     SaveLabelTree(output_filename+std::string(".tree.yaml"), child_labels, father_labels, label_se_points, label_se_radius);

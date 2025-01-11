@@ -124,7 +124,7 @@ namespace reconstruction
         // std::cout<<BLUE<<"???"<<RESET<<std::endl; 
         std::cout<<BLUE<<"[INFO]::[Mesh2SDF]::Generate "<<cube_handler.Size()<<" cubes."<<RESET<<std::endl;
     }
-    std::vector<double> Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3List & points)
+    geometry::ScalarList Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3List & points)
     {
         geometry::HalfEdge he;
         he.FromTriangleMesh(mesh);
@@ -135,7 +135,7 @@ namespace reconstruction
         kdtree.BuildTree(processed_mesh.points);
         processed_mesh.ComputeNormals();
         auto &normals = processed_mesh.normals;
-        std::vector<double> sdfs;
+        geometry::ScalarList sdfs;
         std::function<double (geometry::Point3)> get_sdf = [&](geometry::Point3 p)-> double {
                 std::vector<size_t> indices;
                 std::vector<float> dists;
@@ -240,7 +240,7 @@ namespace reconstruction
         // std::cout<<BLUE<<"???"<<RESET<<std::endl; 
         return sdfs;
     }
-    std::vector<double> Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution)
+    geometry::ScalarList Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution)
     {
         geometry::HalfEdge he;
         he.FromTriangleMesh(mesh);
@@ -344,7 +344,7 @@ namespace reconstruction
                 if(!sign) return -final_distance_abs;
                 return final_distance_abs;
         };
-        std::vector<double> sdfs(size_t(grid_num(0)) * grid_num(1) * grid_num(2));
+        geometry::ScalarList sdfs(size_t(grid_num(0)) * grid_num(1) * grid_num(2));
 #pragma omp parallel for
         for(size_t x = 0; x != size_t(grid_num(0)); ++x)
             for(size_t y = 0; y != size_t(grid_num(1)); ++y)
@@ -355,12 +355,12 @@ namespace reconstruction
                 }
         return sdfs;
     }
-    std::vector<double> Mesh2Indicator(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution, double truncation, bool coarse)
+    geometry::ScalarList Mesh2Indicator(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution, double truncation, bool coarse)
     {
         if(!mesh.HasNormals())
         {
             std::cout<<YELLOW<<"[WARNING]::[NormalPCD2Indicator]::the mesh doesn't has normals."<<RESET<<std::endl;
-            return std::vector<double>();          
+            return geometry::ScalarList();          
         }
         if(coarse) 
         {
@@ -475,7 +475,7 @@ namespace reconstruction
                     if(!sign) return 1.0;
                     return 0.0;
                 };   
-            std::vector<double> sdfs(size_t(grid_num(0)) * grid_num(1) * grid_num(2));
+            geometry::ScalarList sdfs(size_t(grid_num(0)) * grid_num(1) * grid_num(2));
         // unit test
             // geometry::PointCloud vis_pcd;
 #pragma omp parallel for
@@ -497,7 +497,7 @@ namespace reconstruction
             return sdfs;   
         }
     }
-    std::vector<double> NormalPCD2Indicator(const geometry::PointCloud &pcd, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution, double truncation)
+    geometry::ScalarList NormalPCD2Indicator(const geometry::PointCloud &pcd, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution, double truncation)
     {
         geometry::KDTree<3> kdtree;
         kdtree.BuildTree(pcd.points);
@@ -505,7 +505,7 @@ namespace reconstruction
         if(!pcd.HasNormals())
         {
             std::cout<<YELLOW<<"[WARNING]::[NormalPCD2Indicator]::the point cloud doesn't has normals."<<RESET<<std::endl;
-            return std::vector<double>();
+            return geometry::ScalarList();
         }
         std::function<bool (geometry::Point3)> get_sdf = [&](geometry::Point3 p)-> bool {
                 std::vector<size_t> indices;
@@ -521,7 +521,7 @@ namespace reconstruction
                 return 0.0;
 
             }; 
-        std::vector<double> sdfs(size_t(grid_num(0)) * grid_num(1) * grid_num(2));
+        geometry::ScalarList sdfs(size_t(grid_num(0)) * grid_num(1) * grid_num(2));
 // unit test
         // geometry::PointCloud vis_pcd;
 #pragma omp parallel for
@@ -582,7 +582,7 @@ namespace reconstruction
     //     std::cout<<BLUE<<"[INFO]::[Mesh2SDF]::Generate "<<cube_handler.Size()<<" cubes."<<RESET<<std::endl;        
     // }
 
-    geometry::PointCloud Centerline2SurfacePoints(const geometry::Point3List &centers, const std::vector<double> &radius, size_t n_points)
+    geometry::PointCloud Centerline2SurfacePoints(const geometry::Point3List &centers, const geometry::ScalarList &radius, size_t n_points)
     {
         geometry::Graph graph(centers);
         graph.ConstructEdgeAdaptive(2.5, 8);
@@ -636,7 +636,7 @@ namespace reconstruction
         }    
         return res_pcd;             
     }
-    void _UnorderedCenterline2SDF(const geometry::Point3List &centers, const std::vector<double> & radius, CubeHandler &cube_handler, float voxel_resolution, int knn)
+    void _UnorderedCenterline2SDF(const geometry::Point3List &centers, const geometry::ScalarList & radius, CubeHandler &cube_handler, float voxel_resolution, int knn)
     {
         geometry::Graph graph(centers);
         graph.ConstructEdgeAdaptive(2.5, 8);
@@ -790,7 +790,7 @@ namespace reconstruction
         cube_handler.IntegratePoints(centers, get_sdf);
         std::cout<<BLUE<<"[INFO]::[Mesh2SDF]::Generate "<<cube_handler.Size()<<" cubes."<<RESET<<std::endl;   
     }
-    void _OrderedCenterLine2SDF(const geometry::Point3List &centers, const std::vector<double> &radius, CubeHandler &cube_handler, float voxel_resolution, int knn)
+    void _OrderedCenterLine2SDF(const geometry::Point3List &centers, const geometry::ScalarList &radius, CubeHandler &cube_handler, float voxel_resolution, int knn)
     {
         geometry::Point3List normals;
         normals.resize(centers.size());
@@ -912,9 +912,9 @@ namespace reconstruction
         cube_handler.IntegratePoints(centers, get_sdf);
         std::cout<<BLUE<<"[INFO]::[Mesh2SDF]::Generate "<<cube_handler.Size()<<" cubes."<<RESET<<std::endl;   
     }
-
+    
     // Fast computation
-    void _UnorderedCenterline2SDFFast(const geometry::Point3List &centers, const std::vector<double> & radius, CubeHandler &cube_handler, float voxel_resolution, int knn)
+    void _UnorderedCenterline2SDFFast(const geometry::Point3List &centers, const geometry::ScalarList & radius, CubeHandler &cube_handler, float voxel_resolution, int knn)
     {
         geometry::Graph graph(centers);
         graph.ConstructEdgeAdaptive(2.5, 8);
@@ -924,7 +924,6 @@ namespace reconstruction
 
 
         std::vector<std::vector<size_t>> all_neighbors = graph.neighbors;
-        geometry::Vector3 z_axis(0, 0, 1);
         geometry::KDTree<3> kdtree;
         kdtree.BuildTree(centers);
         cube_handler.Clear();
@@ -990,9 +989,8 @@ namespace reconstruction
         std::cout<<BLUE<<"[INFO]::[Mesh2SDF]::Generate "<<cube_handler.Size()<<" cubes."<<RESET<<std::endl;   
     }
 
-    void _OrderedCenterLine2SDFFast(const geometry::Point3List &centers, const std::vector<double> &radius, CubeHandler &cube_handler, float voxel_resolution, int knn)
+    void _OrderedCenterLine2SDFFast(const geometry::Point3List &centers, const geometry::ScalarList &radius, CubeHandler &cube_handler, float voxel_resolution, int knn)
     {
-        geometry::Vector3 z_axis(0, 0, 1);
         geometry::KDTree<3> kdtree;
         kdtree.BuildTree(centers);
         cube_handler.Clear();
@@ -1049,7 +1047,7 @@ namespace reconstruction
         std::cout<<BLUE<<"[INFO]::[Mesh2SDF]::Generate "<<cube_handler.Size()<<" cubes."<<RESET<<std::endl;   
     }
 
-    void CenterLine2SDF(const geometry::Point3List &centers, const std::vector<double> &radius, CubeHandler &cube_handler, float voxel_resolution, bool ordered, int knn, bool fast_computation)
+    void CenterLine2SDF(const geometry::Point3List &centers, const geometry::ScalarList &radius, CubeHandler &cube_handler, float voxel_resolution, bool ordered, int knn, bool fast_computation)
     {
         if(fast_computation)
         {
@@ -1061,6 +1059,234 @@ namespace reconstruction
             if(ordered) _OrderedCenterLine2SDF(centers, radius, cube_handler, voxel_resolution, knn);
             else _UnorderedCenterline2SDF(centers, radius, cube_handler, voxel_resolution, knn);            
         }
+    }
+
+    void SkeletonGraph2SDF(const geometry::SkeletonGraph &sgraph, 
+        CubeHandler &cube_handler, 
+        float voxel_resolution, 
+        int knn,
+        bool fast_computation)
+    {
+        geometry::SkeletonGraph graph = sgraph;
+        const geometry::Point3List & centers = graph.vertices;
+        const geometry::ScalarList & radius = graph.radius;
+        if(graph.neighbors.size() == 0 && graph.edges.size() == 0)
+        graph.ConstructEdgeAdaptive(2.5, 8);
+        else if(graph.neighbors.size() == 0)
+        graph.ComputeNeighbors();
+
+        const std::vector<std::vector<size_t>> &all_neighbors = graph.neighbors;
+        geometry::KDTree<3> kdtree;
+        kdtree.BuildTree(centers);
+        cube_handler.Clear();
+        cube_handler.SetVoxelResolution(voxel_resolution);
+
+        if(fast_computation)
+        {           
+            
+            std::function<double (geometry::Point3)> get_sdf = [&](geometry::Point3 p)-> double 
+            {
+                // auto tmp_neighbor_pos = neighbor_pos;
+                std::vector<size_t> indices;
+                std::vector<float> dists;
+                kdtree.KnnSearch(p, indices, dists, knn);
+                // p is the center of a voxel
+                if(geometry::Distance(centers[indices[0]], p) <= DRAGON_EPS)
+                {
+                    return -radius[indices[0]];
+                }
+                double final_distance = 1e7;
+                size_t count = 0;
+                for(size_t i = 0; i != indices.size(); ++i)
+                {
+                    size_t s_vid = indices[i];
+                    const std::vector<size_t> & neighbors = all_neighbors[s_vid]; 
+
+                    for(size_t j = 0; j != neighbors.size(); ++j)
+                    {
+                        // can be modified to avoid redundant computing.
+                        size_t t_vid = neighbors[j];
+                        const geometry::Point3 &c1 = centers[s_vid];
+                        const geometry::Point3 &c2 = centers[t_vid];
+                        double r1 = radius[s_vid];
+                        double r2 = radius[t_vid];
+                        // project p to the centerline       
+                        geometry::Point3 projected_p;
+                        bool on_line_segment = geometry::CheckPointProjectionOnLineSegment(p, c1, c2, projected_p);    
+                        if(on_line_segment)
+                        {
+                            double d1 = geometry::Distance(c1, projected_p);
+                            double d2 = geometry::Distance(c2, projected_p);
+                            double projected_radius = (d1 * r2 + d2 * r1 )/ (d1 + d2);
+                            double tmp_distance = geometry::Distance(p, projected_p) - projected_radius;
+                            if(tmp_distance < 0)
+                            {
+                                if(final_distance > 0) 
+                                final_distance = tmp_distance;
+                                else
+                                final_distance += tmp_distance;
+                                count += 1; 
+                            }
+                            else if(tmp_distance < final_distance) final_distance = tmp_distance;
+                            if(tmp_distance < final_distance) final_distance = tmp_distance;
+                        }
+                    }
+                }
+                if(count > 0)
+                final_distance /= count;
+                double dist_to_ball = geometry::Distance(centers[indices[0]], p) - radius[indices[0]];
+                if(dist_to_ball < final_distance)
+                final_distance = dist_to_ball;
+                return final_distance;
+
+            };    
+            cube_handler.IntegratePoints(centers, get_sdf);
+        }
+        else
+        {
+            std::vector<geometry::Point3List> all_normals(centers.size());
+            std::vector<std::unordered_map<size_t, size_t>> neighbor_pos(centers.size());
+        #pragma omp parallel for
+            for(size_t i = 0; i != centers.size(); ++i)
+            {
+                const std::vector<size_t> & neighbors = all_neighbors[i]; 
+                geometry::Vector3 normal_sum(0,0,0);
+                // std::cout<<neighbors.size()<<std::endl;
+                for(size_t j = 0; j < neighbors.size(); ++j)
+                {
+                    normal_sum += centers[neighbors[j]] - centers[i];
+                    neighbor_pos[i][neighbors[j]] = j;
+                }
+
+                for(size_t j = 0; j < neighbors.size(); ++j)
+                {
+                    geometry::Vector3 normal = (2 * (centers[neighbors[j]] - centers[i]) - normal_sum ).normalized();
+                    all_normals[i].push_back(normal);
+                }
+                
+                // it's better to use a gaussian function to smooth the radius
+
+            }
+            geometry::Vector3 z_axis(0, 0, 1);
+
+
+            std::function<double (geometry::Point3)> get_sdf = [&](geometry::Point3 p)-> double 
+            {
+                // auto tmp_neighbor_pos = neighbor_pos;
+                std::vector<size_t> indices;
+                std::vector<float> dists;
+                kdtree.KnnSearch(p, indices, dists, knn);
+                // p is the center of a voxel
+                if((p - centers[indices[0]]).norm() <= DRAGON_EPS)
+                {
+                    return -radius[indices[0]];
+                }
+                double final_distance = 1e7;
+                size_t count = 0;
+                for(size_t i = 0; i != indices.size(); ++i)
+                {
+                    size_t s_vid = indices[i];
+                    const std::vector<size_t> & neighbors = all_neighbors[s_vid]; 
+
+                    for(size_t j = 0; j != neighbors.size(); ++j)
+                    {
+                        // can be modified to avoid redundant computing.
+                        size_t t_vid = neighbors[j];
+                        const geometry::Point3 &c1 = centers[s_vid];
+                        const geometry::Point3 &c2 = centers[t_vid];
+                        geometry::Point3 &n1 = all_normals[s_vid][j];
+                        geometry::Point3 &n2 = all_normals[t_vid][neighbor_pos[t_vid][s_vid]];
+                        double r1 = radius[s_vid];
+                        double r2 = radius[t_vid];
+                        // project p to the centerline       
+                        geometry::Point3 projected_p;
+                        geometry::CheckPointProjectionOnLineSegment(p, c1, c2, projected_p);    
+                        geometry::Vector3 n = ((p - c1).cross(c2 - c1)).normalized();         
+                        geometry::Vector3 help_n = (p - projected_p).normalized();
+                        // find two intersection points
+                        geometry::Point3 inter_p1, inter_p2;
+                        {
+                            geometry::TransformationMatrix local2global = geometry::TransformationMatrix::Identity();
+                            local2global.block<3, 3>(0, 0) = 
+                                geometry::RotationMatrixBetweenVectors(z_axis, n1);
+                            local2global.block<3, 1>(0, 3) = c1; 
+                            
+                            geometry::TransformationMatrix global2local = local2global.inverse();
+                            // std::cout<<geometry::TransformPoint(global2local, c1)<<std::endl;
+                            // geometry::Point3 tmp_p = geometry::TransformPoint(global2local, p);
+                            geometry::Vector3 tmp_n = geometry::TransformNormal(global2local, n);
+                            // two intersection
+                            geometry::Point3 solution = geometry::Point3::Zero();
+                            solution(0) = r1 / std::sqrt( 1 + (tmp_n(0) * tmp_n(0)) / (tmp_n(1) * tmp_n(1)));
+                            solution(1) = - tmp_n(0) * solution(0) / tmp_n(1);
+                            geometry::Vector3 tmp_help_n = geometry::TransformNormal(global2local, help_n);
+                            // if((solution.dot(tmp_help_n) > 0) == (tmp_p.dot(tmp_help_n) > 0))
+                            if(solution.dot(tmp_help_n) > 0)
+                                inter_p1 = geometry::TransformPoint(local2global, solution);
+                            else
+                                inter_p1 = geometry::TransformPoint(local2global, -solution);
+                        }
+
+                        {
+                            geometry::TransformationMatrix local2global = geometry::TransformationMatrix::Identity();
+                            local2global.block<3, 3>(0, 0) = 
+                                geometry::RotationMatrixBetweenVectors(z_axis, n2);
+                            local2global.block<3, 1>(0, 3) = c2; 
+                            geometry::TransformationMatrix global2local = local2global.inverse();
+                            // geometry::Point3 tmp_p = geometry::TransformPoint(global2local, p);
+                            geometry::Vector3 tmp_n = geometry::TransformNormal(global2local, n);
+
+                            // two intersection
+                            geometry::Point3 solution = geometry::Point3::Zero();
+                            solution(0) = r2  / std::sqrt( 1 + (tmp_n(0) * tmp_n(0)) / (tmp_n(1) * tmp_n(1)) );
+                            solution(1) = - tmp_n(0) * solution(0) / tmp_n(1);
+                            geometry::Vector3 tmp_help_n = geometry::TransformNormal(global2local, help_n);
+                            // if((solution.dot(tmp_help_n) > 0) == (tmp_p.dot(tmp_help_n) > 0))
+                            if(solution.dot(tmp_help_n) > 0)
+                                inter_p2 = geometry::TransformPoint(local2global, solution);
+                            else
+                                inter_p2 = geometry::TransformPoint(local2global, -solution);
+                        }
+
+                        // we have compute two intersection with surface
+                        geometry::Point3 useless_p;
+                        bool sign = 1;
+                        if(geometry::CheckPointProjectionInTriangle(p, inter_p1, c1, c2, useless_p)
+                            ||geometry::CheckPointProjectionInTriangle(p, c2, inter_p2, inter_p1, useless_p))
+                        sign = 0;
+                        // std::cout<<p.transpose()<<" "<<useless_p.transpose()<<std::endl;
+                        double local_distance;
+                        if(geometry::CheckPointProjectionOnLineSegment(p, inter_p1, inter_p2, useless_p))
+                        {
+                            local_distance = (p - useless_p).norm();
+                        }
+                        else
+                        {
+                            local_distance = std::min((p - inter_p1).norm(), (p - inter_p2).norm());
+                        }
+                        if(!sign)
+                        {
+                            if(final_distance > 0) 
+                            final_distance = -local_distance;
+                            else
+                            final_distance -= local_distance;
+                            count += 1; 
+                        }
+                        else if(local_distance < final_distance) final_distance = local_distance;
+
+                        // if(local_distance < 0) std::cout<<local_distance<<std::endl;
+                    }
+                }
+                // if(final_distance <= 0) std::cout<<final_distance / 3 <<std::endl;
+                if(count > 0) return final_distance / count;
+                double dist_to_ball = geometry::Distance(centers[indices[0]], p) - radius[indices[0]];
+                if(dist_to_ball < final_distance)
+                final_distance = dist_to_ball;
+                return final_distance;
+            };    
+            cube_handler.IntegratePoints(centers, get_sdf);
+        }
+        std::cout<<BLUE<<"[INFO]::[Mesh2SDF]::Generate "<<cube_handler.Size()<<" cubes."<<RESET<<std::endl;   
     }
 }
 }

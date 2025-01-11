@@ -1,12 +1,12 @@
 #!/bin/bash
 
 cpp_program="../../build/app/VesselSegment"
-inputfolder="/media/wlsdzyzl/DATA/datasets/pcd/imageCAS/output/xyzr/"
-inputpcdfolder="/media/wlsdzyzl/DATA/datasets/pcd/imageCAS/output/surface"
-outputfolder="/media/wlsdzyzl/DATA/datasets/pcd/imageCAS/output/segment"
-# inputfolder="/media/wlsdzyzl/DATA/datasets/pcd/kipa22/output3/xyzr"
-# inputpcdfolder='/media/wlsdzyzl/DATA/datasets/pcd/kipa22/output3/surface'
-# outputfolder="/media/wlsdzyzl/DATA/datasets/pcd/kipa22/output3/segment"
+inputfolder="/media/wlsdzyzl/DATA1/datasets/pcd/CAS2023/output/xyzr/"
+inputpcdfolder="/media/wlsdzyzl/DATA1/datasets/pcd/CAS2023/output/surface"
+outputfolder="/media/wlsdzyzl/DATA1/datasets/pcd/CAS2023/output/segment"
+# inputfolder="/media/wlsdzyzl/DATA1/datasets/pcd/kipa22/output3/xyzr"
+# inputpcdfolder='/media/wlsdzyzl/DATA1/datasets/pcd/kipa22/output3/surface'
+# outputfolder="/media/wlsdzyzl/DATA1/datasets/pcd/kipa22/output3/segment"
 
 files=$(find "$inputfolder" -type f)
 total_time=0

@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     origin = geometry::Point3(atof(argv[9]), atof(argv[10]), atof(argv[11]));
     
 
-    std::vector<double> indicator = reconstruction::Mesh2Indicator(mesh, grid_num, origin, voxel_resolution, truncation, coarse_computing);
+    geometry::ScalarList indicator = reconstruction::Mesh2Indicator(mesh, grid_num, origin, voxel_resolution, truncation, coarse_computing);
     cnpy::npy_save(output_file, &indicator[0],{size_t(grid_num(0)), size_t(grid_num(1)), size_t(grid_num(2))},"w");
     return 0;
 }
