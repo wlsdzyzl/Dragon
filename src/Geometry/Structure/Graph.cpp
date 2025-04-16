@@ -62,7 +62,7 @@ namespace geometry
             // std::cout<<"-----------------------------"<<std::endl;
         }
     }
-    void Graph::DeleteVertices(const std::vector<size_t> & vids)
+    std::vector<size_t> Graph::DeleteVertices(const std::vector<size_t> & vids)
     {
         std::vector<bool> deleted_flag(vertices.size(), false);
 
@@ -89,12 +89,14 @@ namespace geometry
         }
         // re-assign vid
         std::vector<size_t> new_vids(vertices.size(), vertices.size());
+        std::vector<size_t> old_ids;
         size_t ptr = 0;
         for(size_t i = 0; i != vertices.size(); ++i)
         {
             if(!deleted_flag[i])
             {
                 new_vids[i] = ptr;
+                old_ids.push_back(i);
                 ptr ++;
             }
         }
@@ -127,6 +129,7 @@ namespace geometry
         vertices = new_vertices;
         // clear edge
         edges.clear();
+        return old_ids;
     }
     void Graph::ConstructEdgeKNN(int k)
     {

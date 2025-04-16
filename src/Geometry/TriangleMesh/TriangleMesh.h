@@ -55,6 +55,10 @@ namespace geometry
             for(size_t i = 0; i != triangles.size(); ++i)
             triangles[i].reverseInPlace();
         }
+        void Normalize()
+        {
+            points = geometry::Normalize(points);
+        }
         size_t GetPointSize() const{return points.size();}
         size_t GetTriangleSize() const{return triangles.size();}
         bool WriteToPLY(const std::string &filename) const;

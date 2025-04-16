@@ -16,19 +16,19 @@ namespace reconstruction
 {
 
     void Mesh2SDF(const geometry::TriangleMesh &mesh, CubeHandler &cube_handler, float voxel_resolution = 0.01);
-    geometry::ScalarList Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3List & points);
-    // geometry::ScalarList Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution)
-    geometry::ScalarList Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01);
-    geometry::ScalarList Mesh2Indicator(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01, double truncation = 1e6, bool coarse = true);
-    geometry::ScalarList NormalPCD2Indicator(const geometry::PointCloud &pcd, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01, double truncation = 1e6);
+    std::vector<double> Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3List & points);
+    // std::vector<double> Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution)
+    std::vector<double> Mesh2SDF(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01);
+    std::vector<double> Mesh2Indicator(const geometry::TriangleMesh &mesh, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01, double truncation = 1e6, bool coarse = true);
+    std::vector<double> NormalPCD2Indicator(const geometry::PointCloud &pcd, const geometry::Point3i & grid_num, geometry::Point3 origin = geometry::Point3::Zero(), float voxel_resolution = 0.01);
 
-    void CenterLine2SDF(const geometry::Point3List &centers, const geometry::ScalarList &radius, CubeHandler &cube_handler, float voxel_resolution = 0.01, bool ordered = true, int knn = 2, bool fast_computation = true);
-    geometry::PointCloud Centerline2SurfacePoints(const geometry::Point3List &centers, const geometry::ScalarList &radius, size_t n_points = 10);
+    void CenterLine2SDF(const geometry::Point3List &centers, const std::vector<double> &radius, CubeHandler &cube_handler, float voxel_resolution = 0.01, bool ordered = true, int knn = 2, bool fast_computation = true);
+    geometry::PointCloud Centerline2SurfacePoints(const geometry::Point3List &centers, const std::vector<double> &radius, size_t n_points = 10);
     void SkeletonGraph2SDF(const geometry::SkeletonGraph &sgraph, 
         CubeHandler &cube_handler, 
-        float voxel_resolution = 0.01, 
-        int knn = 2, 
-        bool fast_computation = true);
+        float voxel_resolution, 
+        int knn,
+        bool fast_computation);
 }
 }
 #endif

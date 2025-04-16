@@ -51,6 +51,10 @@ namespace geometry
                 }
                 return bb;
             }
+            void Normalize()
+            {
+                points = geometry::Normalize(points);
+            }
             void FlipNormal()
             {
                 for(size_t i = 0; i != normals.size(); ++i)

@@ -1,19 +1,15 @@
 #!/bin/bash
 
-cpp_program="../../build/app/SkeletonGraph2SDF"
-inputfolder="//media/wlsdzyzl/DATA/datasets/siqi/imagecas/"
-outputfolder="/media/wlsdzyzl/DATA/datasets/siqi/imagecas_final"
-
-# subfolders=("cow_gen" "cow_recon_test" "intra_gen" "intra_recon_test" "intra_vae_gen" "intra_vae_recon_test" "march_gen" "march_recon_test")
-mkdir "${outputfolder}"
+cpp_program="../../build/app/Mesh2Indicator"
+inputfolder="/media/wlsdzyzl/DATA/datasets/siqi/mesh_to_skeleton/Diffusion/mesh"
+outputfolder="/media/wlsdzyzl/DATA/datasets/siqi/mesh_to_skeleton/Diffusion/npy"
 subfolders=$(ls "$inputfolder")
+
 for sfolder in ${subfolders}; do
   files=$(ls "$inputfolder/$sfolder")
   total_time=0
   file_count=0
-  mkdir "${outputfolder}/${sfolder}"
   for file in $files; do
-    # 获取文件名和后缀
     extension="${file##*.}"
 
     # 去除后缀的文件名
@@ -21,12 +17,10 @@ for sfolder in ${subfolders}; do
 
     # 指定输出文件路径
     input_file="${inputfolder}/${sfolder}/${file}"
-    output_file="${outputfolder}/${sfolder}/${filename_without_extension}.ply"
-    
+    output_file="${outputfolder}/${sfolder}/${filename_without_extension}.npy"
     start_time=$(date +%s.%N)
     # 使用编译好的C++程序处理文件，并指定输出文件路径
-    echo $cpp_program "$input_file" "$output_file" "0.005" "-1" "1"
-    $cpp_program "$input_file" "$output_file" "0.005" "-1" "1"
+    $cpp_program "$input_file" "$output_file" "1" "0.005" "0.05" "0"
     end_time=$(date +%s.%N)
     duration=$(echo "$end_time - $start_time" | bc)
     total_time=$(echo "$total_time + $duration" | bc)

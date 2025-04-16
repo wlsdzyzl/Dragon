@@ -369,6 +369,7 @@ namespace reconstruction
         }
         else
         {
+            geometry::BoundingBox bb = mesh.GetBoundingBox();
             geometry::HalfEdge he;
             he.FromTriangleMesh(mesh);
             geometry::TriangleMesh processed_mesh;
@@ -381,10 +382,13 @@ namespace reconstruction
             std::function<double (geometry::Point3)> get_sdf = [&](geometry::Point3 p)-> double {
                     std::vector<size_t> indices;
                     std::vector<float> dists;
+                    if(!bb.IsInside(p)) return 0.0;
                     kdtree.KnnSearch(p, indices, dists, 5);
                     if(dists.size() > 0 && dists[0] > truncation * truncation)
                     {
-                        return 0.0;
+                        size_t closest_vid = indices[0];
+                        return double((p - mesh.points[closest_vid]).dot(normals[closest_vid]) < 0.0);
+                        // return ;
                     }
                     double final_distance_abs = 1e7;
                     bool sign = 1;
@@ -497,24 +501,26 @@ namespace reconstruction
             return sdfs;   
         }
     }
-    geometry::ScalarList NormalPCD2Indicator(const geometry::PointCloud &pcd, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution, double truncation)
+    geometry::ScalarList NormalPCD2Indicator(const geometry::PointCloud &pcd, const geometry::Point3i & grid_num, geometry::Point3 origin, float voxel_resolution)
     {
         geometry::KDTree<3> kdtree;
         kdtree.BuildTree(pcd.points);
         auto &normals = pcd.normals;
+        geometry::BoundingBox bb = pcd.GetBoundingBox();
         if(!pcd.HasNormals())
         {
             std::cout<<YELLOW<<"[WARNING]::[NormalPCD2Indicator]::the point cloud doesn't has normals."<<RESET<<std::endl;
             return geometry::ScalarList();
         }
         std::function<bool (geometry::Point3)> get_sdf = [&](geometry::Point3 p)-> bool {
+                if(!bb.IsInside(p)) return 0.0;
                 std::vector<size_t> indices;
                 std::vector<float> dists;
                 kdtree.KnnSearch(p, indices, dists, 1);
                 
                 if(indices.size() > 0)
                 {
-                    if(dists[0] > truncation * truncation) return 0.0;
+                    // if(dists[0] > truncation * truncation) return 0.0;
                     int closest_vid = indices[0];
                     return double((p - pcd.points[closest_vid]).dot(normals[closest_vid]) < 0);
                 }

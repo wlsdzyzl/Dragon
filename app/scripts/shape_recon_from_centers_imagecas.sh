@@ -1,8 +1,8 @@
 #!/bin/bash
 
 cpp_program="../../build/app/CenterLine2SDF"
-inputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/xyzr/"
-outputfolder="/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_ours_fast/"
+inputfolder="/media/wlsdzyzl/DATA/datasets/pcd/IntrA/annotated/output/xyzr/"
+outputfolder="/media/wlsdzyzl/DATA/datasets/pcd/IntrA/annotated/output/mesh/"
 files=$(find "$inputfolder" -type f)
 total_time=0
 file_count=0

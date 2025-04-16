@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     if(argc > 7)
     fast_computation = std::atoi(argv[7]);
     // scaling
-    // why is scaling so important?
+    // why is scaling important?
     if(scale <= 0)
     {
         geometry::BoundingBox bb;

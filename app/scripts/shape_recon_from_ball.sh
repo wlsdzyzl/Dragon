@@ -1,10 +1,9 @@
 #!/bin/bash
 
-cpp_program="../../build/app/SkeletonGraph2SDF"
-inputfolder="//media/wlsdzyzl/DATA/datasets/siqi/imagecas/"
-outputfolder="/media/wlsdzyzl/DATA/datasets/siqi/imagecas_final"
 
-# subfolders=("cow_gen" "cow_recon_test" "intra_gen" "intra_recon_test" "intra_vae_gen" "intra_vae_recon_test" "march_gen" "march_recon_test")
+python_program_ballpivoting="./ballpivoting_recon.py"
+inputfolder="/media/wlsdzyzl/DATA/datasets/siqi/mesh_to_skeleton/Diffusion/pcd"
+outputfolder="/media/wlsdzyzl/DATA/datasets/siqi/mesh_to_skeleton/Diffusion/mesh"
 mkdir "${outputfolder}"
 subfolders=$(ls "$inputfolder")
 for sfolder in ${subfolders}; do
@@ -18,15 +17,12 @@ for sfolder in ${subfolders}; do
 
     # 去除后缀的文件名
     filename_without_extension="${file%.*}"
-
-    # 指定输出文件路径
     input_file="${inputfolder}/${sfolder}/${file}"
     output_file="${outputfolder}/${sfolder}/${filename_without_extension}.ply"
     
     start_time=$(date +%s.%N)
-    # 使用编译好的C++程序处理文件，并指定输出文件路径
-    echo $cpp_program "$input_file" "$output_file" "0.005" "-1" "1"
-    $cpp_program "$input_file" "$output_file" "0.005" "-1" "1"
+    echo python $python_program_ballpivoting "$input_file" "$output_file"
+    python $python_program_ballpivoting "$input_file" "$output_file"
     end_time=$(date +%s.%N)
     duration=$(echo "$end_time - $start_time" | bc)
     total_time=$(echo "$total_time + $duration" | bc)

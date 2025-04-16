@@ -1,5 +1,6 @@
 #include "BasicGeometry.h"
 #include "Geometry/Structure/KDTree.h"
+#include "Geometry/Structure/BoundingBox.h"
 #include <unordered_map>
 namespace dragon
 {
@@ -50,6 +51,25 @@ namespace geometry
             T *Vector4(normal(0), normal(1), normal(2), 0.0);
         return new_normal.head<3>();
     }  
+    geometry::Point3List Normalize(const geometry::Point3List &points)
+    {
+        geometry::BoundingBox bb;
+        geometry::Point3List npoints = points;
+        for(size_t i = 0; i != points.size(); ++i)
+        {
+            bb.AddPoint(points[i]);
+        }
+        double scaling = std::max({bb.x_max - bb.x_min, bb.y_max - bb.y_min, bb.z_max - bb.z_min});
+        geometry::Point3 center = bb.Center();
+        geometry::Point3 half(0.5, 0.5, 0.5);
+        for(size_t i = 0; i != npoints.size(); ++i)
+        {
+            npoints[i] -= center;
+            npoints[i] /= scaling;
+            npoints[i] += half;
+        }
+        return npoints;
+    }
     double ComputeTriangleArea(const PointX &a, const PointX &b, const PointX &c)
     {
         auto edge1 = b-a;

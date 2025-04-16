@@ -26,7 +26,7 @@ def get_truncation(xyzr_path):
         max_number = max(numbers)
         return max_number
     else:
-        return None
+        return 1e-7
 def process_file(file_path, input_path, output_path, xyzr_path):
     # 读取文件大小
     image = sitk.ReadImage(file_path)
@@ -38,7 +38,7 @@ def process_file(file_path, input_path, output_path, xyzr_path):
     trunc = get_truncation(os.path.join(xyzr_path, file_name+".xyzr"))
     input_file_path = os.path.join(input_path, file_name+".ply")
     output_file_path = os.path.join(output_path, file_name + '.npy')
-    command = [cpp_program_path, input_file_path, output_file_path, str(size[2]), str(size[1]), str(size[0]), "1.0", str(trunc), '0']
+    command = [cpp_program_path, input_file_path, output_file_path, "0", "1.0", str(trunc), '0', str(size[2]), str(size[1]), str(size[0])]
     print(command)
     subprocess.call(command)
     npy2nii(output_file_path, os.path.join(output_path, file_name + '.nii.gz'))
@@ -67,38 +67,38 @@ def process_directory(directory_path, input_path, output_path, xyzr_path):
                 
 
 
-# method: ours
-# atm
-directory_path = '/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/labelsTr/'  # 替换为你的文件夹路径
-input_path = "/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ours_fast/"
-output_path = "/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mask_fine_ours_ball/"
-xyzr_path = "/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/xyzr"
+# # method: ours
+# # atm
+# directory_path = '/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/labelsTr/'  # 替换为你的文件夹路径
+# input_path = "/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mesh_from_xyzr_ours_fast/"
+# output_path = "/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/mask_fine_ours_ball/"
+# xyzr_path = "/media/wlsdzyzl/DATA/datasets/ATM2022/TrainBatch2_New/output/xyzr"
 
-process_directory(directory_path, input_path, output_path, xyzr_path)
+# process_directory(directory_path, input_path, output_path, xyzr_path)
 
 # imagecas
-directory_path = '/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/label/'  # 替换为你的文件夹路径
-input_path = "/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mesh_from_xyzr_ours_fast"
-output_path = "/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/mask_fine_ours_ball/"
-xyzr_path = "/media/wlsdzyzl/DATA/datasets/imageCAS/dataset_nii_1000/output/xyzr"
+directory_path = '/media/wlsdzyzl/DATA/datasets/pcd/imageCAS/label'  # 替换为你的文件夹路径
+input_path = "/media/wlsdzyzl/DATA/datasets/pcd/imageCAS/output/mesh_from_xyzr_ours_fast"
+output_path = "/media/wlsdzyzl/DATA/datasets/pcd/imageCAS/output/mask"
+xyzr_path = "/media/wlsdzyzl/DATA/datasets/pcd/imageCAS/output/xyzr"
 
 process_directory(directory_path, input_path, output_path, xyzr_path)
 
-# parse
-directory_path = '/media/wlsdzyzl/DATA/datasets/PARSE2022/train/label/'  # 替换为你的文件夹路径
-input_path = "/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/mesh_from_xyzr_ours_fast"
-output_path = "/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/mask_fine_ours_ball/"
-xyzr_path = "/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/xyzr"
+# # parse
+# directory_path = '/media/wlsdzyzl/DATA/datasets/PARSE2022/train/label/'  # 替换为你的文件夹路径
+# input_path = "/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/mesh_from_xyzr_ours_fast"
+# output_path = "/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/mask_fine_ours_ball/"
+# xyzr_path = "/media/wlsdzyzl/DATA/datasets/PARSE2022/train/output/xyzr"
 
-process_directory(directory_path, input_path, output_path, xyzr_path)
+# process_directory(directory_path, input_path, output_path, xyzr_path)
 
-# deep
-directory_path = '/media/wlsdzyzl/DATA/datasets/DeepVesselNet/seg/'  # 替换为你的文件夹路径
-input_path = "/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mesh_from_xyzr_ours_fast"
-output_path = "/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mask_fine_ours_ball/"
-xyzr_path = "/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/xyzr"
+# # deep
+# directory_path = '/media/wlsdzyzl/DATA/datasets/DeepVesselNet/seg/'  # 替换为你的文件夹路径
+# input_path = "/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mesh_from_xyzr_ours_fast"
+# output_path = "/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/mask_fine_ours_ball/"
+# xyzr_path = "/media/wlsdzyzl/DATA/datasets/DeepVesselNet/output/xyzr"
 
-process_directory(directory_path, input_path, output_path, xyzr_path)
+# process_directory(directory_path, input_path, output_path, xyzr_path)
 
 
 # # method: ball pivoting
